@@ -13,7 +13,8 @@ public class ImageProcessor
 {
     private Context context;
     Mat patternImg;
-    Mat[] templateImgs = new Mat[2];
+    Mat templateImg;
+    Mat diceImg;
 
     public ImageProcessor(Mat _patternImg, Context _context)
     {
@@ -25,8 +26,7 @@ public class ImageProcessor
     {
         try
         {
-            this.templateImgs[0] = Utils.loadResource(this.context, R.drawable.circle_template);
-            this.templateImgs[1] = Utils.loadResource(this.context, R.drawable.one_template);
+            this.templateImg = Utils.loadResource(this.context, R.drawable.circle_template);
         }
         catch (IOException e)
         {
@@ -35,5 +35,11 @@ public class ImageProcessor
 
     }
 
+    public void AddDiceImg(Mat _diceImg)
+    {
+        this.diceImg = _diceImg;
+    }
+
     public native void testFunction(long output);
+    public native void DiceDetector();
 }

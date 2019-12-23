@@ -7,23 +7,11 @@
 #include <android/log.h>
 #include <algorithm>
 #include <vector>
+#include "DiceAnalyzer.cpp"
+#include <string>
 
 using namespace cv;
 using namespace std;
-
-enum SagradaColor {
-    S_RED,
-    S_BLUE,
-    S_GREEN,
-    S_YELLOW,
-    S_VIOLET,
-    S_WHITE
-};
-
-enum BlurType {
-    BLUR_GAUSSIAN,
-    BLUR_MEDIAN
-};
 
 enum PatternID {
     PATID_ONE = 1,
@@ -41,20 +29,14 @@ enum PatternID {
     PATID_NONE = -42
 };
 
-int MAX_COLOR_VALUE = 255;
-int MIN_COLOR_VALUE = 0;
-
 bool compareRectsOnRow (const Rect& l, const Rect& r) {
     return l.br().x > r.br().x;
 }
 bool compareRefRects(const Rect& h, const Rect& l){
     return h.br().y < l.br().y;
 }
-
-void GetJClassData(JNIEnv *env, jobject obj, Mat& img, Mat *imgTemplates);
+Mat GetObjectImg(JNIEnv *env, jobject obj, string _propTypeRoute, string _propName);
 PatternID CompareWithTemplate(Mat patternImg, Mat img);
-
-Mat BlurImage(Mat input, BlurType blurType);
 Mat FindHsvColor(Mat inputImage, SagradaColor color);
 Mat FindContours(Mat input, vector<Rect>& rectBoxes);
 Mat GetEdges(Mat input);
@@ -72,26 +54,22 @@ double getOtsuThresh(Mat input, Mat& output);
 vector<Rect> RectPatternGrid(int rows, int cols, Point controlPoint, vector<Rect> contourBoxes);
 vector<Mat> SplitImageToPattern(int rows, int cols, vector<Rect> rectMatrix, Mat image);  //TODO: MORE ELEGANT NAME
 bool IsColorPattern(Mat subject, PatternID& pID);   //TODO: calibrate colors
-bool IsDicePattern(Mat subject, int lowNum, int highNum, PatternID& pID);   //TODO: detect if given img is number on dice pattern on card
+bool IsDicePattern(Mat subject, int lowNum, int highNum, PatternID& pID);
 vector<PatternID> GetCardPattern(int rows, int cols, vector<Mat> splittedImg /*color palette, numRange*/);
 
-//TODO : Structures with specified color range instead of creation in function.
-//TODO : File with Enums, structures
-//TODO : Function to fill output class
-//TODO : Class that encapsulates game card pattern
-//TODO : Class that encapsulates ImageDetection
-//TODO : Class that encapsulates final dice positions
-//TODO : Class that handles rules over the final dice class
-
 Mat PATTERN_IMG;
+int MAX_COLOR_VALUE = 255;
+int MIN_COLOR_VALUE = 0;
 
 extern "C"
 JNIEXPORT void JNICALL Java_Model_ImageProcessor_testFunction(JNIEnv *env, jobject obj, jlong output){
     Mat& outputImg = *(Mat*) output;
     Mat patternImg;
-    Mat imgTemplateArray[6];
+    Mat imgTemplate;
 
-    GetJClassData(env, obj, patternImg, imgTemplateArray);
+    //GetJClassData(env, obj, patternImg, imgTemplate);
+    patternImg = GetObjectImg(env, obj, "org/opencv/core/Mat", "patternImg");
+    imgTemplate = GetObjectImg(env, obj, "org/opencv/core/Mat", "templateImg");
 
     Mat gray, hsv;
 
@@ -100,7 +78,7 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_testFunction(JNIEnv *env, jobje
 
     Mat histed, blurredImage;
     equalizeHist(gray, histed);    //Equalizing histogram of grayscaled image
-    blurredImage = BlurImage(histed, BLUR_GAUSSIAN);    //Blurring image
+    GaussianBlur(histed, blurredImage, Size(5,5), 2, 2, BORDER_CONSTANT);    //Blurring image
     erode(blurredImage, blurredImage, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));   //Highlighting lines
 
     //Detect edges
@@ -114,7 +92,7 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_testFunction(JNIEnv *env, jobje
 
     vector<Mat> imageMatrix = SplitImageToPattern(4, 5, matrixRect, patternImg);
 
-    imgTemplateArray[0].copyTo(PATTERN_IMG);
+    imgTemplate.copyTo(PATTERN_IMG);
 
     vector<PatternID> card = GetCardPattern(4,5, imageMatrix);
 
@@ -158,7 +136,7 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_testFunction(JNIEnv *env, jobje
     Mat draw = Mat::zeros( img.size(), CV_8UC3);
     bool ind = false;
     cvtColor(img,img, COLOR_BGR2GRAY);
-    img = BlurImage(img, BLUR_GAUSSIAN);
+    GaussianBlur(img, img, Size(5,5), 2, 2, BORDER_CONSTANT);
     threshold(img, img, 170, 255, THRESH_BINARY);
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
@@ -189,23 +167,24 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_testFunction(JNIEnv *env, jobje
         }
     }*/
 
-    outputImg = patternImg;
+    patternImg.copyTo(outputImg);
 };
-void GetJClassData(JNIEnv *env, jobject obj, Mat& img, Mat *imgTemplates){
+extern "C"
+JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobject obj)
+{
+    Mat diceImg = GetObjectImg(env, obj, "org/opencv/core/Mat", "diceImg");
+};
+Mat GetObjectImg(JNIEnv *env, jobject obj, string _propTypeRoute, string _propName){
     jclass thisClass = env->GetObjectClass(obj);
-    jclass matClass = env->FindClass("org/opencv/core/Mat");
+    jclass typeClass = env->FindClass(&_propTypeRoute[0]);
+    jmethodID ptrMethod = env->GetMethodID(typeClass, "getNativeObjAddr", "()J");
 
-    jmethodID getPtrMethod = env->GetMethodID(matClass, "getNativeObjAddr", "()J");
-    jfieldID patternImgID = env->GetFieldID(thisClass, "patternImg", "Lorg/opencv/core/Mat;");
-    jfieldID templateImgsID = env->GetFieldID(thisClass, "templateImgs", "[Lorg/opencv/core/Mat;");
+    string propTypeRoute = "L" + _propTypeRoute + ";";
 
-    jobject patternImgJ = env->GetObjectField(obj, patternImgID);
-    jobjectArray templateImgsJ = (jobjectArray)env->GetObjectField(obj, templateImgsID);
+    jfieldID propID = env->GetFieldID(thisClass, &_propName[0], &propTypeRoute[0]);
+    jobject propJ = env->GetObjectField(obj, propID);
 
-    //Mat templateImgs[1];
-    imgTemplates[0] = *(Mat*)env->CallLongMethod(env->GetObjectArrayElement(templateImgsJ, 0), getPtrMethod);
-    imgTemplates[1] = *(Mat*)env->CallLongMethod(env->GetObjectArrayElement(templateImgsJ, 1), getPtrMethod);
-    img = *(Mat*)env->CallLongMethod(patternImgJ, getPtrMethod);
+    return *(Mat*)env->CallLongMethod(propJ, ptrMethod);
 }
 bool DetectWhiteBlobNumber(Mat _img, PatternID& _pID){
     Mat img;
@@ -354,47 +333,26 @@ Mat FindHsvColor(Mat inputImage, SagradaColor color){
     Mat lowerMask;
     Mat upperMask;
 
-    /*Yellow color OK!*/
-    static Scalar lowYellow = Scalar(20,100,20);
-    static Scalar highYellow = Scalar(30,255,255);
-    /*Green color OK!*/
-    static Scalar lowGreen = Scalar(40,50,20);
-    static Scalar highGreen = Scalar(70,255,255);
-    /*Blue color OK*/
-    static Scalar lowBlue = Scalar(80,50,20);
-    static Scalar highBlue = Scalar(127,255,255);
-    /*Red color OK!*/
-    static Scalar lowRedFirstMask = Scalar(0, 150, 70);
-    static Scalar highRedFirstMask = Scalar(10, 255, 255);
-    static Scalar lowRedSecondMask = Scalar(175, 150, 70);
-    static Scalar highRedSecondMask = Scalar(180, 255, 255);
-    /*Violet color OK!*/
-    static Scalar lowViolet = Scalar(145,100,20);
-    static Scalar highViolet = Scalar(170,255,255);
-    //TODO White color
-    static Scalar lowWhite = Scalar(0,0,168);
-    static Scalar highWhite = Scalar(180,50,255);
-
     switch (color){
         case S_GREEN:
-            inRange(inputImage, lowGreen , highGreen , output); //Green color
+            inRange(inputImage, COLOR_RANGES.lowGreen , COLOR_RANGES.highGreen , output); //Green color
             break;
         case S_BLUE:
-            inRange(inputImage, lowBlue , highBlue , output); //Blue color
+            inRange(inputImage, COLOR_RANGES.lowBlue , COLOR_RANGES.highBlue , output); //Blue color
             break;
         case S_RED:
-            inRange(inputImage, lowRedFirstMask , highRedFirstMask , lowerMask);   //Red color
-            inRange(inputImage, lowRedSecondMask, highRedSecondMask, upperMask);
+            inRange(inputImage, COLOR_RANGES.lowRedFirstMask , COLOR_RANGES.highRedFirstMask , lowerMask);   //Red color
+            inRange(inputImage, COLOR_RANGES.lowRedSecondMask, COLOR_RANGES.highRedSecondMask, upperMask);
             output = lowerMask + upperMask;
             break;
         case S_YELLOW:
-            inRange(inputImage, lowYellow , highYellow , output);   //Yellow color
+            inRange(inputImage, COLOR_RANGES.lowYellow , COLOR_RANGES.highYellow , output);   //Yellow color
             break;
         case S_VIOLET:  // TODO: Color range Violet
-            inRange(inputImage, lowViolet , highViolet , output); //Violer/Pink color
+            inRange(inputImage, COLOR_RANGES.lowViolet , COLOR_RANGES.highViolet , output); //Violer/Pink color
             break;
         case S_WHITE:   // TODO: Color range + possible model White
-            inRange(inputImage, lowWhite, highWhite, output);
+            inRange(inputImage, COLOR_RANGES.lowWhite, COLOR_RANGES.highWhite, output);
             break;
         default:
             output = inputImage;
@@ -403,18 +361,6 @@ Mat FindHsvColor(Mat inputImage, SagradaColor color){
 
     return output;
 
-}
-Mat BlurImage(Mat input, BlurType blurType){
-    Mat output;
-    switch (blurType){
-        case BLUR_GAUSSIAN:
-            GaussianBlur(input, output, Size(5,5), 2, 2, BORDER_CONSTANT);    //Blurring IMG using Gaussian blur
-            break;
-        case BLUR_MEDIAN:
-            medianBlur(input, output, 3);   //Blurring IMG using Median blur
-            break;
-    }
-    return output;
 }
 double getOtsuThresh(Mat input, Mat& output){
 
@@ -847,22 +793,12 @@ PatternID CheckNumber(Mat subject, int minRadius, int maxRadius, double lowerThr
 bool IsDicePattern(Mat subject, int lowNum, int highNum, PatternID& pID){
     Mat img;
     cvtColor(subject, img, COLOR_BGR2GRAY);
-    img = BlurImage(img, BLUR_GAUSSIAN);    //Blurring image
+    GaussianBlur(img, img, Size(5,5), 2, 2, BORDER_CONSTANT);    //Blurring image
     erode(img, img, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));   //Highlighting lines
 
     Mat otsuThreshImg;
     double otsuThresh = getOtsuThresh(img, otsuThreshImg);
 
-    /*PatternID tmpPID = CheckNumber(img, 35, 40, 20, otsuThresh,img.rows/16);
-    if(tmpPID > 3 && tmpPID < 7){
-        pID = tmpPID;
-        return true;
-    }
-    tmpPID = CheckNumber(img, 40,50, 10, 255, 110);
-    if(tmpPID == 3){
-        pID = tmpPID;
-        return true;
-    }*/
     PatternID tmpPID;
     if(DetectWhiteBlobNumber(subject, tmpPID)){
         pID = tmpPID;
