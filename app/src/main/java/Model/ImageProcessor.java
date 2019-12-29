@@ -35,11 +35,23 @@ public class ImageProcessor
 
     }
 
-    public void AddDiceImg(Mat _diceImg)
+    public void AddDiceImg()
     {
-        this.diceImg = _diceImg;
+        try
+        {
+            this.diceImg = Utils.loadResource(this.context, R.drawable.dices_1);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
+    /*public void AddDiceImg(Mat _diceImg)
+    {
+        this.diceImg = _diceImg;
+    }*/
+
     public native void testFunction(long output);
-    public native void DiceDetector();
+    public native void DiceDetector(long output);
 }
