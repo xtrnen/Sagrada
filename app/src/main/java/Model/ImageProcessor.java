@@ -39,7 +39,7 @@ public class ImageProcessor
     {
         try
         {
-            this.diceImg = Utils.loadResource(this.context, R.drawable.dices_1);
+            this.diceImg = Utils.loadResource(this.context, R.drawable.dices_2);
         }
         catch (IOException e)
         {

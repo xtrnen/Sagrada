@@ -33,7 +33,7 @@ struct color_range
     Scalar highGreen = Scalar(90,255,255);
 
     /*Blue color*/
-    Scalar lowBlue = Scalar(80,50,20);
+    Scalar lowBlue = Scalar(80,50,50);
     Scalar highBlue = Scalar(127,255,255);
 
     /*Red color*/
@@ -81,6 +81,7 @@ public:
         DetectColor(S_BLUE, 50000.0);
         DetectColor(S_YELLOW, 50000.0);
         DetectColor(S_VIOLET, 50000.0);
+        //TODO: Detect White color
         //detect number
         DetectNumber();
         //DEBUG
@@ -144,20 +145,21 @@ public:
             {
                 //Analyze space
                     //Either random space or empty slot
+
             }
         }
     }
-    void DetectDiceSlot()
+    void DetectEmptySlot()
     {
-        //find empty slots between found rects
-        //for each rect
-        //apply color & number detection
-        //fill dices vector
-    }
-    void ControlEmptySlots()
-    {
+        //get template rect
+        int defRectHeight;
+        int defRectWidth;
+
+        GetDefaultRect(defRectHeight, defRectWidth);
+        //Get corner dice (at least one corner will have dice placed on template)
 
     }
+
 
     //
     vector<Scalar> SelectRange(SagradaColor _color)
@@ -191,6 +193,7 @@ public:
     }
     bool IsNumber(Mat _img, int& _number)
     {
+        //TODO Correct number count, because of random contour
         Mat mask;
         int number = 0;
 
@@ -228,5 +231,32 @@ public:
                 __android_log_print(ANDROID_LOG_INFO, "DiceOutput", "------");
             }
         }
+    }
+    void GetDefaultRect(int& _height, int& _width)
+    {
+        int sumHeight = 0;
+        int sumWidth = 0;
+
+        for(int i = 0; i < this->dices.size(); i++)
+        {
+            sumHeight += this->dices[i].boundRect.height;
+            sumWidth += this->dices[i].boundRect.width;
+        }
+
+        _height = sumHeight / this->dices.size();
+        _width = sumWidth / this->dices.size();
+    }
+    int GetCornerDice(Dice_s& _dice)
+    {
+        Dice_s cornerDice = Dice_s();
+        int mode = 0;
+        vector<Dice_s> selDices = this->dices;
+
+        //search for dice with number and color
+        //for()
+        //take TL, TR, BL, BR if there is. At least one will be
+
+        _dice = cornerDice;
+        return mode;
     }
 };

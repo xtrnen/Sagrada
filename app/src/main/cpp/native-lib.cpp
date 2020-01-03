@@ -29,9 +29,12 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_testFunction(JNIEnv *env, jobje
 
     vector<Mat> grid = patternAnalyzer.CreatePatternGrid();
 
-    patternAnalyzer.GetCardPattern(grid);
+    //Correction in grid creater
+    //patternAnalyzer.GetCardPattern(grid);
 
-    patternAnalyzer.patternImg.copyTo(outputImg);
+    //patternAnalyzer.patternImg.copyTo(outputImg);
+
+    patternAnalyzer.tmp.copyTo(outputImg);
 };
 extern "C"
 JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobject obj, jlong output)
@@ -42,9 +45,9 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobje
 
     DiceAnalyzer diceAnalyzer = DiceAnalyzer(diceImg);
     diceAnalyzer.DetectDices();
-    diceAnalyzer.DiceOutput();
+    //diceAnalyzer.DiceOutput();
 
-    /*diceAnalyzer.hsvImage(diceAnalyzer.dices[16].boundRect).copyTo(tmp);
+    diceAnalyzer.hsvImage(diceAnalyzer.dices[15].boundRect).copyTo(tmp);
 
     Mat mask;
 
@@ -69,9 +72,9 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobje
         if(i == contours.size() - 1){
             __android_log_print(ANDROID_LOG_INFO, "Num", "%d", num);
         }
-    }*/
+    }
 
-    diceAnalyzer.tmp.copyTo(outputImg);
+    tmp.copyTo(outputImg);
 };
 Mat GetObjectImg(JNIEnv *env, jobject obj, string _propTypeRoute, string _propName){
     jclass thisClass = env->GetObjectClass(obj);
