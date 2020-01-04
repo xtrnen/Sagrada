@@ -37,7 +37,11 @@ public:
     Mat patternImg;
     Mat templateImg;
     Point controlPoint;
+    int refOffset;
+    int refHeight;
+    int refWidth;
     vector<PatternID> pattern;
+    Mat tmp;
 
     PatternAnalyzer(Mat _patternImg, Mat _templateImg)
     {
@@ -49,16 +53,26 @@ public:
     {
         //PrepGrayImg
         Mat gray = PrepGrayImg();
+
         //DetectEdges
         Mat edges = DetectEdges(gray);
+        this->patternImg.copyTo(this->tmp);
+
         //FindControlPoint
         Point controlPoint = DetectControlPoint(gray);
+        this->controlPoint = controlPoint;
+
         //DetectContours
         vector<Rect> boxes;
-        FindContours(edges, boxes, 50000.0);
-        //FincRects
+        FindContours(edges, boxes);
+
         //SplitImg
-        vector<Rect> matrixRect = RectPatternGrid(4, 5, controlPoint ,boxes);
+        vector<Rect> matrixRect = RectPatternGrid(4, 5, controlPoint, boxes);
+
+        for(Rect rect : matrixRect)
+        {
+            rectangle(this->tmp, rect, Scalar(0,0,255), 10);
+        }
 
         return SplitImageToPattern(4, 5, matrixRect, this->patternImg);
     }
@@ -104,7 +118,8 @@ private:
         Mat edges;
         _grayImg.copyTo(edges);
 
-        double otsuThresh = threshold(edges, edges, 0, 255, THRESH_BINARY + THRESH_OTSU);
+        double otsuThresh = threshold(edges, edges, 128, 255, THRESH_BINARY );
+
         Canny(edges, edges, otsuThresh*0.3, otsuThresh, 3, true);
         dilate(edges, edges, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));
 
@@ -114,18 +129,58 @@ private:
     Point DetectControlPoint(Mat _grayImg)
     {
         Mat grayImg;
-        Mat tmp;
-        _grayImg.copyTo(grayImg);
+        //Mat tmp;
+        threshold(_grayImg, grayImg, 180, 255, THRESH_BINARY);
+        /*double otsuThresh = threshold(grayImg, tmp, 0, 255, THRESH_BINARY + THRESH_OTSU);
 
-        double otsuThresh = threshold(grayImg, tmp, 0, 255, THRESH_BINARY + THRESH_OTSU);
-
-        vector<Point> centers = DetectCircles(grayImg, 64, otsuThresh, 20, 20, 50);
+        vector<Point> centers = DetectCircles(grayImg, 64, otsuThresh, 50, 20, 20);
 
         auto rightMost = minmax_element(centers.begin(), centers.end(), [](Point const& a, Point const& b){
             return a.x < b.x;
-        });
+        });*/
+        vector<vector<Point>> contours;
+        vector<Vec4i> hierarchy;
 
-        return Point(rightMost.second->x,rightMost.second->y);
+        findContours(grayImg, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+
+        vector<vector<Point>> contours_poly( contours.size());
+        vector<Point>centers( contours.size());
+
+        for( size_t i = 0; i < contours.size(); i++ )
+        {
+            double epsilon = 0.01*arcLength(contours[i],true);
+            approxPolyDP( contours[i], contours_poly[i], epsilon, true );
+
+            double area = contourArea(contours_poly[i]);
+            Point2f center;
+            float radius;
+            minEnclosingCircle(contours_poly[i], center, radius);
+            double cArea = radius * radius * 3.14;
+            //__android_log_print(ANDROID_LOG_INFO, "DDD", "%f || %f", area, cArea);
+            if(area > 100.0 && cArea >= area && cArea < area * 2){
+                //__android_log_print(ANDROID_LOG_INFO, "DDD", "%f || %f", area, cArea);
+                //circle(this->tmp, center, (int)radius, Scalar(0,255,0), 3);
+                centers.push_back(Point((int)center.x, (int)center.y));
+            }
+
+        }
+
+        Point bottom = Point(0,0);
+
+        for(Point cent : centers)
+        {
+            if(cent.y > bottom.y)
+                bottom = cent;
+        }
+        for(Point cent : centers)
+        {
+            if(cent.y >= bottom.y - 10 && cent.x > bottom.x)
+                bottom = cent;
+        }
+
+        circle(this->tmp, bottom, 1, Scalar(0,0,255), 20);
+
+        return bottom;
     }
 
     vector<Point> DetectCircles(Mat input, int _distDivider, double _param1, double _param2, int _minRad, int _maxRad)
@@ -140,39 +195,70 @@ private:
             Vec3i c = circles[i];
             Point center = Point(c[0], c[1]);
             centersVector.push_back(center);
+            //circle(this->tmp, center, c[2], Scalar(0,0,255), 3, LINE_AA);
         }
 
         return centersVector;
     }
 
-    Mat FindContours(Mat input, vector<Rect>& rectBoxes, double _contourSize)
+    Mat FindContours(Mat input, vector<Rect>& rectBoxes)
     {
         Mat drawing = Mat::zeros( input.size(), CV_8UC3);
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
 
-        findContours(input, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+        findContours(input, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
         vector<vector<Point>> contours_poly( contours.size());
         vector<Rect> boundRect( contours.size());
         vector<Point2f>centers( contours.size());
 
-        Scalar color = Scalar( 0,0,255 );
         Scalar color1 = Scalar (0,255,0);
-        Scalar color2 = Scalar(0,255,255);
+
+        long sum = 0;
+        int count = 0;
+
         for( size_t i = 0; i < contours.size(); i++ )
         {
             double epsilon = 0.01*arcLength(contours[i],true);
             approxPolyDP( contours[i], contours_poly[i], epsilon, true );
-
-            if(contours_poly[i].size() == 4){
-                drawContours(drawing, contours, (int) i, color1);
-                boundRect[i] = boundingRect( contours_poly[i] );
-                if(boundRect[i].area() > _contourSize){
-                    rectBoxes.push_back(boundRect[i]);
+            if(contours_poly[i].size() == 4)
+            {
+                RotatedRect roRect = minAreaRect(contours_poly[i]);
+                int area = (int)contourArea(contours_poly[i]);
+                int roArea = roRect.boundingRect().area();
+                if(roRect.boundingRect().br().y < this->controlPoint.y && area > 100 && hierarchy[i][2] != -1 && roArea >= area && roArea < area*2)
+                {
+                    sum += area;
+                    count++;
+                    Rect rect = boundingRect( contours_poly[i] );
+                    rectBoxes.push_back(rect);
                 }
             }
         }
+
+        int approx = sum / count;
+
+        int sumWidth = 0;
+        int sumHeight = 0;
+        count = 0;
+
+        for(int i = 0; i < rectBoxes.size(); i++)
+        {
+            if(rectBoxes[i].area() < approx)
+            {
+                rectBoxes.erase(rectBoxes.begin() + i);
+            }
+            else
+            {
+                sumWidth += rectBoxes[i].width;
+                sumHeight += rectBoxes[i].height;
+                count++;
+            }
+        }
+
+        this->refHeight = sumHeight / count;
+        this->refWidth = sumWidth / count;
 
         return drawing;
     }
@@ -840,6 +926,14 @@ private:
         return (x >= refPoint.x - offset && x <= refPoint.x + offset);
     }
 
+    Rect DetectKeyRect()
+    {
 
+    }
+
+    int DetectRectOffset()
+    {
+
+    }
 
 };
