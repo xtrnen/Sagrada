@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         Mat img = null;
         Mat retImg = new Mat();
         try {
-            img = Utils.loadResource(this, R.drawable.belles);
+            img = Utils.loadResource(this, R.drawable.chvala);
         } catch (IOException e){
             e.printStackTrace();
         }

@@ -57,7 +57,8 @@ struct Dice_s
     int number;
     SagradaColor color;
 };
-
+//TODO: BELLES white dots might seem like gray so the detection is incorrect - lower the threshold
+//TODO: DOTS CONTOURS RECOGNITION BASED ON BOUNDING CIRCLE AREA
 class DiceAnalyzer
 {
 public:
@@ -193,7 +194,7 @@ public:
     }
     bool IsNumber(Mat _img, int& _number)
     {
-        //TODO Correct number count, because of random contour
+        //TODO Correct number count, because of random contour -> bounding circle area
         Mat mask;
         int number = 0;
 
@@ -225,7 +226,7 @@ public:
     {
         for(int i = 0; i < this->dices.size(); i++)
         {
-            __android_log_print(ANDROID_LOG_INFO, "DiceOutput", "%d", this->dices[i].number);
+            __android_log_print(ANDROID_LOG_INFO, "DiceOutput", "%d | %s", this->dices[i].number, PIDName(this->dices[i].color));
             if(i % 4 == 0)
             {
                 __android_log_print(ANDROID_LOG_INFO, "DiceOutput", "------");
@@ -258,5 +259,26 @@ public:
 
         _dice = cornerDice;
         return mode;
+    }
+
+    char* PIDName(SagradaColor _pid)
+    {
+        switch (_pid)
+        {
+            case S_WHITE :
+                return "White";
+            case S_BLUE :
+                return "Blue";
+            case S_GREEN :
+                return "Green";
+            case S_RED :
+                return "Red";
+            case S_VIOLET :
+                return "Violet";
+            case S_YELLOW :
+                return "Yellow";
+            default:
+                return "UNKNOWN";
+        }
     }
 };

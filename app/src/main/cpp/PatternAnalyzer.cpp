@@ -30,7 +30,12 @@ enum PatternID {
 bool compareRectsOnRow (const Rect& l, const Rect& r) {
     return l.br().x > r.br().x;
 }
-
+/*
+ * TODO: Refactor process of slot rectangles
+ *          -Detect controlPoint -> resize image so CP is on bottom of mat
+ *          -Apply color masks for each pattern color even White
+ *          -Create grid and detect slots whom masks didnt detect (finding those slots is already implemented)
+ * */
 class PatternAnalyzer
 {
 public:
@@ -54,18 +59,37 @@ public:
         //PrepGrayImg
         Mat gray = PrepGrayImg();
 
-        //DetectEdges
-        Mat edges = DetectEdges(gray);
-        this->patternImg.copyTo(this->tmp);
-
         //FindControlPoint
+        this->patternImg.copyTo(this->tmp);
         Point controlPoint = DetectControlPoint(gray);
         this->controlPoint = controlPoint;
 
-        //DetectContours
+        //Crop image rectangle
+        int oft = 200;
+        while(controlPoint.x + oft > this->patternImg.cols){
+            oft -=10;
+        }
+        //__android_log_print(ANDROID_LOG_INFO, "OFS", "%d", oft);
+        controlPoint.x += oft;
+        Rect rect = Rect(Point(0,0), controlPoint);
+        //Find color slots & detect contours
         vector<Rect> boxes;
-        FindContours(edges, boxes);
+        boxes = ApplyColorMasks(this->patternImg(rect));
+        /*Mat edges = DetectEdges(gray(rect));
+        edges.copyTo(this->tmp);
 
+        //DetectContours
+
+        FindContours(this->tmp, boxes);
+
+        for(int i = 0; i < boxes.size(); i++)
+        {
+            rectangle(this->tmp, boxes[i], Scalar(0,255,0), 5);
+        }*/
+
+        this->refOffset = DetectRectOffset(boxes);
+
+        __android_log_print(ANDROID_LOG_INFO, "OFS", "%d - %d|%d", this->refOffset, this->refWidth, this->refHeight);
         //SplitImg
         vector<Rect> matrixRect = RectPatternGrid(4, 5, controlPoint, boxes);
 
@@ -75,6 +99,7 @@ public:
         }
 
         return SplitImageToPattern(4, 5, matrixRect, this->patternImg);
+        //return vector<Mat> ();
     }
 
     void GetCardPattern(vector<Mat> _splittedImg)
@@ -118,7 +143,7 @@ private:
         Mat edges;
         _grayImg.copyTo(edges);
 
-        double otsuThresh = threshold(edges, edges, 128, 255, THRESH_BINARY );
+        double otsuThresh = threshold(edges, edges, 100, 255, THRESH_BINARY );
 
         Canny(edges, edges, otsuThresh*0.3, otsuThresh, 3, true);
         dilate(edges, edges, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));
@@ -130,21 +155,15 @@ private:
     {
         Mat grayImg;
         //Mat tmp;
-        threshold(_grayImg, grayImg, 180, 255, THRESH_BINARY);
-        /*double otsuThresh = threshold(grayImg, tmp, 0, 255, THRESH_BINARY + THRESH_OTSU);
+        threshold(_grayImg, grayImg, 100, 255, THRESH_BINARY);
 
-        vector<Point> centers = DetectCircles(grayImg, 64, otsuThresh, 50, 20, 20);
-
-        auto rightMost = minmax_element(centers.begin(), centers.end(), [](Point const& a, Point const& b){
-            return a.x < b.x;
-        });*/
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
 
-        findContours(grayImg, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+        findContours(grayImg, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
         vector<vector<Point>> contours_poly( contours.size());
-        vector<Point>centers( contours.size());
+        vector<Point> centers;
 
         for( size_t i = 0; i < contours.size(); i++ )
         {
@@ -156,13 +175,13 @@ private:
             float radius;
             minEnclosingCircle(contours_poly[i], center, radius);
             double cArea = radius * radius * 3.14;
-            //__android_log_print(ANDROID_LOG_INFO, "DDD", "%f || %f", area, cArea);
-            if(area > 100.0 && cArea >= area && cArea < area * 2){
+            double areaOffset = area * 0.5;
+
+            if(area > 500.0 && cArea >= area && cArea <= area + areaOffset){
                 //__android_log_print(ANDROID_LOG_INFO, "DDD", "%f || %f", area, cArea);
                 //circle(this->tmp, center, (int)radius, Scalar(0,255,0), 3);
                 centers.push_back(Point((int)center.x, (int)center.y));
             }
-
         }
 
         Point bottom = Point(0,0);
@@ -174,7 +193,7 @@ private:
         }
         for(Point cent : centers)
         {
-            if(cent.y >= bottom.y - 10 && cent.x > bottom.x)
+            if(cent.y >= bottom.y - 50 && cent.x > bottom.x)
                 bottom = cent;
         }
 
@@ -201,6 +220,34 @@ private:
         return centersVector;
     }
 
+    vector<Rect> ApplyColorMasks(Mat _img)
+    {
+        vector<Rect> colorRects;
+        Mat mask;
+        //Get hsv model for img
+        Mat hsv;
+        cvtColor(_img, hsv, COLOR_BGR2HSV);
+
+        /*Get rects for each color*/
+        //Red
+        mask = FindHsvColor(hsv, S_RED);
+        //Green
+        mask += FindHsvColor(hsv, S_GREEN);
+        //Blue
+        mask += FindHsvColor(hsv, S_BLUE);
+        //Yellow
+        mask += FindHsvColor(hsv, S_YELLOW);
+        //Violet
+        mask += FindHsvColor(hsv, S_VIOLET);
+        mask += FindHsvColor(hsv, S_WHITE);
+        vector<Rect> boxes;
+
+        //mask.copyTo(this->tmp);
+        FindContours(mask, boxes);
+
+        return boxes;
+    }
+
     Mat FindContours(Mat input, vector<Rect>& rectBoxes)
     {
         Mat drawing = Mat::zeros( input.size(), CV_8UC3);
@@ -214,8 +261,9 @@ private:
         vector<Point2f>centers( contours.size());
 
         Scalar color1 = Scalar (0,255,0);
+        vector<Rect> boxes;
 
-        long sum = 0;
+        int sum = 0;
         int count = 0;
 
         for( size_t i = 0; i < contours.size(); i++ )
@@ -227,38 +275,42 @@ private:
                 RotatedRect roRect = minAreaRect(contours_poly[i]);
                 int area = (int)contourArea(contours_poly[i]);
                 int roArea = roRect.boundingRect().area();
-                if(roRect.boundingRect().br().y < this->controlPoint.y && area > 100 && hierarchy[i][2] != -1 && roArea >= area && roArea < area*2)
+                if(roRect.boundingRect().br().y < this->controlPoint.y && area > 100 /*&& hierarchy[i][2] != -1*/ && roArea >= area && roArea < area*2)
                 {
                     sum += area;
                     count++;
                     Rect rect = boundingRect( contours_poly[i] );
-                    rectBoxes.push_back(rect);
+                    boxes.push_back(rect);
                 }
             }
         }
 
-        int approx = sum / count;
+        if(count != 0){
+            sum = sum / count;
+        }
 
         int sumWidth = 0;
         int sumHeight = 0;
         count = 0;
-
-        for(int i = 0; i < rectBoxes.size(); i++)
+        for(int i = 0; i < boxes.size(); i++)
         {
-            if(rectBoxes[i].area() < approx)
+            if(boxes[i].area() > (sum - sum*0.25))
             {
-                rectBoxes.erase(rectBoxes.begin() + i);
-            }
-            else
-            {
-                sumWidth += rectBoxes[i].width;
-                sumHeight += rectBoxes[i].height;
+                rectBoxes.push_back(boxes[i]);
+                sumWidth += boxes[i].width;
+                sumHeight += boxes[i].height;
                 count++;
+                rectangle(drawing, boxes[i], Scalar(0,255,0), 5);
             }
         }
+        //__android_log_print(ANDROID_LOG_INFO, "DD", "%d", count);
+        if(count != 0)
+        {
+            this->refHeight = sumHeight / count;
+            this->refWidth = sumWidth / count;
+        }
 
-        this->refHeight = sumHeight / count;
-        this->refWidth = sumWidth / count;
+        boxes.clear();
 
         return drawing;
     }
@@ -277,12 +329,21 @@ private:
         //Nejniže -> Control Rect
         refRects = CompleteRefRects(closestRect, controlPoint);
 
+        /*for(Rect rect : refRects)
+        {
+            rectangle(this->tmp, rect, Scalar(0,0,255), 10);
+        }*/
+
         for(int i = 0; i < 4 ; i++){
             if(i >= refRects.size()){
                 closestRect = refRects[i-1];
                 Point tmpCP = Point(closestRect.br().x, closestRect.tl().y);
                 refRects.push_back(GetClosestRect(contourBoxes, tmpCP));
             }
+            /*for(Rect rect : refRects)
+            {
+                rectangle(this->tmp, rect, Scalar(0,0,255), 10);
+            }*/
             tmpVector.push_back(refRects[i]);
             rectsOnRow = FindRectsOnRow(contourBoxes, refRects[i]);
             for(Rect rect : rectsOnRow){
@@ -313,14 +374,26 @@ private:
 
     vector<Rect> CompleteRefRects(Rect controlRect, Point controlPoint)
     {
-        int offset = 50;
+        int offset = this->refOffset;
         vector<Rect> outputVector;
         Point br;
         Point tl;
         Rect refRect = controlRect;
         Rect tmpRect;
 
-        while(refRect.br().y < controlPoint.y - refRect.width - offset) {
+        //calculate y-distance between CPoint & cRect
+        //int yDist = abs(refRect.tl().y - refRect.height - offset);
+        //decide whether CPoint is in range of yDist
+        /*int yDistOffset = 10;
+        if(controlPoint.y >= yDist + yDistOffset && controlPoint.y <= yDist - yDistOffset)
+        {
+            //refRect is the lowest
+        }
+        else {
+            //there is a line beneath the refRect
+        }*/
+
+        while(refRect.br().y < controlPoint.y - refRect.width - offset ) {
             br = Point(refRect.br().x, refRect.br().y + refRect.width + offset);
             tl = Point(refRect.tl().x, refRect.br().y + offset);
             tmpRect = Rect(tl, br);
@@ -445,7 +518,7 @@ private:
 
     Rect CreateBlankRect(Rect prevRect, bool reverseDirection)
     {
-        int offset = 50;
+        int offset = this->refOffset;
         Point br = Point(0,0);
         Point tl = Point(0,0);
 
@@ -468,7 +541,7 @@ private:
     Rect GetClosestRect(vector<Rect> polyRects, Point controlPoint)
     {
         Rect tmpRect = Rect(Point(0,0),Point(0,0));
-        int offset = 30;
+        int offset = this->refOffset;
 
         for(Rect rect : polyRects){
             if(rect.br().y > tmpRect.br().y + tmpRect.height && rect.br().y < controlPoint.y){
@@ -693,7 +766,7 @@ private:
         _img.copyTo(img);
         bool ind = false;
         cvtColor(img,img, COLOR_BGR2GRAY);
-        threshold(img, img, 170, 255, THRESH_BINARY);
+        threshold(img, img, 160, 255, THRESH_BINARY);
         //DETECT 6,5,4
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
@@ -707,24 +780,54 @@ private:
         Scalar color = Scalar( 0,0,0 );
         Scalar color1 = Scalar (255,255,255);
         int counter = 0;
+        int sumArea = 0;
+        vector<double> circles;
         for( size_t i = 0; i < contours.size(); i++ )
         {
             double epsilon = 0.01*arcLength(contours[i],true);
             approxPolyDP( contours[i], contours_poly[i], epsilon, true );
 
-            double areaContour = contourArea(contours_poly[i]);
+            double area = contourArea(contours_poly[i]);
+            Point2f center;
+            float radius;
+            minEnclosingCircle(contours_poly[i], center, radius);
+            double cArea = radius * radius * 3.14;
 
-            if( areaContour > 1000.0 && areaContour < 10000.0 && contours_poly[i].size() > 5){
-                drawContours(img, contours, (int) i, color1);
+            //double areaContour = contourArea(contours_poly[i]);
+
+            /*if( areaContour > 1000.0 && areaContour < 10000.0 && contours_poly[i].size() > 5){
+                //drawContours(img, contours, (int) i, color1);
                 counter++;
             }
-            else{
-                drawContours(img, contours, (int) i, color);
+            if(cArea > 100.0)
+            {
+                __android_log_print(ANDROID_LOG_DEBUG, "CIrcle radius", "%f", cArea);
+                //drawContours(img, contours, (int) i, color1);
+                circle(img, center, (int)radius, color1, 10, LINE_AA);
+                //counter++;
+            }*/
+            if(cArea > 100.0 && cArea >= area && cArea < area * 2)
+            {
+                circles.push_back(radius);
+                sumArea += area;
+                counter++;
+            }
+        }
+        if(counter != 0){
+            sumArea = sumArea / counter;
+            double offsetArea = sumArea * 0.25;
+
+            for(double center : circles)
+            {
+                double circleArea = center * center * 3.14;
+                if(circleArea < sumArea - offsetArea || circleArea > sumArea + offsetArea)
+                {
+                    counter--;
+                }
             }
         }
 
         if(counter == 6 || counter == 4 || counter == 5){
-            //__android_log_print(ANDROID_LOG_INFO, "DETECT WHITE BLOB", "%d", counter); //DEBUG
             _pID = PatternID(counter);
             return true;
         }
@@ -746,27 +849,27 @@ private:
         for(Point circle : circles){
             if(circle.x > imgCenter.x + offset && circle.y < imgCenter.y - offset){
                 //1 Q
-                __android_log_print(ANDROID_LOG_INFO, "Circle Pos", "1 Quadrant %d | %d ", circle.x, circle.y);
+                //__android_log_print(ANDROID_LOG_INFO, "Circle Pos", "1 Quadrant %d | %d ", circle.x, circle.y);
                 quadrant1.push_back(circle);
             }
             else if(circle.x < imgCenter.x - offset && circle.y < imgCenter.y - offset){
                 //2 Q
-                __android_log_print(ANDROID_LOG_INFO, "Circle Pos", "2 Quadrant %d | %d ", circle.x, circle.y);
+                //__android_log_print(ANDROID_LOG_INFO, "Circle Pos", "2 Quadrant %d | %d ", circle.x, circle.y);
                 quadrant2.push_back(circle);
             }
             else if(circle.x < imgCenter.x - offset && circle.y > imgCenter.y + offset){
                 //3 Q
-                __android_log_print(ANDROID_LOG_INFO, "Circle Pos", "3 Quadrant %d | %d ", circle.x, circle.y);
+                //__android_log_print(ANDROID_LOG_INFO, "Circle Pos", "3 Quadrant %d | %d ", circle.x, circle.y);
                 quadrant3.push_back(circle);
             }
             else if(circle.x > imgCenter.x + offset && circle.y > imgCenter.y + offset){
                 //4 Q
-                __android_log_print(ANDROID_LOG_INFO, "Circle Pos", "4 Quadrant %d | %d ", circle.x, circle.y);
+                //__android_log_print(ANDROID_LOG_INFO, "Circle Pos", "4 Quadrant %d | %d ", circle.x, circle.y);
                 quadrant4.push_back(circle);
             }
             else if(circle.x >= imgCenter.x - offset && circle.x <= imgCenter.x + offset){
                 //Center Q
-                __android_log_print(ANDROID_LOG_INFO, "Circle Pos", "Center Quadrant %d | %d ", circle.x, circle.y);
+                //__android_log_print(ANDROID_LOG_INFO, "Circle Pos", "Center Quadrant %d | %d ", circle.x, circle.y);
                 quadrantC.push_back(circle);
             }
         }
@@ -922,18 +1025,49 @@ private:
         //find Point on given height
         double x = (refPoint.y - q)/k;
         //check if in range
-        __android_log_print(ANDROID_LOG_INFO, "DIAGONAL", "X : %f | K : %f | Q : %f", x, k, q);
+        //__android_log_print(ANDROID_LOG_INFO, "DIAGONAL", "X : %f | K : %f | Q : %f", x, k, q);
         return (x >= refPoint.x - offset && x <= refPoint.x + offset);
     }
 
-    Rect DetectKeyRect()
+    int DetectRectOffset(vector<Rect> boxes)
     {
+        int offset = 10;
+        Rect box = boxes.back();
+        boxes.pop_back();
+        while(!boxes.empty())
+        {
+            int xR = box.br().x;
+            int xL = box.tl().x;
+            int yT = box.tl().y;
+            int yB = box.br().y;
+            for(Rect rect : boxes)
+            {
+                if(rect.tl().x > xR && rect.tl().x <= xR + this->refWidth && rect.br().y >= yB - offset && rect.br().y <= yB + offset)
+                {
+                    __android_log_print(ANDROID_LOG_INFO, "OFS--xR", "%d | %d -- %d", rect.tl().x, xR, rect.tl().x - xR);
+                    return  rect.tl().x - xR;
+                }
+                else if (rect.br().x < xL && rect.br().x >= xL - this->refWidth && rect.br().y >= yB - offset && rect.br().y <= yB + offset)
+                {
+                    __android_log_print(ANDROID_LOG_INFO, "OFS--xL", "%d | %d -- %d", rect.br().x, xL, xL - rect.br().x);
+                    return xL - rect.br().x;
+                }
+                else if (rect.br().y < yT && rect.br().y >= yT - this->refHeight && rect.br().x >= xL - offset && rect.br().x <= xL + offset)
+                {
+                    __android_log_print(ANDROID_LOG_INFO, "OFS--yT", "%d | %d -- %d", rect.br().y, yT, yT - rect.br().y);
+                    return yT - rect.br().y;
+                }
+                else if (rect.tl().y > yB && rect.tl().y <= yB + this->refHeight && rect.tl().x >= xR - offset && rect.tl().x <= xR + offset)
+                {
+                    __android_log_print(ANDROID_LOG_INFO, "OFS--yB", "%d | %d -- %d", rect.tl().y, yB, rect.br().y - yB);
+                    return (rect.br().y - yB) - rect.height;
+                }
+            }
+            box = boxes.back();
+            boxes.pop_back();
+        }
 
-    }
-
-    int DetectRectOffset()
-    {
-
+        return this->refWidth / 8;
     }
 
 };

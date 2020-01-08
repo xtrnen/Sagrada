@@ -30,10 +30,9 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_testFunction(JNIEnv *env, jobje
     vector<Mat> grid = patternAnalyzer.CreatePatternGrid();
 
     //Correction in grid creater
-    //patternAnalyzer.GetCardPattern(grid);
+    patternAnalyzer.GetCardPattern(grid);
 
     //patternAnalyzer.patternImg.copyTo(outputImg);
-
     patternAnalyzer.tmp.copyTo(outputImg);
 };
 extern "C"
@@ -60,6 +59,8 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobje
 
     vector<vector<Point>> contours_poly( contours.size());
     int num = 0;
+    int sumArea = 0;
+    vector<double> boundRect;
     for( size_t i = 0; i < contours.size(); i++ )
     {
         double epsilon = 0.01*arcLength(contours[i],true);
@@ -67,13 +68,25 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobje
         double area = contourArea(contours_poly[i]);
         if(area > 2000.0 && contours_poly[i].size() > 5){
             drawContours(tmp, contours, i, Scalar(0,0,0), FILLED);
+            sumArea += area;
             num++;
+            __android_log_print(ANDROID_LOG_INFO, "AREA", "%f", area);
+            boundRect.push_back(area);
         }
         if(i == contours.size() - 1){
-            __android_log_print(ANDROID_LOG_INFO, "Num", "%d", num);
+            __android_log_print(ANDROID_LOG_INFO, "Num IN", "%d", num);
         }
     }
 
+    sumArea = sumArea / num;
+    double offsetArea = sumArea * 0.25;
+    __android_log_print(ANDROID_LOG_INFO, "SUM", "%d | %f", sumArea, offsetArea);
+    for(double ar : boundRect)
+    {
+        if(ar < sumArea - offsetArea || ar > sumArea + offsetArea)
+            num--;
+    }
+    __android_log_print(ANDROID_LOG_INFO, "Num OUT", "%d", num);
     tmp.copyTo(outputImg);
 };
 Mat GetObjectImg(JNIEnv *env, jobject obj, string _propTypeRoute, string _propName){
