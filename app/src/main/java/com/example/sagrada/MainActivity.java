@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         Mat img = null;
         Mat retImg = new Mat();
         try {
-            img = Utils.loadResource(this, R.drawable.chvala);
+            img = Utils.loadResource(this, R.drawable.nejsvetejsi_trojice);
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -34,8 +34,8 @@ public class MainActivity extends AppCompatActivity {
         ImageProcessor imgProcessor = new ImageProcessor(img, this);
         imgProcessor.AddTemplateImgs();
         imgProcessor.AddDiceImg();
-        imgProcessor.testFunction(retImg.getNativeObjAddr());
-        //imgProcessor.DiceDetector(retImg.getNativeObjAddr());
+        //imgProcessor.testFunction(retImg.getNativeObjAddr());
+        imgProcessor.DiceDetector(retImg.getNativeObjAddr());
 
         if(retImg != null){
             imageView = (ImageView)findViewById(R.id.mat);

@@ -11,54 +11,99 @@
 using namespace std;
 using namespace cv;
 
-Mat tap;
-
 enum SagradaColor {
     S_RED,
     S_BLUE,
     S_GREEN,
     S_YELLOW,
     S_VIOLET,
-    S_WHITE
+    S_WHITE,
+    S_NONE
 };
 
 struct color_range
 {
     /*Yellow color*/
-    Scalar lowYellow = Scalar(20,100,20);
-    Scalar highYellow = Scalar(30,255,255);
+    Scalar lowYellow = Scalar(15,150,20);//20
+    Scalar highYellow = Scalar(35,255,255);
 
     /*Green color*/
-    Scalar lowGreen = Scalar(40,50,20);
-    Scalar highGreen = Scalar(90,255,255);
+    Scalar lowGreen = Scalar(40,100,35);
+    Scalar highGreen = Scalar(85,255,255);//90-255-255
 
     /*Blue color*/
-    Scalar lowBlue = Scalar(80,50,50);
-    Scalar highBlue = Scalar(127,255,255);
+    Scalar lowBlue = Scalar(85,80,40);//80-50-20
+    Scalar highBlue = Scalar(130,255,255);//127-255-255
 
     /*Red color*/
-    Scalar lowRedFirstMask = Scalar(0, 150, 70);
-    Scalar highRedFirstMask = Scalar(10, 255, 255);
-    Scalar lowRedSecondMask = Scalar(165, 150, 70);
-    Scalar highRedSecondMask = Scalar(180, 255, 255);
+    Scalar lowRedFirstMask = Scalar(0, 150, 20);//(0, 150, 70)
+    Scalar highRedFirstMask = Scalar(10, 255, 255);//(10, 255, 255)
+    Scalar lowRedSecondMask = Scalar(175, 150, 20);//(165, 150, 70)
+    Scalar highRedSecondMask = Scalar(180, 255, 255);//(180, 255, 255)
 
     /*Violet color*/
-    Scalar lowViolet = Scalar(135,50,20);
-    Scalar highViolet = Scalar(175,255,255);
+    Scalar lowViolet = Scalar(135,100,35);//135-50-20
+    Scalar highViolet = Scalar(174,255,255);
 
     /*White color*/
     Scalar lowWhite = Scalar(0,0,168);
+    Scalar lowDiceWhite = Scalar(0,0,120);
+    Scalar highDiceWhite = Scalar(180,80,255);
     Scalar highWhite = Scalar(180,50,255);
 } COLOR_RANGES;
+
+struct s_circle
+{
+    int radius;
+    Point center;
+};
 
 struct Dice_s
 {
     Rect boundRect;
     int number;
     SagradaColor color;
+    int col;
+    int row;
+    Dice_s* leftDice;
+    Dice_s* rightDice;
+    Dice_s* upperDice;
+    Dice_s* lowerDice;
+
+    Dice_s(Rect _boundRect, SagradaColor _color)
+    {
+        this->boundRect = _boundRect;
+        this->color = _color;
+
+        this->number = 0;
+        this->col = NULL;
+        this->row = NULL;
+        this->leftDice = NULL;
+        this->rightDice = NULL;
+        this->upperDice = NULL;
+        this->lowerDice = NULL;
+    }
+    /*
+     * _side = true -> Row 1 (upper border)
+     * _side = false -> Row 4 (bottom border)*/
+    void SetBorderRow(bool _side)
+    {
+        _side ? this->row = 1 : this->row = 4;
+    }
+    /*
+     * _side = true -> Col 1 (upper border)
+     * _side = false -> Col 5 (bottom border)*/
+    void SetBorderCol(bool _side)
+    {
+        _side ? this->col = 1 : this->col = 5;
+    }
 };
-//TODO: BELLES white dots might seem like gray so the detection is incorrect - lower the threshold
-//TODO: DOTS CONTOURS RECOGNITION BASED ON BOUNDING CIRCLE AREA
+
+Mat tMask;
+
+bool sort_by_x(Dice_s dice1, Dice_s dice2) { return dice1.boundRect.tl().x < dice2.boundRect.tl().x; }
+bool sort_by_y(Dice_s dice1, Dice_s dice2) { return dice1.boundRect.br().y < dice2.boundRect.br().y; }
+
 class DiceAnalyzer
 {
 public:
@@ -66,31 +111,112 @@ public:
     Mat hsvImage;
     Mat tmp;
     //color ranges
+    int rectOffset;
     vector<Dice_s> dices;
     DiceAnalyzer(Mat _image)
     {
         this->diceImage = _image;
-        this->tmp = Mat::zeros( _image.size(), CV_8UC3);
+        _image.copyTo(this->tmp);
     }
     void DetectDices()
     {
         //RGB -> HSV
         cvtColor(this->diceImage, this->hsvImage, COLOR_BGR2HSV);
         //Filter each color
-        DetectColor(S_RED, 50000.0);
-        DetectColor(S_GREEN, 50000.0);
-        DetectColor(S_BLUE, 50000.0);
-        DetectColor(S_YELLOW, 50000.0);
-        DetectColor(S_VIOLET, 50000.0);
-        //TODO: Detect White color
-        //detect number
-        DetectNumber();
+        FindDiceByColor(S_RED);
+        FindDiceByColor(S_GREEN);
+        FindDiceByColor(S_BLUE);
+        FindDiceByColor(S_YELLOW);
+        FindDiceByColor(S_VIOLET);
         //DEBUG
-        for(int i; i < this->dices.size(); i++){
-            rectangle(this->tmp, this->dices[i].boundRect.tl(), this->dices[i].boundRect.br(), Scalar(0,0,255), 5, LINE_AA);
+        __android_log_print(ANDROID_LOG_INFO, "Number of dices", "%d", this->dices.size());
+        for(int i = 0; i < this->dices.size(); i++){
+            rectangle(this->tmp, this->dices[i].boundRect.tl(), this->dices[i].boundRect.br(), Scalar(0,0,255), 10, LINE_AA);
         }
     }
-    void DetectColor(SagradaColor _color, double size)
+    vector<Dice_s> SortDices(int _rows, int _cols)
+    {
+        sort(this->dices.begin(), this->dices.end(), sort_by_y);
+        vector<Dice_s> outputVector;
+        //Create rows
+        vector<vector<Dice_s>> dice_rows;
+        vector<Dice_s> dice_row;
+
+        int ref_value = this->dices[0].boundRect.y;
+
+        dice_row.push_back(this->dices[0]);
+        //rows
+        for(int i = 1; i < this->dices.size(); i++){
+            Dice_s dice = this->dices[i];
+            if(dice.boundRect.y >= ref_value - dice.boundRect.height/2 && dice.boundRect.y <= ref_value + dice.boundRect.height/2){
+                dice_row.push_back(dice);
+            }
+            else if(dice.boundRect.y > ref_value + dice.boundRect.height/2){
+                dice_rows.push_back(dice_row);
+                dice_row.clear();
+                dice_row.push_back(dice);
+                ref_value = dice.boundRect.y;
+            }
+            if(i == this->dices.size() - 1){
+                dice_rows.push_back(dice_row);
+                dice_row.clear();
+            }
+        }
+        //Rows assertion
+        if(dice_rows.size() > _rows){
+            __android_log_print(ANDROID_LOG_ERROR, "Number of detected rows exceeded", "rows : %d", _rows);
+        }
+        else if(dice_rows.size() < _rows){
+            //create empty rows
+            //TODO: Empty rows
+        }
+        //Cols
+        vector<Dice_s> dice_col;
+        vector<vector<Dice_s>> dice_cols;
+
+        sort(this->dices.begin(), this->dices.end(), sort_by_x);
+        dice_col.push_back(this->dices[0]);
+        ref_value = this->dices[0].boundRect.x;
+
+        for(int i = 1; i < this->dices.size(); i++){
+            Dice_s dice = this->dices[i];
+            if(dice.boundRect.x >= ref_value - dice.boundRect.width/2 && dice.boundRect.x <= ref_value + dice.boundRect.width/2){
+                dice_col.push_back(dice);
+            }
+            else if(dice.boundRect.x > ref_value + dice.boundRect.width/2){
+                dice_cols.push_back(dice_col);
+                dice_col.clear();
+                dice_col.push_back(dice);
+                ref_value = dice.boundRect.x;
+            }
+            if(i == this->dices.size() -1){
+                dice_cols.push_back(dice_col);
+                dice_col.clear();
+            }
+        }
+        //Cols assertion
+        if(dice_cols.size() > _cols){
+            __android_log_print(ANDROID_LOG_ERROR, "Number of detected cols exceeded", "cols: %d", _cols);
+        }
+        else if(dice_cols.size() < _rows){
+            //create empty cols
+            //TODO: Empty cols
+        }
+
+        return outputVector;
+    }
+    vector<vector<Dice_s>> AdjustDiceRows(vector<vector<Dice_s>> _diceRows)
+    {
+        //TODO
+        //dice on row
+        Dice_s dice = _diceRows[_diceRows.size()-1][0];
+        //offset
+        int offset = (int)(dice.boundRect.height * 0.25);
+        vector<vector<Dice_s>> vec;
+        return vec;
+    }
+    //Output Mat is for debug
+    Mat FindDiceByColor(SagradaColor _color)
     {
         Mat colorMask;
         vector<Scalar> cRange = SelectRange(_color);
@@ -101,16 +227,18 @@ public:
             inRange(this->hsvImage, cRange[0], cRange[2], tmp);
             inRange(this->hsvImage, cRange[1], cRange[3], colorMask);
             colorMask += tmp;
-            colorMask.copyTo(tap);
+            colorMask.copyTo(tMask);
         }
         else
         {
             inRange(this->hsvImage, cRange[0], cRange[1], colorMask);
         }
 
-        Mat drawing = Mat::zeros( this->hsvImage.size(), CV_8UC3);
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
+
+        Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
+        erode(colorMask,colorMask, kernel, Point(-1,-1), 4);
 
         findContours(colorMask, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
@@ -122,47 +250,19 @@ public:
             approxPolyDP( contours[i], contours_poly[i], epsilon, true );
 
             double area = contourArea(contours_poly[i]);
-            if(area > 50000.0){
-                drawContours(drawing, contours, (int) i, Scalar(0,0,255));
-                Dice_s dice;
-                dice.color = _color;
-                dice.boundRect = boundingRect(contours_poly[i]);
-                this->dices.push_back(dice);
+            Rect bound = boundingRect(contours[i]);
+            if(hierarchy[i][3] == -1 ){
+                int blob_count = 0;
+                if(IsNumber(this->hsvImage(bound), blob_count) && blob_count > 0 && blob_count < 7){
+                    Dice_s dice(boundingRect(contours_poly[i]), _color);
+                    dice.number = blob_count;
+                    this->dices.push_back(dice);
+                }
             }
         }
+
+        return colorMask;
     }
-    void DetectNumber()
-    {
-        for(size_t index = 0; index < this->dices.size(); index++)
-        {
-            int number = 0;
-            Dice_s victimDice = dices[index];
-            Mat victimImg = this->hsvImage(victimDice.boundRect);
-            if(IsNumber(victimImg, number))
-            {
-                this->dices[index].number = number;
-            }
-            else
-            {
-                //Analyze space
-                    //Either random space or empty slot
-
-            }
-        }
-    }
-    void DetectEmptySlot()
-    {
-        //get template rect
-        int defRectHeight;
-        int defRectWidth;
-
-        GetDefaultRect(defRectHeight, defRectWidth);
-        //Get corner dice (at least one corner will have dice placed on template)
-
-    }
-
-
-    //
     vector<Scalar> SelectRange(SagradaColor _color)
     {
         vector<Scalar> outputVec;
@@ -170,7 +270,7 @@ public:
         switch (_color)
         {
             case S_WHITE:
-                outputVec.push_back(COLOR_RANGES.lowWhite);
+                outputVec.push_back(COLOR_RANGES.lowDiceWhite);
                 outputVec.push_back(COLOR_RANGES.highWhite);
             case S_RED:
                 outputVec.push_back(COLOR_RANGES.lowRedFirstMask);
@@ -189,16 +289,17 @@ public:
             case S_VIOLET:
                 outputVec.push_back(COLOR_RANGES.lowViolet);
                 outputVec.push_back(COLOR_RANGES.highViolet);
+            default:
+                break;
         }
         return outputVec;
     }
     bool IsNumber(Mat _img, int& _number)
     {
-        //TODO Correct number count, because of random contour -> bounding circle area
         Mat mask;
         int number = 0;
 
-        inRange(_img, COLOR_RANGES.lowWhite, COLOR_RANGES.highWhite, mask);
+        inRange(_img, COLOR_RANGES.lowDiceWhite, COLOR_RANGES.highDiceWhite, mask);
 
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
@@ -207,58 +308,44 @@ public:
 
         vector<vector<Point>> contours_poly( contours.size());
 
+        int count = 0;
+
         for( size_t i = 0; i < contours.size(); i++ )
         {
             double epsilon = 0.01*arcLength(contours[i],true);
             approxPolyDP( contours[i], contours_poly[i], epsilon, true );
-
             double area = contourArea(contours_poly[i]);
-            if(area > 2000.0 && contours_poly[i].size() > 5){
-                number++;
+            Point2f center;
+            float radius;
+            minEnclosingCircle(contours_poly[i], center, radius);
+            double cArea = radius * radius * 3.14;
+            double areaOffset = cArea * 0.25;
+
+            if(area >= cArea - areaOffset && hierarchy[i][3] == -1)
+            {
+                count++;
             }
         }
 
-        _number = number;
+        _number = count;
 
-        return true;
+        if(count >= 1 && count <= 6)
+        {
+            _number = count;
+            return true;
+        }
+        else
+        {
+            _number = -1;
+            return false;
+        }
     }
     void DiceOutput()
     {
         for(int i = 0; i < this->dices.size(); i++)
         {
             __android_log_print(ANDROID_LOG_INFO, "DiceOutput", "%d | %s", this->dices[i].number, PIDName(this->dices[i].color));
-            if(i % 4 == 0)
-            {
-                __android_log_print(ANDROID_LOG_INFO, "DiceOutput", "------");
-            }
         }
-    }
-    void GetDefaultRect(int& _height, int& _width)
-    {
-        int sumHeight = 0;
-        int sumWidth = 0;
-
-        for(int i = 0; i < this->dices.size(); i++)
-        {
-            sumHeight += this->dices[i].boundRect.height;
-            sumWidth += this->dices[i].boundRect.width;
-        }
-
-        _height = sumHeight / this->dices.size();
-        _width = sumWidth / this->dices.size();
-    }
-    int GetCornerDice(Dice_s& _dice)
-    {
-        Dice_s cornerDice = Dice_s();
-        int mode = 0;
-        vector<Dice_s> selDices = this->dices;
-
-        //search for dice with number and color
-        //for()
-        //take TL, TR, BL, BR if there is. At least one will be
-
-        _dice = cornerDice;
-        return mode;
     }
 
     char* PIDName(SagradaColor _pid)

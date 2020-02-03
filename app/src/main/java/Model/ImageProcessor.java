@@ -1,13 +1,16 @@
 package Model;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 
 import com.example.sagrada.R;
-
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class ImageProcessor
 {
@@ -37,20 +40,25 @@ public class ImageProcessor
 
     public void AddDiceImg()
     {
-        try
-        {
-            this.diceImg = Utils.loadResource(this.context, R.drawable.dices_2);
+        /*try{
+            this.diceImg = Utils.loadResource(this.context, R.drawable.dices1);
         }
-        catch (IOException e)
-        {
+        catch (IOException e){
+            e.printStackTrace();
+        }*/
+        RotateImage();
+    }
+
+    public void RotateImage(){
+        try {
+            InputStream inStream = this.context.getAssets().open("test05_crop.jpg");
+            Bitmap bitmap = ImageRotator.rotateImage(inStream);
+            this.diceImg = ImageRotator.convertImage(bitmap);
+            inStream.close();
+        } catch (IOException e){
             e.printStackTrace();
         }
     }
-
-    /*public void AddDiceImg(Mat _diceImg)
-    {
-        this.diceImg = _diceImg;
-    }*/
 
     public native void testFunction(long output);
     public native void DiceDetector(long output);
