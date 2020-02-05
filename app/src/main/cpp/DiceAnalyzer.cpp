@@ -110,18 +110,68 @@ public:
     Mat diceImage;
     Mat hsvImage;
     Mat tmp;
-    //color ranges
-    int rectOffset;
     vector<Dice_s> dices;
+    Mat diceBoundImg;
     DiceAnalyzer(Mat _image)
     {
         this->diceImage = _image;
         _image.copyTo(this->tmp);
     }
+    void DetectDiceGrid(){
+        Mat labImg;
+        Mat mask;
+        Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
+        double scaleWidth;
+        double scaleHeight;
+        Rect bound = Rect(0,0,0,0);
+        int L1 = 0;
+        int L2 = 35;
+        int a1 = -20;
+        int a2 = 20;
+        int b1 = -10;
+        int b2 = 10;
+        //convert image to Lab color space
+        cvtColor(diceImage, labImg, COLOR_BGR2Lab);
+        //Set scale values for resized image
+        SetScaleValues(diceImage.size().width, diceImage.size().height, scaleWidth, scaleHeight, 512, 512);
+        //Set OpenCV Lab values for black
+        CalculateLabValues(L1, a1, b1); //lower bound
+        CalculateLabValues(L2, a2, b2); //upper bound
+        //Create black color mask
+        inRange(labImg, Scalar(L1, a1, b1), Scalar(L2, a2, b2), mask);
+        //resize mask
+        resize(mask, mask, Size(512,512));
+        //erode
+        erode(mask, mask, kernel, Point(-1,-1), 5);
+        //Find contours
+        vector<vector<Point>> contours;
+        findContours(mask, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
+        for(size_t i = 0; i < contours.size(); i++){
+            Rect tmpBound = boundingRect(contours[i]);
+            //filter contours && find fitting contours
+            //TODO: Instead of bound.width use bound.height when image is being rotated correctly
+            if(tmpBound.area() > 30000 && tmpBound.width > 100){
+                //Store the lowest fitting contour
+                if(tmpBound.area() < bound.area() || bound.width == 0){
+                    bound = tmpBound;
+                }
+            }
+        }
+        //scale bound to fit diceImg size
+        bound.width =(int) (bound.width * scaleWidth);
+        bound.height =(int) (bound.height * scaleHeight);
+        bound.x =(int) (bound.x * scaleWidth);
+        bound.y =(int) (bound.y * scaleHeight);
+        //check if bound was found
+        if(bound.width == 0){
+            __android_log_print(ANDROID_LOG_ERROR, "Detect dices", "No bound was found!");
+        }
+        diceImage(bound).copyTo(diceBoundImg);
+    }
     void DetectDices()
     {
         //RGB -> HSV
-        cvtColor(this->diceImage, this->hsvImage, COLOR_BGR2HSV);
+        cvtColor(diceBoundImg, hsvImage, COLOR_BGR2HSV);
         //Filter each color
         FindDiceByColor(S_RED);
         FindDiceByColor(S_GREEN);
@@ -130,8 +180,9 @@ public:
         FindDiceByColor(S_VIOLET);
         //DEBUG
         __android_log_print(ANDROID_LOG_INFO, "Number of dices", "%d", this->dices.size());
-        for(int i = 0; i < this->dices.size(); i++){
-            rectangle(this->tmp, this->dices[i].boundRect.tl(), this->dices[i].boundRect.br(), Scalar(0,0,255), 10, LINE_AA);
+        diceBoundImg.copyTo(tmp);
+        for(int i = 0; i < dices.size(); i++){
+            rectangle(tmp, dices[i].boundRect.tl(), dices[i].boundRect.br(), Scalar(0,0,255), 10, LINE_AA);
         }
     }
     vector<Dice_s> SortDices(int _rows, int _cols)
@@ -208,10 +259,11 @@ public:
     vector<vector<Dice_s>> AdjustDiceRows(vector<vector<Dice_s>> _diceRows)
     {
         //TODO
-        //dice on row
+        //dice on the biggest (y - value) row
         Dice_s dice = _diceRows[_diceRows.size()-1][0];
         //offset
         int offset = (int)(dice.boundRect.height * 0.25);
+        //Control row below
         vector<vector<Dice_s>> vec;
         return vec;
     }
@@ -340,6 +392,19 @@ public:
             return false;
         }
     }
+    void SetScaleValues(int _width, int _height, double& scaleWidth, double& scaleHeight, double refWidth, double refHeight)
+    {
+        scaleWidth = _width / refWidth;
+        scaleHeight = _height / refHeight;
+        __android_log_print(ANDROID_LOG_INFO, "scale", "%d | %d | %f | %f", _width, _height, scaleWidth, scaleHeight);
+    }
+    void CalculateLabValues(int& L, int& a, int& b)
+    {
+        L = L * 255/100;
+        a = a + 128;
+        b = b + 128;
+    }
+
     void DiceOutput()
     {
         for(int i = 0; i < this->dices.size(); i++)
@@ -347,7 +412,6 @@ public:
             __android_log_print(ANDROID_LOG_INFO, "DiceOutput", "%d | %s", this->dices[i].number, PIDName(this->dices[i].color));
         }
     }
-
     char* PIDName(SagradaColor _pid)
     {
         switch (_pid)

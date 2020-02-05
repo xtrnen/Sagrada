@@ -51,7 +51,7 @@ public class ImageProcessor
 
     public void RotateImage(){
         try {
-            InputStream inStream = this.context.getAssets().open("test05_crop.jpg");
+            InputStream inStream = this.context.getAssets().open("dices_1.jpg");
             Bitmap bitmap = ImageRotator.rotateImage(inStream);
             this.diceImg = ImageRotator.convertImage(bitmap);
             inStream.close();

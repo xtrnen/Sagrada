@@ -140,49 +140,61 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobje
 
     cvtColor(diceImg, diceImg, COLOR_BGR2RGB);
     DiceAnalyzer diceAnalyzer = DiceAnalyzer(diceImg);
-
+    diceAnalyzer.DetectDiceGrid();
     diceAnalyzer.DetectDices();
     diceAnalyzer.SortDices(4,5);
-    //diceAnalyzer.DiceOutput();
+    diceAnalyzer.DiceOutput();
 
     /*Mat mask;
-    cvtColor(diceAnalyzer.diceImage, diceAnalyzer.hsvImage, COLOR_BGR2HSV);
-    diceAnalyzer.DetectColor(S_RED).copyTo(mask);
+    Mat img;
+    cvtColor(diceAnalyzer.diceImage, img, COLOR_BGR2Lab);
+    int L1 = 0;
+    int L2 = 35 * 255/100;
+    int a1 = -20 + 128;
+    int a2 = 20 + 128;
+    int b1 = -10 + 128;
+    int b2 = 10 + 128;
+    inRange(img, Scalar(L1, a1, b1), Scalar(L2, a2, b2), mask);
+
+    double scaleWidth = img.size().width / 512.0;
+    double scaleHeight = img.size().height / 512.0;
+    //
+    resize(mask,mask, Size(512,512));
+
     Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
-    erode(mask,mask, kernel, Point(-1,-1), 4);
-    GaussianBlur(mask,mask, Size(3,3),0);
-    int number = 0;
-
-    //inRange(diceAnalyzer.hsvImage(diceAnalyzer.dices[1].boundRect), COLOR_RANGES.lowDiceWhite, COLOR_RANGES.highDiceWhite, mask);
-
+    erode(mask,mask, kernel, Point(-1,-1), 5);
     vector<vector<Point>> contours;
-    vector<Vec4i> hierarchy;
 
-     findContours(mask, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+    findContours(mask, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
     vector<vector<Point>> contours_poly( contours.size());
-
-    int count = 0;
-
+    Rect boundry = Rect(0,0,0,0);
     for( size_t i = 0; i < contours.size(); i++ )
     {
         double epsilon = 0.01*arcLength(contours[i],true);
         approxPolyDP( contours[i], contours_poly[i], epsilon, true );
-        double area = contourArea(contours_poly[i]);
-        Point2f center;
-        float radius;
-        minEnclosingCircle(contours_poly[i], center, radius);
-        double cArea = radius * radius * 3.14;
-        double areaOffset = cArea * 0.25;
-
-        if(area >= cArea - areaOffset && hierarchy[i][3] == -1)
-        {
-            //circle(mask, center, radius, Scalar(255,255,255), 3);
-            count++;
+        Rect bound = boundingRect(contours[i]);
+        if(bound.area() > 30000.0 && bound.width > 100){//height
+            if(boundry.width == 0){
+                boundry = bound;
+            }
+            if(boundry.area() > bound.area()){
+                boundry = bound;
+            }
+            __android_log_print(ANDROID_LOG_INFO, "RECT SIZE", "w: %d | h: %d |area: %d", bound.width, bound.height, bound.area());
+            bound.width =(int) (bound.width * scaleWidth);
+            bound.height =(int) (bound.height * scaleHeight);
+            bound.x =(int) (bound.x * scaleWidth);
+            bound.y =(int) (bound.y * scaleHeight);
+            rectangle(diceAnalyzer.diceImage, bound, Scalar(255,255,255), 5);
         }
     }
-    __android_log_print(ANDROID_LOG_INFO, "CIRCLE", "%d", count);
-    mask.copyTo(outputImg);*/
+    boundry.width =(int) (boundry.width * scaleWidth);
+    boundry.height =(int) (boundry.height * scaleHeight);
+    boundry.x =(int) (boundry.x * scaleWidth);
+    boundry.y =(int) (boundry.y * scaleHeight);
+    if(boundry.width != 0)
+        diceAnalyzer.diceImage(boundry).copyTo(outputImg);*/
 
     diceAnalyzer.tmp.copyTo(outputImg);
 };
