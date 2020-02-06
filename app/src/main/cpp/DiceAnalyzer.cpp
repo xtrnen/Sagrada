@@ -165,8 +165,61 @@ public:
         //check if bound was found
         if(bound.width == 0){
             __android_log_print(ANDROID_LOG_ERROR, "Detect dices", "No bound was found!");
+            diceImage.copyTo(diceBoundImg);
         }
-        diceImage(bound).copyTo(diceBoundImg);
+        else{
+            diceImage(bound).copyTo(diceBoundImg);
+        }
+    }
+    vector<Rect> DetectDiceSlots()
+    {
+        Mat labImg;
+        Mat mask;
+        Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
+        double scaleWidth;
+        double scaleHeight;
+        vector<Rect> slots;
+        int L1 = 0;
+        int L2 = 35;
+        int a1 = -20;
+        int a2 = 20;
+        int b1 = -10;
+        int b2 = 10;
+        //convert image to Lab color space
+        cvtColor(diceBoundImg, labImg, COLOR_BGR2Lab);
+        //Set scale values for resized image
+        SetScaleValues(diceBoundImg.size().width, diceBoundImg.size().height, scaleWidth, scaleHeight, 512, 512);
+        //Set OpenCV Lab values for black
+        CalculateLabValues(L1, a1, b1); //lower bound
+        CalculateLabValues(L2, a2, b2); //upper bound
+        //Create black color mask
+        inRange(labImg, Scalar(L1, a1, b1), Scalar(L2, a2, b2), mask);
+        //resize mask
+        resize(mask, mask, Size(512,512));
+        //Highlight slots
+        bitwise_not(mask,mask);
+        //Find contours
+        vector<vector<Point>> contours;
+        findContours(mask, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
+        for(size_t i = 0; i < contours.size(); i++){
+            Rect tmpBound = boundingRect(contours[i]);
+            //filter contours && find fitting contours
+            //TODO: Instead of bound.width use bound.height when image is being rotated correctly
+            if(tmpBound.width > 45 && tmpBound.width < 150 && tmpBound.height > 45 && tmpBound.height < 150){
+                //resize back
+                tmpBound.width =(int) (tmpBound.width * scaleWidth);
+                tmpBound.height =(int) (tmpBound.height * scaleHeight);
+                tmpBound.x =(int) (tmpBound.x * scaleWidth);
+                tmpBound.y =(int) (tmpBound.y * scaleHeight);
+                if(!SlotExists(slots, tmpBound)){
+                    //store slots
+                    rectangle(diceBoundImg, tmpBound, Scalar(255,255,255), 10);
+                    slots.push_back(tmpBound);
+                }
+            }
+        }
+
+        return slots;
     }
     void DetectDices()
     {
@@ -256,15 +309,35 @@ public:
 
         return outputVector;
     }
-    vector<vector<Dice_s>> AdjustDiceRows(vector<vector<Dice_s>> _diceRows)
+    vector<vector<Dice_s>> AdjustDiceRows(vector<vector<Dice_s>> _diceRows, int _rows)
     {
         //TODO
-        //dice on the biggest (y - value) row
-        Dice_s dice = _diceRows[_diceRows.size()-1][0];
+        //output vec
+        vector<vector<Dice_s>> vec;
+        //num of rows
+        int rows = _diceRows.size();
+        //dice on the lowest (y - value) row
+        Dice_s dice = _diceRows[0][0];
         //offset
         int offset = (int)(dice.boundRect.height * 0.25);
-        //Control row below
-        vector<vector<Dice_s>> vec;
+        //upper boundry x
+        int xBound = 0;
+        //check how many times can we fit dice on top of our dice
+        int possDices = dice.boundRect.y / dice.boundRect.height + offset * 2;
+        if(possDices > 0){
+            for(int i = 0; i < possDices; i++){
+                vector<Dice_s> emptyVec;
+                vec.push_back(emptyVec);
+            }
+        }
+        if(rows + vec.size() == _rows){
+            for(vector<Dice_s> row : _diceRows){
+                vec.push_back(row);
+            }
+            return vec;
+        }
+        //Check each row if other rows are next to them
+
         return vec;
     }
     //Output Mat is for debug
@@ -403,6 +476,22 @@ public:
         L = L * 255/100;
         a = a + 128;
         b = b + 128;
+    }
+    bool SlotExists(vector<Rect> slots, Rect newSlot)
+    {
+        for(Rect rect : slots){
+            int slotCX = rect.x + rect.width / 2;
+            int slotCY = rect.y + rect.height / 2;
+            int lowerRangeX = newSlot.x - newSlot.width/2;
+            int upperRangeX = newSlot.x + newSlot.width + newSlot.width/2;
+            int lowerRangeY = newSlot.y - newSlot.height/2;
+            int upperRangeY = newSlot.y + newSlot.height + newSlot.height/2;
+            if(slotCX >= lowerRangeX && slotCX <= upperRangeX &&
+               slotCY >= lowerRangeY && slotCY <= upperRangeY){
+                return true;
+            }
+        }
+        return false;
     }
 
     void DiceOutput()

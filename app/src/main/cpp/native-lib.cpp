@@ -141,13 +141,14 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobje
     cvtColor(diceImg, diceImg, COLOR_BGR2RGB);
     DiceAnalyzer diceAnalyzer = DiceAnalyzer(diceImg);
     diceAnalyzer.DetectDiceGrid();
-    diceAnalyzer.DetectDices();
+    diceAnalyzer.DetectDiceSlots();
+    /*diceAnalyzer.DetectDices();
     diceAnalyzer.SortDices(4,5);
-    diceAnalyzer.DiceOutput();
+    diceAnalyzer.DiceOutput();*/
 
     /*Mat mask;
     Mat img;
-    cvtColor(diceAnalyzer.diceImage, img, COLOR_BGR2Lab);
+    cvtColor(diceAnalyzer.diceBoundImg, img, COLOR_BGR2Lab);
     int L1 = 0;
     int L2 = 35 * 255/100;
     int a1 = -20 + 128;
@@ -160,9 +161,10 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobje
     double scaleHeight = img.size().height / 512.0;
     //
     resize(mask,mask, Size(512,512));
+    bitwise_not(mask,mask);
 
-    Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
-    erode(mask,mask, kernel, Point(-1,-1), 5);
+    //Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
+    //erode(mask,mask, kernel, Point(-1,-1), 1);
     vector<vector<Point>> contours;
 
     findContours(mask, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
@@ -174,29 +176,19 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobje
         double epsilon = 0.01*arcLength(contours[i],true);
         approxPolyDP( contours[i], contours_poly[i], epsilon, true );
         Rect bound = boundingRect(contours[i]);
-        if(bound.area() > 30000.0 && bound.width > 100){//height
-            if(boundry.width == 0){
-                boundry = bound;
-            }
-            if(boundry.area() > bound.area()){
-                boundry = bound;
-            }
-            __android_log_print(ANDROID_LOG_INFO, "RECT SIZE", "w: %d | h: %d |area: %d", bound.width, bound.height, bound.area());
+        if(bound.width > 45 && bound.width < 150 && bound.height > 45 && bound.height < 150){
+            __android_log_print(ANDROID_LOG_INFO, "RECT", "%d|%d", bound.width, bound.height);
             bound.width =(int) (bound.width * scaleWidth);
             bound.height =(int) (bound.height * scaleHeight);
             bound.x =(int) (bound.x * scaleWidth);
             bound.y =(int) (bound.y * scaleHeight);
-            rectangle(diceAnalyzer.diceImage, bound, Scalar(255,255,255), 5);
+            rectangle(diceAnalyzer.diceBoundImg, bound, Scalar(255,255,255), 5);
         }
     }
-    boundry.width =(int) (boundry.width * scaleWidth);
-    boundry.height =(int) (boundry.height * scaleHeight);
-    boundry.x =(int) (boundry.x * scaleWidth);
-    boundry.y =(int) (boundry.y * scaleHeight);
-    if(boundry.width != 0)
-        diceAnalyzer.diceImage(boundry).copyTo(outputImg);*/
 
-    diceAnalyzer.tmp.copyTo(outputImg);
+    diceAnalyzer.diceBoundImg.copyTo(outputImg);*/
+
+    diceAnalyzer.diceBoundImg.copyTo(outputImg);
 };
 Mat GetObjectImg(JNIEnv *env, jobject obj, string _propTypeRoute, string _propName){
     jclass thisClass = env->GetObjectClass(obj);
