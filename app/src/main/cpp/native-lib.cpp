@@ -136,57 +136,14 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobje
 {
     Mat& outputImg = *(Mat*) output;
     Mat diceImg = GetObjectImg(env, obj, "org/opencv/core/Mat", "diceImg");
-    Mat tmp;
 
     cvtColor(diceImg, diceImg, COLOR_BGR2RGB);
     DiceAnalyzer diceAnalyzer = DiceAnalyzer(diceImg);
     diceAnalyzer.DetectDiceGrid();
     diceAnalyzer.DetectDiceSlots();
-    /*diceAnalyzer.DetectDices();
-    diceAnalyzer.SortDices(4,5);
-    diceAnalyzer.DiceOutput();*/
-
-    /*Mat mask;
-    Mat img;
-    cvtColor(diceAnalyzer.diceBoundImg, img, COLOR_BGR2Lab);
-    int L1 = 0;
-    int L2 = 35 * 255/100;
-    int a1 = -20 + 128;
-    int a2 = 20 + 128;
-    int b1 = -10 + 128;
-    int b2 = 10 + 128;
-    inRange(img, Scalar(L1, a1, b1), Scalar(L2, a2, b2), mask);
-
-    double scaleWidth = img.size().width / 512.0;
-    double scaleHeight = img.size().height / 512.0;
-    //
-    resize(mask,mask, Size(512,512));
-    bitwise_not(mask,mask);
-
-    //Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
-    //erode(mask,mask, kernel, Point(-1,-1), 1);
-    vector<vector<Point>> contours;
-
-    findContours(mask, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
-
-    vector<vector<Point>> contours_poly( contours.size());
-    Rect boundry = Rect(0,0,0,0);
-    for( size_t i = 0; i < contours.size(); i++ )
-    {
-        double epsilon = 0.01*arcLength(contours[i],true);
-        approxPolyDP( contours[i], contours_poly[i], epsilon, true );
-        Rect bound = boundingRect(contours[i]);
-        if(bound.width > 45 && bound.width < 150 && bound.height > 45 && bound.height < 150){
-            __android_log_print(ANDROID_LOG_INFO, "RECT", "%d|%d", bound.width, bound.height);
-            bound.width =(int) (bound.width * scaleWidth);
-            bound.height =(int) (bound.height * scaleHeight);
-            bound.x =(int) (bound.x * scaleWidth);
-            bound.y =(int) (bound.y * scaleHeight);
-            rectangle(diceAnalyzer.diceBoundImg, bound, Scalar(255,255,255), 5);
-        }
-    }
-
-    diceAnalyzer.diceBoundImg.copyTo(outputImg);*/
+    diceAnalyzer.DetectDices();
+    //diceAnalyzer.DiceOutput();
+    //TODO: map dices to Java Array
 
     diceAnalyzer.diceBoundImg.copyTo(outputImg);
 };
