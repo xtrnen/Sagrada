@@ -113,6 +113,7 @@ int ControlBlobPosition(vector<s_circle> circles, Point imgCenter)
     }
 }
 
+jobjectArray BuildOutput(JNIEnv *env, vector<Dice_s> dices);
 extern "C"
 JNIEXPORT void JNICALL Java_Model_ImageProcessor_testFunction(JNIEnv *env, jobject obj, jlong output){
     Mat& outputImg = *(Mat*) output;
@@ -132,7 +133,7 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_testFunction(JNIEnv *env, jobje
     patternAnalyzer.patternImg.copyTo(outputImg);
 };
 extern "C"
-JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobject obj, jlong output)
+JNIEXPORT jobjectArray JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobject obj, jlong output)
 {
     Mat& outputImg = *(Mat*) output;
     Mat diceImg = GetObjectImg(env, obj, "org/opencv/core/Mat", "diceImg");
@@ -144,8 +145,9 @@ JNIEXPORT void JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobje
     diceAnalyzer.DetectDices();
     //diceAnalyzer.DiceOutput();
     //TODO: map dices to Java Array
-
-    diceAnalyzer.diceBoundImg.copyTo(outputImg);
+    jobjectArray outputArray = BuildOutput(env, diceAnalyzer.dices);
+    return outputArray;
+    //diceAnalyzer.diceBoundImg.copyTo(outputImg);
 };
 Mat GetObjectImg(JNIEnv *env, jobject obj, string _propTypeRoute, string _propName){
     jclass thisClass = env->GetObjectClass(obj);
@@ -158,4 +160,21 @@ Mat GetObjectImg(JNIEnv *env, jobject obj, string _propTypeRoute, string _propNa
     jobject propJ = env->GetObjectField(obj, propID);
 
     return *(Mat*)env->CallLongMethod(propJ, ptrMethod);
+}
+jobjectArray BuildOutput(JNIEnv *env, vector<Dice_s> dices)
+{
+    jclass jDice = env->FindClass("Model/Structs/Dice");
+    jobjectArray jDiceArray = env->NewObjectArray(dices.size(), jDice, 0);
+
+    jmethodID jDiceInit = env->GetMethodID(jDice, "<init>", "(Ljava/lang/String;III)V");
+    if(jDiceInit == 0)
+        __android_log_print(ANDROID_LOG_ERROR, "BuildOutput", "Cannot create init method!");
+
+    for(int i = 0; i < dices.size(); i++){
+        jstring dColor = env->NewStringUTF(dices[i].GetColorString().c_str());
+        jobject dice = env->NewObject(jDice, jDiceInit, dColor, dices[i].number, dices[i].row, dices[i].col);
+        env->SetObjectArrayElement(jDiceArray, i, dice);
+    }
+
+    return jDiceArray;
 }

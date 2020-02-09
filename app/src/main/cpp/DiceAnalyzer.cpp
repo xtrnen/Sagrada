@@ -75,6 +75,23 @@ struct Dice_s
         this->col = NULL;
         this->row = NULL;
     }
+
+    string GetColorString(){
+        switch (color) {
+            case S_RED:
+                return string("RED");
+            case S_GREEN:
+                return string("GREEN");
+            case S_BLUE:
+                return string("BLUE");
+            case S_YELLOW:
+                return string("YELLOW");
+            case S_VIOLET:
+                return string("VIOLET");
+            default:
+                return string("NONE");
+        }
+    }
 };
 
 Mat tMask;
@@ -437,7 +454,7 @@ public:
     {
         for(int i = 0; i < this->dices.size(); i++)
         {
-            __android_log_print(ANDROID_LOG_INFO, "DiceOutput", "%d | %s", this->dices[i].number, PIDName(this->dices[i].color));
+            __android_log_print(ANDROID_LOG_INFO, "DiceOutput", "Number : %d | Color: %s | pos: %d:%d", dices[i].number, PIDName(dices[i].color), dices[i].row, dices[i].col);
         }
     }
     char* PIDName(SagradaColor _pid)

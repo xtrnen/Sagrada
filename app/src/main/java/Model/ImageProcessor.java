@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import Model.Structs.Dice;
+
 public class ImageProcessor
 {
     private Context context;
@@ -51,7 +53,7 @@ public class ImageProcessor
 
     public void RotateImage(){
         try {
-            InputStream inStream = this.context.getAssets().open("test03.jpg");
+            InputStream inStream = this.context.getAssets().open("dice_not_con.jpg");
             Bitmap bitmap = ImageRotator.rotateImage(inStream);
             this.diceImg = ImageRotator.convertImage(bitmap);
             inStream.close();
@@ -61,5 +63,5 @@ public class ImageProcessor
     }
 
     public native void testFunction(long output);
-    public native void DiceDetector(long output);
+    public native Dice[] DiceDetector(long output);
 }

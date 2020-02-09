@@ -12,6 +12,7 @@ import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 import java.io.IOException;
 import Model.ImageProcessor;
+import Model.Structs.Dice;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,11 +36,11 @@ public class MainActivity extends AppCompatActivity {
         imgProcessor.AddTemplateImgs();
         imgProcessor.AddDiceImg();
         //imgProcessor.testFunction(retImg.getNativeObjAddr());
-        imgProcessor.DiceDetector(retImg.getNativeObjAddr());
+        Dice[] dices = imgProcessor.DiceDetector(retImg.getNativeObjAddr());
 
-        if(retImg != null){
+        if(img != null){
             imageView = (ImageView)findViewById(R.id.mat);
-            imageView.setImageBitmap(convMatToBitmap(retImg));
+            imageView.setImageBitmap(convMatToBitmap(img));
         }
     }
 
