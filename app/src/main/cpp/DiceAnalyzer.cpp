@@ -28,11 +28,14 @@ struct color_range
     Scalar highYellow = Scalar(35,255,255);
 
     /*Green color*/
-    Scalar lowGreen = Scalar(40,100,35);
-    Scalar highGreen = Scalar(85,255,255);//90-255-255
+    Scalar lowDiceGreen = Scalar(40,100,35);
+    Scalar lowGreen = Scalar(40,50,35);
+    Scalar highGreen = Scalar(90,255,255);
+    Scalar highDiceGreen = Scalar(85,255,255);//90-255-255
 
     /*Blue color*/
-    Scalar lowBlue = Scalar(85,80,40);//80-50-20
+    Scalar lowDiceBlue = Scalar(85,80,40);//80-50-20
+    Scalar lowBlue = Scalar(80,50,20);
     Scalar highBlue = Scalar(130,255,255);//127-255-255
 
     /*Red color*/
@@ -65,10 +68,6 @@ struct Dice_s
     SagradaColor color;
     int col;
     int row;
-    Dice_s* leftDice;
-    Dice_s* rightDice;
-    Dice_s* upperDice;
-    Dice_s* lowerDice;
 
     Dice_s(Rect _boundRect, SagradaColor _color)
     {
@@ -78,44 +77,41 @@ struct Dice_s
         this->number = 0;
         this->col = NULL;
         this->row = NULL;
-        this->leftDice = NULL;
-        this->rightDice = NULL;
-        this->upperDice = NULL;
-        this->lowerDice = NULL;
     }
-    /*
-     * _side = true -> Row 1 (upper border)
-     * _side = false -> Row 4 (bottom border)*/
-    void SetBorderRow(bool _side)
-    {
-        _side ? this->row = 1 : this->row = 4;
-    }
-    /*
-     * _side = true -> Col 1 (upper border)
-     * _side = false -> Col 5 (bottom border)*/
-    void SetBorderCol(bool _side)
-    {
-        _side ? this->col = 1 : this->col = 5;
+
+    string GetColorString(){
+        switch (color) {
+            case S_RED:
+                return string("RED");
+            case S_GREEN:
+                return string("GREEN");
+            case S_BLUE:
+                return string("BLUE");
+            case S_YELLOW:
+                return string("YELLOW");
+            case S_VIOLET:
+                return string("VIOLET");
+            default:
+                return string("NONE");
+        }
     }
 };
 
 Mat tMask;
 
-bool sort_by_x(Dice_s dice1, Dice_s dice2) { return dice1.boundRect.tl().x < dice2.boundRect.tl().x; }
-bool sort_by_y(Dice_s dice1, Dice_s dice2) { return dice1.boundRect.br().y < dice2.boundRect.br().y; }
+bool sort_by_x(Rect slot1, Rect slot2) { return slot1.x < slot2.x; }
+bool sort_by_y(Rect slot1, Rect slot2) { return slot1.y < slot2.y; }
 
 class DiceAnalyzer
 {
 public:
     Mat diceImage;
     Mat hsvImage;
-    Mat tmp;
     vector<Dice_s> dices;
     Mat diceBoundImg;
     DiceAnalyzer(Mat _image)
     {
         this->diceImage = _image;
-        _image.copyTo(this->tmp);
     }
     void DetectDiceGrid(){
         Mat labImg;
@@ -165,110 +161,147 @@ public:
         //check if bound was found
         if(bound.width == 0){
             __android_log_print(ANDROID_LOG_ERROR, "Detect dices", "No bound was found!");
+            diceImage.copyTo(diceBoundImg);
         }
-        diceImage(bound).copyTo(diceBoundImg);
+        else{
+            diceImage(bound).copyTo(diceBoundImg);
+        }
+    }
+    vector<Rect> DetectDiceSlots()
+    {
+        Mat labImg;
+        Mat mask;
+        Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
+        double scaleWidth;
+        double scaleHeight;
+        vector<Rect> slots;
+        int L1 = 0;
+        int L2 = 35;
+        int a1 = -20;
+        int a2 = 20;
+        int b1 = -10;
+        int b2 = 10;
+        //convert image to Lab color space
+        cvtColor(diceBoundImg, labImg, COLOR_BGR2Lab);
+        //Set scale values for resized image
+        SetScaleValues(diceBoundImg.size().width, diceBoundImg.size().height, scaleWidth, scaleHeight, 512, 512);
+        //Set OpenCV Lab values for black
+        CalculateLabValues(L1, a1, b1); //lower bound
+        CalculateLabValues(L2, a2, b2); //upper bound
+        //Create black color mask
+        inRange(labImg, Scalar(L1, a1, b1), Scalar(L2, a2, b2), mask);
+        //resize mask
+        resize(mask, mask, Size(512,512));
+        //Highlight slots
+        bitwise_not(mask,mask);
+        //Find contours
+        vector<vector<Point>> contours;
+        findContours(mask, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
+        for(size_t i = 0; i < contours.size(); i++){
+            Rect tmpBound = boundingRect(contours[i]);
+            //filter contours && find fitting contours
+            //TODO: Instead of bound.width use bound.height when image is being rotated correctly
+            if(tmpBound.width > 45 && tmpBound.width < 150 && tmpBound.height > 45 && tmpBound.height < 150){
+                //resize back
+                tmpBound.width =(int) (tmpBound.width * scaleWidth);
+                tmpBound.height =(int) (tmpBound.height * scaleHeight);
+                tmpBound.x =(int) (tmpBound.x * scaleWidth);
+                tmpBound.y =(int) (tmpBound.y * scaleHeight);
+                if(!SlotExists(slots, tmpBound)){
+                    //store slots
+                    //rectangle(diceBoundImg, tmpBound, Scalar(255,255,255), 10);
+                    slots.push_back(tmpBound);
+                }
+            }
+        }
+
+        return slots;
     }
     void DetectDices()
     {
-        //RGB -> HSV
         cvtColor(diceBoundImg, hsvImage, COLOR_BGR2HSV);
-        //Filter each color
-        FindDiceByColor(S_RED);
-        FindDiceByColor(S_GREEN);
-        FindDiceByColor(S_BLUE);
-        FindDiceByColor(S_YELLOW);
-        FindDiceByColor(S_VIOLET);
-        //DEBUG
-        __android_log_print(ANDROID_LOG_INFO, "Number of dices", "%d", this->dices.size());
-        diceBoundImg.copyTo(tmp);
-        for(int i = 0; i < dices.size(); i++){
-            rectangle(tmp, dices[i].boundRect.tl(), dices[i].boundRect.br(), Scalar(0,0,255), 10, LINE_AA);
+        //Get slots
+        vector<Rect> slotBounds = DetectDiceSlots();
+        //sort slots by rows
+        vector<vector<Rect>> sortedSlots = SortSlots(4, slotBounds);
+        //for each row -> from left to right check slot, assign Dice value, color, row and col
+        for(int row = 0; row < sortedSlots.size(); row++){
+            //Check each slot
+            for(int col = 0; col < sortedSlots[row].size(); col++){
+                Dice_s dice = FindDice(sortedSlots[row][col]);
+                if(dice.color != S_NONE)
+                {
+                    dice.row = row;
+                    dice.col = col;
+                    dices.push_back(dice);
+                    rectangle(diceBoundImg, dice.boundRect.tl(), dice.boundRect.br(), Scalar(0,0,255), 5, LINE_AA);
+                }
+            }
         }
     }
-    vector<Dice_s> SortDices(int _rows, int _cols)
+    vector<vector<Rect>> SortSlots(int _rows, vector<Rect> _slots)
     {
-        sort(this->dices.begin(), this->dices.end(), sort_by_y);
-        vector<Dice_s> outputVector;
+        sort(_slots.begin(), _slots.end(), sort_by_y);
         //Create rows
-        vector<vector<Dice_s>> dice_rows;
-        vector<Dice_s> dice_row;
+        vector<vector<Rect>> slotRows;
+        vector<Rect> slotRow;
 
-        int ref_value = this->dices[0].boundRect.y;
+        int ref_value = _slots[0].y;
 
-        dice_row.push_back(this->dices[0]);
+        slotRow.push_back(_slots[0]);
         //rows
-        for(int i = 1; i < this->dices.size(); i++){
-            Dice_s dice = this->dices[i];
-            if(dice.boundRect.y >= ref_value - dice.boundRect.height/2 && dice.boundRect.y <= ref_value + dice.boundRect.height/2){
-                dice_row.push_back(dice);
+        for(int i = 1; i < _slots.size(); i++){
+            Rect slot = _slots[i];
+            if(slot.y >= ref_value - slot.height/2 && slot.y <= ref_value + slot.height/2){
+                slotRow.push_back(slot);
             }
-            else if(dice.boundRect.y > ref_value + dice.boundRect.height/2){
-                dice_rows.push_back(dice_row);
-                dice_row.clear();
-                dice_row.push_back(dice);
-                ref_value = dice.boundRect.y;
+            else if(slot.y > ref_value + slot.height/2){
+                sort(slotRow.begin(), slotRow.end(), sort_by_x);
+                slotRows.push_back(slotRow);
+                slotRow.clear();
+                slotRow.push_back(slot);
+                ref_value = slot.y;
             }
-            if(i == this->dices.size() - 1){
-                dice_rows.push_back(dice_row);
-                dice_row.clear();
+            if(i == _slots.size() - 1){
+                sort(slotRow.begin(), slotRow.end(), sort_by_x);
+                slotRows.push_back(slotRow);
+                slotRow.clear();
             }
         }
         //Rows assertion
-        if(dice_rows.size() > _rows){
+        if(slotRows.size() > _rows){
             __android_log_print(ANDROID_LOG_ERROR, "Number of detected rows exceeded", "rows : %d", _rows);
         }
-        else if(dice_rows.size() < _rows){
-            //create empty rows
-            //TODO: Empty rows
-        }
-        //Cols
-        vector<Dice_s> dice_col;
-        vector<vector<Dice_s>> dice_cols;
 
-        sort(this->dices.begin(), this->dices.end(), sort_by_x);
-        dice_col.push_back(this->dices[0]);
-        ref_value = this->dices[0].boundRect.x;
-
-        for(int i = 1; i < this->dices.size(); i++){
-            Dice_s dice = this->dices[i];
-            if(dice.boundRect.x >= ref_value - dice.boundRect.width/2 && dice.boundRect.x <= ref_value + dice.boundRect.width/2){
-                dice_col.push_back(dice);
-            }
-            else if(dice.boundRect.x > ref_value + dice.boundRect.width/2){
-                dice_cols.push_back(dice_col);
-                dice_col.clear();
-                dice_col.push_back(dice);
-                ref_value = dice.boundRect.x;
-            }
-            if(i == this->dices.size() -1){
-                dice_cols.push_back(dice_col);
-                dice_col.clear();
-            }
-        }
-        //Cols assertion
-        if(dice_cols.size() > _cols){
-            __android_log_print(ANDROID_LOG_ERROR, "Number of detected cols exceeded", "cols: %d", _cols);
-        }
-        else if(dice_cols.size() < _rows){
-            //create empty cols
-            //TODO: Empty cols
-        }
-
-        return outputVector;
+        return slotRows;
     }
-    vector<vector<Dice_s>> AdjustDiceRows(vector<vector<Dice_s>> _diceRows)
+    Dice_s FindDice(Rect slot)
     {
-        //TODO
-        //dice on the biggest (y - value) row
-        Dice_s dice = _diceRows[_diceRows.size()-1][0];
-        //offset
-        int offset = (int)(dice.boundRect.height * 0.25);
-        //Control row below
-        vector<vector<Dice_s>> vec;
-        return vec;
+        //Check Red
+        Dice_s redDice = FindDiceByColor(S_RED, slot);
+        if(redDice.boundRect.width != 0)
+            return redDice;
+        //Check Blue
+        Dice_s blueDice = FindDiceByColor(S_BLUE, slot);
+        if(blueDice.boundRect.width != 0)
+            return blueDice;
+        //Check Green
+        Dice_s greenDice = FindDiceByColor(S_GREEN, slot);
+        if(greenDice.boundRect.width != 0)
+            return greenDice;
+        //Check Yellow
+        Dice_s yellowDice = FindDiceByColor(S_YELLOW, slot);
+        if(yellowDice.boundRect.width != 0)
+            return yellowDice;
+        //Check Violet
+        Dice_s violetDice = FindDiceByColor(S_VIOLET, slot);
+        if(violetDice.boundRect.width != 0)
+            return violetDice;
+        Dice_s noDice(Rect(0,0,0,0), S_NONE);
+        return noDice;
     }
     //Output Mat is for debug
-    Mat FindDiceByColor(SagradaColor _color)
+    Dice_s FindDiceByColor(SagradaColor _color, Rect slot)
     {
         Mat colorMask;
         vector<Scalar> cRange = SelectRange(_color);
@@ -276,14 +309,14 @@ public:
         if(_color == S_RED)
         {
             Mat tmp;
-            inRange(this->hsvImage, cRange[0], cRange[2], tmp);
-            inRange(this->hsvImage, cRange[1], cRange[3], colorMask);
+            inRange(this->hsvImage(slot), cRange[0], cRange[2], tmp);
+            inRange(this->hsvImage(slot), cRange[1], cRange[3], colorMask);
             colorMask += tmp;
             colorMask.copyTo(tMask);
         }
         else
         {
-            inRange(this->hsvImage, cRange[0], cRange[1], colorMask);
+            inRange(this->hsvImage(slot), cRange[0], cRange[1], colorMask);
         }
 
         vector<vector<Point>> contours;
@@ -295,25 +328,23 @@ public:
         findContours(colorMask, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
         vector<vector<Point>> contours_poly( contours.size());
-
         for( size_t i = 0; i < contours.size(); i++ )
         {
             double epsilon = 0.01*arcLength(contours[i],true);
             approxPolyDP( contours[i], contours_poly[i], epsilon, true );
 
             double area = contourArea(contours_poly[i]);
-            Rect bound = boundingRect(contours[i]);
-            if(hierarchy[i][3] == -1 ){
+            if(area >= slot.area() * 0.25){
                 int blob_count = 0;
-                if(IsNumber(this->hsvImage(bound), blob_count) && blob_count > 0 && blob_count < 7){
-                    Dice_s dice(boundingRect(contours_poly[i]), _color);
+                if(IsNumber(this->hsvImage(slot), blob_count) && blob_count > 0 && blob_count < 7){
+                    Dice_s dice(slot, _color);
                     dice.number = blob_count;
-                    this->dices.push_back(dice);
+                    return dice;
                 }
             }
         }
-
-        return colorMask;
+        Dice_s dice(Rect(0,0,0,0), _color);
+        return dice;
     }
     vector<Scalar> SelectRange(SagradaColor _color)
     {
@@ -330,10 +361,10 @@ public:
                 outputVec.push_back(COLOR_RANGES.highRedFirstMask);
                 outputVec.push_back(COLOR_RANGES.highRedSecondMask);
             case S_GREEN:
-                outputVec.push_back(COLOR_RANGES.lowGreen);
-                outputVec.push_back(COLOR_RANGES.highGreen);
+                outputVec.push_back(COLOR_RANGES.lowDiceGreen);
+                outputVec.push_back(COLOR_RANGES.highDiceGreen);
             case S_BLUE:
-                outputVec.push_back(COLOR_RANGES.lowBlue);
+                outputVec.push_back(COLOR_RANGES.lowDiceBlue);
                 outputVec.push_back(COLOR_RANGES.highBlue);
             case S_YELLOW:
                 outputVec.push_back(COLOR_RANGES.lowYellow);
@@ -373,7 +404,7 @@ public:
             double cArea = radius * radius * 3.14;
             double areaOffset = cArea * 0.25;
 
-            if(area >= cArea - areaOffset && hierarchy[i][3] == -1)
+            if(area >= cArea - areaOffset && hierarchy[i][3] == -1 && area > 100)
             {
                 count++;
             }
@@ -392,24 +423,41 @@ public:
             return false;
         }
     }
-    void SetScaleValues(int _width, int _height, double& scaleWidth, double& scaleHeight, double refWidth, double refHeight)
+    static void SetScaleValues(int _width, int _height, double& scaleWidth, double& scaleHeight, double refWidth, double refHeight)
     {
         scaleWidth = _width / refWidth;
         scaleHeight = _height / refHeight;
-        __android_log_print(ANDROID_LOG_INFO, "scale", "%d | %d | %f | %f", _width, _height, scaleWidth, scaleHeight);
+        //__android_log_print(ANDROID_LOG_INFO, "scale", "%d | %d | %f | %f", _width, _height, scaleWidth, scaleHeight);
     }
-    void CalculateLabValues(int& L, int& a, int& b)
+    static void CalculateLabValues(int& L, int& a, int& b)
     {
         L = L * 255/100;
         a = a + 128;
         b = b + 128;
     }
+    bool SlotExists(vector<Rect> slots, Rect newSlot)
+    {
+        for(Rect rect : slots){
+            int slotCX = rect.x + rect.width / 2;
+            int slotCY = rect.y + rect.height / 2;
+            int lowerRangeX = newSlot.x - newSlot.width/2;
+            int upperRangeX = newSlot.x + newSlot.width + newSlot.width/2;
+            int lowerRangeY = newSlot.y - newSlot.height/2;
+            int upperRangeY = newSlot.y + newSlot.height + newSlot.height/2;
+            if(slotCX >= lowerRangeX && slotCX <= upperRangeX &&
+               slotCY >= lowerRangeY && slotCY <= upperRangeY){
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     void DiceOutput()
     {
         for(int i = 0; i < this->dices.size(); i++)
         {
-            __android_log_print(ANDROID_LOG_INFO, "DiceOutput", "%d | %s", this->dices[i].number, PIDName(this->dices[i].color));
+            __android_log_print(ANDROID_LOG_INFO, "DiceOutput", "Number : %d | Color: %s | pos: %d:%d", dices[i].number, PIDName(dices[i].color), dices[i].row, dices[i].col);
         }
     }
     char* PIDName(SagradaColor _pid)
