@@ -26,14 +26,16 @@ public class MainActivity extends AppCompatActivity {
         Mat img = null;
         Mat retImg = new Mat();
         try {
-            img = Utils.loadResource(this, R.drawable.zlodej_stinu);
+            img = Utils.loadResource(this, R.drawable.nejsvetejsi_trojice);
         } catch (IOException e){
             e.printStackTrace();
         }
 
         ImageProcessor imgProcessor = new ImageProcessor(img, this);
         imgProcessor.AddTemplateImgs();
-        imgProcessor.testFunction(retImg.getNativeObjAddr());
+        imgProcessor.AddDiceImg();
+        //imgProcessor.testFunction(retImg.getNativeObjAddr());
+        imgProcessor.DiceDetector(retImg.getNativeObjAddr());
 
         if(retImg != null){
             imageView = (ImageView)findViewById(R.id.mat);
