@@ -21,10 +21,10 @@ public class Slot {
     public int col;
     public SlotInfo info;
 
-    Slot(int _row, int _col, SlotInfo _info)
+    Slot(String _info, int _row, int _col)
     {
         this.row = _row;
         this.col = _col;
-        this.info = _info;
+        this.info = SlotInfo.valueOf(_info);
     }
 }

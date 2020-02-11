@@ -11,8 +11,6 @@
 using namespace std;
 using namespace cv;
 
-vector<Mat> tt;
-
 enum PatternID {
     PATID_ONE = 1,
     PATID_TWO = 2,
@@ -29,6 +27,50 @@ enum PatternID {
     PATID_NONE = -42
 };
 
+struct Slot {
+    int row;
+    int col;
+    PatternID info;
+
+    Slot(int _row, int _col, PatternID _info)
+    {
+        row = _row;
+        col = _col;
+        info = _info;
+    }
+    string RetStr()
+    {
+        switch (info){
+            case PATID_ONE:
+                return "ONE";
+            case PATID_TWO:
+                return "TWO";
+            case PATID_THREE:
+                return "THREE";
+            case PATID_FOUR:
+                return "FOUR";
+            case PATID_FIVE:
+                return "FIVE";
+            case PATID_SIX:
+                return "SIX";
+            case PATID_RED:
+                return "RED";
+            case PATID_BLUE:
+                return "BLUE";
+            case PATID_GREEN:
+                return "GREEN";
+            case PATID_YELLOW:
+                return "YELLOW";
+            case PATID_VIOLET:
+                return "VIOLET";
+            case PATID_WHITE:
+                return "WHITE";
+            default:
+                return "NONE";
+        }
+    }
+};
+
 bool compareRectsOnRow (const Rect& l, const Rect& r) {
     return l.br().x > r.br().x;
 }
@@ -37,18 +79,16 @@ class PatternAnalyzer
 {
 public:
     Mat patternImg;
-    Mat templateImg;
+    vector<Slot> slots;
     Point controlPoint;
     int refOffset;
     int refHeight;
     int refWidth;
-    vector<PatternID> pattern;
     Mat tmp;
 
     PatternAnalyzer(Mat _patternImg, Mat _templateImg)
     {
         this->patternImg = _patternImg;
-        this->templateImg = _templateImg;
     }
 
     vector<Mat> CreatePatternGrid()
@@ -90,24 +130,31 @@ public:
 
     void GetCardPattern(vector<Mat> _splittedImg)
     {
-        vector<PatternID> cardPattern;
         PatternID pID;
-        for (Mat img : _splittedImg) {
+        int col = 0;
+        int row = 0;
+        for (int i = 0; i < _splittedImg.size(); i++) {
+            Mat img = _splittedImg[i];
+            if((i % 5) == 0 && i != 0)
+                __android_log_print(ANDROID_LOG_INFO, "TREE ", "---------");
             if(IsColorPattern(img, pID)){
-                cardPattern.push_back(pID);
-                __android_log_print(ANDROID_LOG_INFO, "TREE :", "IS COLOR %s", PIDName(pID));
+                __android_log_print(ANDROID_LOG_INFO, "TREE ", "IS COLOR %s | %d/%d", PIDName(pID), row, col);
+                slots.push_back(Slot(row, col, pID));
             }
             else if(IsDicePattern(img, 1, 6, pID)){
-                cardPattern.push_back(pID);
-                __android_log_print(ANDROID_LOG_INFO, "TREE :", "IS DICE %s", PIDName(pID));
+                __android_log_print(ANDROID_LOG_INFO, "TREE ", "IS DICE %s | %d/%d", PIDName(pID), row, col);
+                slots.push_back(Slot(row, col, pID));
             }
             else{
-                cardPattern.push_back(PatternID(PATID_NONE));
-                __android_log_print(ANDROID_LOG_INFO, "TREE :", "IS UNKNOWN %s", PIDName(pID));
+                __android_log_print(ANDROID_LOG_INFO, "TREE ", "IS UNKNOWN %s | %d/%d", PIDName(pID), row, col);
+                slots.push_back(Slot(row, col, pID));
+            }
+            col++;
+            if(col == 5){
+                row++;
+                col = 0;
             }
         }
-
-        this->pattern = cardPattern;
     }
 
 private:
@@ -122,19 +169,6 @@ private:
         erode(prepImg, prepImg, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));
 
         return prepImg;
-    }
-
-    Mat DetectEdges(Mat _grayImg)
-    {
-        Mat edges;
-        _grayImg.copyTo(edges);
-
-        double otsuThresh = threshold(edges, edges, 100, 255, THRESH_BINARY );
-
-        Canny(edges, edges, otsuThresh*0.3, otsuThresh, 3, true);
-        dilate(edges, edges, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));
-
-        return edges;
     }
 
     Point DetectControlPoint(Mat _grayImg)
@@ -186,24 +220,6 @@ private:
         circle(this->tmp, bottom, 1, Scalar(0,0,255), 20);
 
         return bottom;
-    }
-
-    vector<Point> DetectCircles(Mat input, int _distDivider, double _param1, double _param2, int _minRad, int _maxRad)
-    {
-        vector<Vec3f> circles;
-        HoughCircles(input, circles, HOUGH_GRADIENT, 1, input.rows/_distDivider, _param1, _param2, _minRad, _maxRad);
-
-        vector<Point> centersVector;
-
-        for( size_t i = 0; i < circles.size(); i++ )
-        {
-            Vec3i c = circles[i];
-            Point center = Point(c[0], c[1]);
-            centersVector.push_back(center);
-            //circle(this->tmp, center, c[2], Scalar(0,0,255), 3, LINE_AA);
-        }
-
-        return centersVector;
     }
 
     vector<Rect> ApplyColorMasks(Mat _img)
@@ -315,21 +331,12 @@ private:
         //Nejniže -> Control Rect
         refRects = CompleteRefRects(closestRect, controlPoint);
 
-        /*for(Rect rect : refRects)
-        {
-            rectangle(this->tmp, rect, Scalar(0,0,255), 10);
-        }*/
-
         for(int i = 0; i < 4 ; i++){
             if(i >= refRects.size()){
                 closestRect = refRects[i-1];
                 Point tmpCP = Point(closestRect.br().x, closestRect.tl().y);
                 refRects.push_back(GetClosestRect(contourBoxes, tmpCP));
             }
-            /*for(Rect rect : refRects)
-            {
-                rectangle(this->tmp, rect, Scalar(0,0,255), 10);
-            }*/
             tmpVector.push_back(refRects[i]);
             rectsOnRow = FindRectsOnRow(contourBoxes, refRects[i]);
             for(Rect rect : rectsOnRow){
@@ -348,7 +355,7 @@ private:
                 tmpVector.push_back(rect);
             }
 
-            sort(tmpVector.begin(), tmpVector.end(), compareRectsOnRow);
+            sort(tmpVector.begin(), tmpVector.end(), sort_by_x);
 
             retVector.insert(retVector.begin(), tmpVector.begin(), tmpVector.end());
 
@@ -708,8 +715,8 @@ private:
     {
         Mat img;
         cvtColor(subject, img, COLOR_BGR2GRAY);
-        GaussianBlur(img, img, Size(5,5), 2, 2, BORDER_CONSTANT);    //Blurring image
-        erode(img, img, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));   //Highlighting lines
+        //GaussianBlur(img, img, Size(5,5), 2, 2, BORDER_CONSTANT);    //Blurring image
+        //erode(img, img, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));   //Highlighting lines
 
         Mat otsuThreshImg;
         double otsuThresh = threshold(img, otsuThreshImg, 0, 255, THRESH_BINARY + THRESH_OTSU);
@@ -722,21 +729,6 @@ private:
         {
             pID = DetectLowerNumber(img);
         }
-        /*else{
-            tmpPID = CompareWithTemplate(this->templateImg, subject);
-        }
-        if(tmpPID != PATID_NONE){
-            pID = tmpPID;
-            return true;
-        }
-        tmpPID = CheckNumber(img, 48,50, 10, otsuThresh, img.rows);
-        if(tmpPID == 1){
-            pID = tmpPID;
-            return true;
-        }
-        else{
-            return false;
-        }*/
         return pID != PATID_NONE;
     }
 
@@ -848,6 +840,7 @@ private:
 
     vector<s_circle> DetectLowerNumberContour(Mat _img)
     {
+        int c = 0;
         vector<s_circle> circles;
         vector<vector<Point>> contours;
         findContours(_img, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
@@ -866,10 +859,11 @@ private:
                 //circle(tp, center, radius + 5, Scalar(0,255,0), 5);
                 //drawContours(img, contours, i, Scalar(0,0,255), 3);
                 circles.push_back(s_circle{(int)radius, Point((int)center.x, (int)center.y)});
+                c++;
             }
         }
 
-        //__android_log_print(ANDROID_LOG_INFO, "NUMBER Contour", "%d", circles.size());
+        //__android_log_print(ANDROID_LOG_INFO, "NUMBER Contour", "%d", c);
 
         return circles;
     }
@@ -939,146 +933,11 @@ private:
         {
             return -42;
         }
-    }
+        /*int number = circles.size();
+        if(number > 0 && number < 4)
+            return number;
 
-    PatternID CheckNumber(Mat subject, int minRadius, int maxRadius, double lowerThresh, double upperThresh, int minDist)
-    {
-        vector<Vec3f> circles;
-
-        HoughCircles(subject, circles, HOUGH_GRADIENT, 1, minDist, upperThresh, lowerThresh, minRadius, maxRadius);
-
-        return PatternID(circles.size());
-    }
-
-    int PositionComparison(vector<Point> circles, Mat refImg)
-    {
-        //calculate img center point
-        Point imgCenter = Point(refImg.cols/2, refImg.rows/2);
-        //__android_log_print(ANDROID_LOG_INFO, "Circle Pos", "CENTER POINT %d | %d ", imgCenter.x, imgCenter.y);
-        int offset = 40;
-        //initialize 4 quadrants
-        vector<Point> quadrant1, quadrant2, quadrant3, quadrant4, quadrantC;
-        //separate circles in quadrants
-        for(Point circle : circles){
-            if(circle.x > imgCenter.x + offset && circle.y < imgCenter.y - offset){
-                //1 Q
-                __android_log_print(ANDROID_LOG_INFO, "Circle Pos", "1 Quadrant %d | %d ", circle.x, circle.y);
-                quadrant1.push_back(circle);
-            }
-            else if(circle.x < imgCenter.x - offset && circle.y < imgCenter.y - offset){
-                //2 Q
-                __android_log_print(ANDROID_LOG_INFO, "Circle Pos", "2 Quadrant %d | %d ", circle.x, circle.y);
-                quadrant2.push_back(circle);
-            }
-            else if(circle.x < imgCenter.x - offset && circle.y > imgCenter.y + offset){
-                //3 Q
-                __android_log_print(ANDROID_LOG_INFO, "Circle Pos", "3 Quadrant %d | %d ", circle.x, circle.y);
-                quadrant3.push_back(circle);
-            }
-            else if(circle.x > imgCenter.x + offset && circle.y > imgCenter.y + offset){
-                //4 Q
-                __android_log_print(ANDROID_LOG_INFO, "Circle Pos", "4 Quadrant %d | %d ", circle.x, circle.y);
-                quadrant4.push_back(circle);
-            }
-            else if(circle.x >= imgCenter.x - offset && circle.x <= imgCenter.x + offset){
-                //Center Q
-                __android_log_print(ANDROID_LOG_INFO, "Circle Pos", "Center Quadrant %d | %d ", circle.x, circle.y);
-                quadrantC.push_back(circle);
-            }
-        }
-
-        if(!quadrantC.empty() || (!quadrant1.empty() || !quadrant3.empty())){
-            //for each centerP check each point in q1 & q3 for diagonal matching
-            for(Point refPoint : quadrantC)
-            {
-                bool q1 = false;
-                bool q3 = false;
-                for(Point q1P : quadrant1)
-                {
-                    if(IsOnDiagonal(refPoint, q1P, 45.0, 50))
-                    {
-                        q1 = true;
-                        break;
-                    }
-                }
-                for(Point q3P : quadrant3)
-                {
-                    if(IsOnDiagonal(refPoint, q3P, 225.0, 50))
-                    {
-                        q3 = true;
-                        break;
-                    }
-                }
-                if(q1 || q3)
-                {
-                    return 3;
-                }
-                return -42;
-            }
-        }
-        else if(quadrantC.empty() && !quadrant2.empty() && !quadrant4.empty()){
-            for(Point refPoint : quadrant2)
-            {
-                bool q4 = false;
-                for(Point q4P : quadrant4)
-                {
-                    if(IsOnDiagonal(refPoint, q4P, 315.0, 50))
-                    {
-                        q4 = true;
-                        break;
-                    }
-                }
-                for(Point qCP : quadrantC)
-                {
-                    if(IsOnDiagonal(refPoint, qCP, 315.0, 50))
-                    {
-                        q4 = true;
-                        break;
-                    }
-                }
-                if(q4)
-                {
-                    return 2;
-                }
-            }
-            return -42;
-        }
-        else{
-            return -42;
-        }
-    }
-
-    PatternID CompareWithTemplate(Mat patternImg, Mat img)
-    {
-        Mat pattern, Img;
-        cvtColor(patternImg, pattern, COLOR_BGR2GRAY);
-        cvtColor(img, Img, COLOR_BGR2GRAY);
-
-        Mat result32f = Mat(Img.rows - pattern.rows + 1, Img.cols - pattern.cols + 1, CV_32FC1);
-        Mat img_display;
-        img.copyTo(img_display);
-
-        matchTemplate(Img, pattern, result32f, TM_CCOEFF_NORMED);
-
-        Mat result;
-        result32f.convertTo(result, CV_8U, 255.0);
-
-        vector<Point> centers = DetectCircles(result, 8, 255, 10, 30, 40);//result, 8, 255, 10, 30, 50
-
-        return PatternID(PositionComparison(centers, img));
-    }
-
-    bool IsOnDiagonal(Point refPoint, Point sugPoint, double angle, int offset)
-    {
-        //diagonal line equation
-        double rad = angle*3.14159/180; //angle in rads
-        double k = tan(angle);
-        double q = sugPoint.y - (k * sugPoint.x);   //offset
-        //find Point on given height
-        double x = (refPoint.y - q)/k;
-        //check if in range
-        __android_log_print(ANDROID_LOG_INFO, "DIAGONAL SUG", "y = %dx + %d || %f", (int)k, (int)q, x);
-        return (x >= refPoint.x - offset && x <= refPoint.x + offset);
+        return -42;*/
     }
 
     Mat FindHsvColor(Mat inputImage, SagradaColor color)

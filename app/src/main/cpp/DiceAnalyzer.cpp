@@ -28,11 +28,14 @@ struct color_range
     Scalar highYellow = Scalar(35,255,255);
 
     /*Green color*/
-    Scalar lowGreen = Scalar(40,100,35);
-    Scalar highGreen = Scalar(85,255,255);//90-255-255
+    Scalar lowDiceGreen = Scalar(40,100,35);
+    Scalar lowGreen = Scalar(40,50,35);
+    Scalar highGreen = Scalar(90,255,255);
+    Scalar highDiceGreen = Scalar(85,255,255);//90-255-255
 
     /*Blue color*/
-    Scalar lowBlue = Scalar(85,80,40);//80-50-20
+    Scalar lowDiceBlue = Scalar(85,80,40);//80-50-20
+    Scalar lowBlue = Scalar(80,50,20);
     Scalar highBlue = Scalar(130,255,255);//127-255-255
 
     /*Red color*/
@@ -358,10 +361,10 @@ public:
                 outputVec.push_back(COLOR_RANGES.highRedFirstMask);
                 outputVec.push_back(COLOR_RANGES.highRedSecondMask);
             case S_GREEN:
-                outputVec.push_back(COLOR_RANGES.lowGreen);
-                outputVec.push_back(COLOR_RANGES.highGreen);
+                outputVec.push_back(COLOR_RANGES.lowDiceGreen);
+                outputVec.push_back(COLOR_RANGES.highDiceGreen);
             case S_BLUE:
-                outputVec.push_back(COLOR_RANGES.lowBlue);
+                outputVec.push_back(COLOR_RANGES.lowDiceBlue);
                 outputVec.push_back(COLOR_RANGES.highBlue);
             case S_YELLOW:
                 outputVec.push_back(COLOR_RANGES.lowYellow);
@@ -420,13 +423,13 @@ public:
             return false;
         }
     }
-    void SetScaleValues(int _width, int _height, double& scaleWidth, double& scaleHeight, double refWidth, double refHeight)
+    static void SetScaleValues(int _width, int _height, double& scaleWidth, double& scaleHeight, double refWidth, double refHeight)
     {
         scaleWidth = _width / refWidth;
         scaleHeight = _height / refHeight;
         //__android_log_print(ANDROID_LOG_INFO, "scale", "%d | %d | %f | %f", _width, _height, scaleWidth, scaleHeight);
     }
-    void CalculateLabValues(int& L, int& a, int& b)
+    static void CalculateLabValues(int& L, int& a, int& b)
     {
         L = L * 255/100;
         a = a + 128;

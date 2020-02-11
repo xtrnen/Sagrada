@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import Model.Structs.Dice;
+import Model.Structs.Slot;
 
 public class ImageProcessor
 {
@@ -62,6 +63,6 @@ public class ImageProcessor
         }
     }
 
-    public native void testFunction(long output);
+    public native Slot[] PatternDetector(long output);
     public native Dice[] DiceDetector(long output);
 }

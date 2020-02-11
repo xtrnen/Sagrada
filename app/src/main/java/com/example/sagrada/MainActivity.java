@@ -13,6 +13,7 @@ import org.opencv.imgproc.Imgproc;
 import java.io.IOException;
 import Model.ImageProcessor;
 import Model.Structs.Dice;
+import Model.Structs.Slot;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,8 +36,12 @@ public class MainActivity extends AppCompatActivity {
         ImageProcessor imgProcessor = new ImageProcessor(img, this);
         imgProcessor.AddTemplateImgs();
         imgProcessor.AddDiceImg();
-        //imgProcessor.testFunction(retImg.getNativeObjAddr());
         Dice[] dices = imgProcessor.DiceDetector(retImg.getNativeObjAddr());
+        Slot[] slots = imgProcessor.PatternDetector(retImg.getNativeObjAddr());
+
+        for(Slot slot : slots){
+            Log.println(Log.INFO, "slot", slot.row + " | " + slot.col + " - " + slot.info);
+        }
 
         if(img != null){
             imageView = (ImageView)findViewById(R.id.mat);
