@@ -1,4 +1,4 @@
-package Model;
+package Model.Rules;
 
 public class RuleHandler {
     /*
@@ -17,7 +17,7 @@ public class RuleHandler {
     *   each set of dices that fit the assign counts
     * Personal assign:
     *   each card has specified counting
-    * Craftsman stones:
+    * CraftsmanPoints stones:
     *   each not used stone counts for 1P
     * Empty slots:
     *   for each empty slot lose 1P

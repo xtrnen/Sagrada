@@ -1,4 +1,4 @@
-package Model;
+package Model.Rules;
 
 public class RuleCalculator
 {
