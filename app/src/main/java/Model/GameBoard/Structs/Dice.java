@@ -1,4 +1,4 @@
-package Model.Structs;
+package Model.GameBoard.Structs;
 
 public class Dice{
     public int number;

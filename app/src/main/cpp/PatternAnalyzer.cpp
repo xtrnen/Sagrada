@@ -135,18 +135,19 @@ public:
         int row = 0;
         for (int i = 0; i < _splittedImg.size(); i++) {
             Mat img = _splittedImg[i];
-            if((i % 5) == 0 && i != 0)
-                __android_log_print(ANDROID_LOG_INFO, "TREE ", "---------");
+            if((i % 5) == 0 && i != 0){
+                //__android_log_print(ANDROID_LOG_INFO, "TREE ", "---------");
+            }
             if(IsColorPattern(img, pID)){
-                __android_log_print(ANDROID_LOG_INFO, "TREE ", "IS COLOR %s | %d/%d", PIDName(pID), row, col);
+                //__android_log_print(ANDROID_LOG_INFO, "TREE ", "IS COLOR %s | %d/%d", PIDName(pID), row, col);
                 slots.push_back(Slot(row, col, pID));
             }
             else if(IsDicePattern(img, 1, 6, pID)){
-                __android_log_print(ANDROID_LOG_INFO, "TREE ", "IS DICE %s | %d/%d", PIDName(pID), row, col);
+                //__android_log_print(ANDROID_LOG_INFO, "TREE ", "IS DICE %s | %d/%d", PIDName(pID), row, col);
                 slots.push_back(Slot(row, col, pID));
             }
             else{
-                __android_log_print(ANDROID_LOG_INFO, "TREE ", "IS UNKNOWN %s | %d/%d", PIDName(pID), row, col);
+                //__android_log_print(ANDROID_LOG_INFO, "TREE ", "IS UNKNOWN %s | %d/%d", PIDName(pID), row, col);
                 slots.push_back(Slot(row, col, pID));
             }
             col++;
@@ -1024,22 +1025,22 @@ private:
             {
                 if(rect.tl().x > xR && rect.tl().x <= xR + this->refWidth && rect.br().y >= yB - offset && rect.br().y <= yB + offset)
                 {
-                    __android_log_print(ANDROID_LOG_INFO, "OFS--xR", "%d | %d -- %d", rect.tl().x, xR, rect.tl().x - xR);
+                    //__android_log_print(ANDROID_LOG_INFO, "OFS--xR", "%d | %d -- %d", rect.tl().x, xR, rect.tl().x - xR);
                     return  rect.tl().x - xR;
                 }
                 else if (rect.br().x < xL && rect.br().x >= xL - this->refWidth && rect.br().y >= yB - offset && rect.br().y <= yB + offset)
                 {
-                    __android_log_print(ANDROID_LOG_INFO, "OFS--xL", "%d | %d -- %d", rect.br().x, xL, xL - rect.br().x);
+                    //__android_log_print(ANDROID_LOG_INFO, "OFS--xL", "%d | %d -- %d", rect.br().x, xL, xL - rect.br().x);
                     return xL - rect.br().x;
                 }
                 else if (rect.br().y < yT && rect.br().y >= yT - this->refHeight && rect.br().x >= xL - offset && rect.br().x <= xL + offset)
                 {
-                    __android_log_print(ANDROID_LOG_INFO, "OFS--yT", "%d | %d -- %d", rect.br().y, yT, yT - rect.br().y);
+                    //__android_log_print(ANDROID_LOG_INFO, "OFS--yT", "%d | %d -- %d", rect.br().y, yT, yT - rect.br().y);
                     return yT - rect.br().y;
                 }
                 else if (rect.tl().y > yB && rect.tl().y <= yB + this->refHeight && rect.tl().x >= xR - offset && rect.tl().x <= xR + offset)
                 {
-                    __android_log_print(ANDROID_LOG_INFO, "OFS--yB", "%d | %d -- %d", rect.tl().y, yB, rect.br().y - yB);
+                    //__android_log_print(ANDROID_LOG_INFO, "OFS--yB", "%d | %d -- %d", rect.tl().y, yB, rect.br().y - yB);
                     return (rect.br().y - yB) - rect.height;
                 }
             }

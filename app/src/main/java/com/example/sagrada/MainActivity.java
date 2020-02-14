@@ -11,12 +11,13 @@ import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 import java.io.IOException;
 
+import Model.GameBoard.GameBoard;
+import Model.GameBoard.Structs.Slot;
 import Model.Points.Quests.CQ_TYPES;
 import Model.Points.Quests.PQ_TYPES;
 import Model.Points.Quests.Quest;
 import Model.ImageProcessor;
-import Model.Structs.Dice;
-import Model.Structs.Slot;
+import Model.GameBoard.Structs.Dice;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,25 +40,33 @@ public class MainActivity extends AppCompatActivity {
         ImageProcessor imgProcessor = new ImageProcessor(img, this);
         imgProcessor.AddTemplateImgs();
         imgProcessor.AddDiceImg();
-        Dice[] dices = imgProcessor.DiceDetector(retImg.getNativeObjAddr());
         Slot[] slots = imgProcessor.PatternDetector(retImg.getNativeObjAddr());
+        Dice[] dices = imgProcessor.DiceDetector(retImg.getNativeObjAddr());
+
+        if(slots.length != 20){
+            Log.println(Log.ERROR, "Slot array", "Length doesn't fit");
+        }
+        if(dices.length == 0){
+            Log.println(Log.ERROR, "Dice array", "No dice detected");
+        }
 
         /*for(Slot slot : slots){
             Log.println(Log.INFO, "slot", slot.row + " | " + slot.col + " - " + slot.info);
         }
         for(Dice dice : dices){
             Log.println(Log.INFO, "dice", dice.row + " | " + dice.col + " - " + dice.number + " | " + dice.color);
-        }
-        */
+        }*/
         /*TEST*/
+        GameBoard gameBoard = new GameBoard(dices, slots, 4, 5);
         Quest q = new Quest();
-        q.SetPersonalCalculator(PQ_TYPES.EMERALD);
-        q.SetCommonCalculator(CQ_TYPES.SAME_DIAGONAL);
-        q.RunEvaluation(dices);
+        q.SetPersonalCalculator(PQ_TYPES.AMETHYST);
+        q.SetCommonCalculator(CQ_TYPES.LIGHT_PAIR);
+        int points = q.RunEvaluation(gameBoard.diceArray);
+        Log.println(Log.INFO, "points", Integer.toString(points));
 
-        if(img != null){
+        if(retImg != null){
             imageView = (ImageView)findViewById(R.id.mat);
-            imageView.setImageBitmap(convMatToBitmap(img));
+            imageView.setImageBitmap(convMatToBitmap(retImg));
         }
     }
 

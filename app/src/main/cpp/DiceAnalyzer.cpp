@@ -101,9 +101,9 @@ Mat tMask;
 
 bool sort_by_x(Rect slot1, Rect slot2) { return slot1.x < slot2.x; }
 bool sort_by_y(Rect slot1, Rect slot2) { return slot1.y < slot2.y; }
-
 class DiceAnalyzer
 {
+    //TODO: "dice_correct" red dice One blob detection problem
 public:
     Mat diceImage;
     Mat hsvImage;

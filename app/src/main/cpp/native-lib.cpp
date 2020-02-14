@@ -165,7 +165,6 @@ JNIEXPORT jobjectArray JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *en
     diceAnalyzer.DetectDiceSlots();
     diceAnalyzer.DetectDices();
     //diceAnalyzer.DiceOutput();
-    //TODO: map dices to Java Array
     jobjectArray outputArray = BuildDicesOutput(env, diceAnalyzer.dices);
 
     diceAnalyzer.diceBoundImg.copyTo(outputImg);
@@ -186,7 +185,7 @@ Mat GetObjectImg(JNIEnv *env, jobject obj, string _propTypeRoute, string _propNa
 
 jobjectArray BuildSlotsOutput(JNIEnv *env, vector<Slot> slots)
 {
-    jclass jSlot = env->FindClass("Model/Structs/Slot");
+    jclass jSlot = env->FindClass("Model/GameBoard/Structs/Slot");
     jobjectArray jSlotArray = env->NewObjectArray(slots.size(), jSlot, 0);
 
     jmethodID jSlotInit = env->GetMethodID(jSlot, "<init>", "(Ljava/lang/String;II)V");
@@ -205,7 +204,7 @@ jobjectArray BuildSlotsOutput(JNIEnv *env, vector<Slot> slots)
 
 jobjectArray BuildDicesOutput(JNIEnv *env, vector<Dice_s> dices)
 {
-    jclass jDice = env->FindClass("Model/Structs/Dice");
+    jclass jDice = env->FindClass("Model/GameBoard/Structs/Dice");
     jobjectArray jDiceArray = env->NewObjectArray(dices.size(), jDice, 0);
 
     jmethodID jDiceInit = env->GetMethodID(jDice, "<init>", "(Ljava/lang/String;III)V");

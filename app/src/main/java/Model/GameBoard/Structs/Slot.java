@@ -1,4 +1,4 @@
-package Model.Structs;
+package Model.GameBoard.Structs;
 
 enum SlotInfo {
     NONE,
@@ -21,7 +21,7 @@ public class Slot {
     public int col;
     public SlotInfo info;
 
-    Slot(String _info, int _row, int _col)
+    public Slot(String _info, int _row, int _col)
     {
         this.row = _row;
         this.col = _col;
