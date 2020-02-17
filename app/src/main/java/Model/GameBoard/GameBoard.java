@@ -1,9 +1,10 @@
 package Model.GameBoard;
 
-import java.util.Arrays;
-
 import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
+import Model.Points.Quests.CQ_TYPES;
+import Model.Points.Quests.PQ_TYPES;
+import Model.Points.Quests.Quest;
 
 public class GameBoard {
     public Dice[][] diceArray;
@@ -46,5 +47,15 @@ public class GameBoard {
 
         rows = _rows;
         columns = _cols;
+    }
+
+    public int Evaluation(PQ_TYPES personalQuest, CQ_TYPES commonQuest)
+    {
+        Quest quest = new Quest();
+
+        quest.SetPersonalCalculator(personalQuest);
+        quest.SetCommonCalculator(commonQuest);
+
+        return quest.RunEvaluation(diceArray);
     }
 }
