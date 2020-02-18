@@ -16,6 +16,7 @@ android {
                 arguments "-DANDROID_ARM_NEON=TRUE",'-DANDROID_STL=c++_shared'
             }
         }
+        multiDexEnabled true
     }
     buildTypes {
         release {

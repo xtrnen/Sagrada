@@ -26,19 +26,6 @@ public class ImageProcessor
         this.context = _context;
     }
 
-    public void AddTemplateImgs()
-    {
-        try
-        {
-            this.templateImg = Utils.loadResource(this.context, R.drawable.circle_template);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-    }
-
     public void AddDiceImg()
     {
         /*try{

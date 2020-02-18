@@ -28,9 +28,8 @@ JNIEXPORT jobjectArray JNICALL Java_Model_ImageProcessor_PatternDetector(JNIEnv 
     Mat imgTemplate;
 
     patternImg = GetObjectImg(env, obj, "org/opencv/core/Mat", "patternImg");
-    imgTemplate = GetObjectImg(env, obj, "org/opencv/core/Mat", "templateImg");
 
-    PatternAnalyzer patternAnalyzer = PatternAnalyzer(patternImg, imgTemplate);
+    PatternAnalyzer patternAnalyzer = PatternAnalyzer(patternImg);
 
     vector<Mat> grid = patternAnalyzer.CreatePatternGrid();
 
