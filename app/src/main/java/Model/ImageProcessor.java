@@ -17,7 +17,6 @@ public class ImageProcessor
 {
     private Context context;
     Mat patternImg;
-    Mat templateImg;
     Mat diceImg;
 
     public ImageProcessor(Mat _patternImg, Context _context)
@@ -26,15 +25,9 @@ public class ImageProcessor
         this.context = _context;
     }
 
-    public void AddDiceImg()
+    public void AddDiceImg(Mat img)
     {
-        /*try{
-            this.diceImg = Utils.loadResource(this.context, R.drawable.dices1);
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }*/
-        RotateImage();
+        diceImg = img;
     }
 
     public void RotateImage(){

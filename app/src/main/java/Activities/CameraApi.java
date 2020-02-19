@@ -3,6 +3,7 @@ package Activities;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -27,13 +28,17 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
 import Model.ImageProcessor;
 
 
 public class CameraApi extends AppCompatActivity {
     ImageView imageView;
-    Button takePicture;
+    Button takePattern;
+    Button takeDice;
+
+    int captureMode = 0;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
@@ -41,15 +46,25 @@ public class CameraApi extends AppCompatActivity {
 
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.test);
         System.loadLibrary("native-lib");
 
         imageView = (ImageView)findViewById(R.id.image);
-        takePicture = (Button)findViewById(R.id.btn_takepicture);
+        takePattern = (Button)findViewById(R.id.btn_patternPhoto);
+        takeDice = (Button)findViewById(R.id.btn_dicePhoto);
 
-        takePicture.setOnClickListener(new View.OnClickListener() {
+        takePattern.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                captureMode = 0;
+                dispatchTakePictureIntent();
+            }
+        });
+
+        takeDice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                captureMode = 1;
                 dispatchTakePictureIntent();
             }
         });
@@ -61,24 +76,63 @@ public class CameraApi extends AppCompatActivity {
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
             Bitmap image = BitmapFactory.decodeFile(currentPhotoPath);
 
+            ExifInterface exif;
+            try {
+                exif = new ExifInterface(currentPhotoPath);
+                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                switch (orientation) {
+                    case androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_270:
+                        Log.println(Log.INFO, "exif", "270");
+                        break;
+                    case androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_180:
+                        Log.println(Log.INFO, "exif", "180");
+                        break;
+                    case androidx.exifinterface.media.ExifInterface.ORIENTATION_ROTATE_90:
+                        Log.println(Log.INFO, "exif", "90");
+                        break;
+                    default:
+                        Log.println(Log.INFO, "exif", "??");
+                        break;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             Mat retImg = new Mat();
             Mat in = new Mat();
 
             Utils.bitmapToMat(image, in);
 
             ImageProcessor imgProcessor = new ImageProcessor(in, this);
-            Slot[] slots = imgProcessor.PatternDetector(retImg.getNativeObjAddr());
-
-            if(slots.length != 20){
-                Log.println(Log.ERROR, "Slot array", "Length doesn't fit");
-            }
-            for(Slot slot : slots){
-                Log.println(Log.INFO, "slot", slot.row + " | " + slot.col + " - " + slot.info);
-            }
 
             ImageView ivPhoto;
-            ivPhoto = findViewById(R.id.image);
-            ivPhoto.setImageBitmap(image);
+            if(captureMode == 0){
+                Slot[] slots = imgProcessor.PatternDetector(retImg.getNativeObjAddr());
+
+                if(slots.length != 20){
+                    Log.println(Log.ERROR, "Slot array", "Length doesn't fit");
+                }
+                for(Slot slot : slots){
+                    Log.println(Log.INFO, "slot", slot.row + " | " + slot.col + " - " + slot.info);
+                }
+
+                ivPhoto = findViewById(R.id.patternImage);
+                ivPhoto.setImageBitmap(MainActivity.convMatToBitmap(retImg));
+            }
+            else{
+                Utils.bitmapToMat(image, in);
+                imgProcessor.AddDiceImg(in);
+                Dice[] dices = imgProcessor.DiceDetector(retImg.getNativeObjAddr());
+                if(dices.length ==0){
+                    Log.println(Log.ERROR, "Dice array", "No dice!");
+                }
+                for(Dice dice : dices){
+                    Log.println(Log.INFO, "dice", dice.row + " | " + dice.col + " - " + dice.number + " | " + dice.color);
+                }
+
+                ivPhoto = findViewById(R.id.diceImage);
+                ivPhoto.setImageBitmap(MainActivity.convMatToBitmap(retImg));
+            }
         }
     }
 

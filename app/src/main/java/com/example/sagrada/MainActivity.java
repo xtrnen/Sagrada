@@ -2,6 +2,7 @@ package com.example.sagrada;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.hardware.camera2.CameraDevice;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,6 +26,8 @@ import Model.GameBoard.Structs.Dice;
 import Model.Rules.RuleHandler;
 
 public class MainActivity extends AppCompatActivity {
+    ImageView imageView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,28 +37,35 @@ public class MainActivity extends AppCompatActivity {
         Mat img = null;
         Mat retImg = new Mat();
         try {
-            img = Utils.loadResource(this, R.drawable.spektral_div);
+            img = Utils.loadResource(this, R.drawable.venus);
         } catch (IOException e){
             e.printStackTrace();
         }
 
-        /*ImageProcessor imgProcessor = new ImageProcessor(img, this);
-        imgProcessor.AddTemplateImgs();
-        imgProcessor.AddDiceImg();
+        Bitmap bitmap = convMatToBitmap(img);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        Bitmap bit = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+        Utils.bitmapToMat(bit, img);
+        ImageProcessor imgProcessor = new ImageProcessor(img, this);
         Slot[] slots = imgProcessor.PatternDetector(retImg.getNativeObjAddr());
-        Dice[] dices = imgProcessor.DiceDetector(retImg.getNativeObjAddr());
+        /*Dice[] dices = imgProcessor.DiceDetector(retImg.getNativeObjAddr());
 
         if(slots.length != 20){
             Log.println(Log.ERROR, "Slot array", "Length doesn't fit");
         }
         if(dices.length == 0){
             Log.println(Log.ERROR, "Dice array", "No dice detected");
-        }
+        }*/
 
         for(Slot slot : slots){
             Log.println(Log.INFO, "slot", slot.row + " | " + slot.col + " - " + slot.info);
         }
-        for(Dice dice : dices){
+
+        imageView = (ImageView)findViewById(R.id.testDice);
+        imageView.setImageBitmap(convMatToBitmap(retImg));
+        /*for(Dice dice : dices){
             Log.println(Log.INFO, "dice", dice.row + " | " + dice.col + " - " + dice.number + " | " + dice.color);
         }*/
         /*TEST*/

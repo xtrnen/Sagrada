@@ -164,7 +164,7 @@ private:
         Mat prepImg;
         this->patternImg.copyTo(prepImg);
 
-        cvtColor(prepImg, prepImg, COLOR_RGB2GRAY);
+        cvtColor(prepImg, prepImg, COLOR_BGR2GRAY);
         equalizeHist(prepImg, prepImg);
         GaussianBlur(prepImg, prepImg, Size(5,5), 2, 2, BORDER_CONSTANT);
         erode(prepImg, prepImg, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));
@@ -229,7 +229,7 @@ private:
         Mat mask;
         //Get hsv model for img
         Mat hsv;
-        cvtColor(_img, hsv, COLOR_RGB2HSV);
+        cvtColor(_img, hsv, COLOR_BGR2HSV);
 
         /*Get rects for each color*/
         //Red
@@ -685,7 +685,7 @@ private:
     {
         Mat img;
 
-        cvtColor(subject, img, COLOR_RGB2HSV);
+        cvtColor(subject, img, COLOR_BGR2HSV);
 
         switch(CheckColor(img)){
             case PATID_WHITE:
@@ -715,7 +715,7 @@ private:
     bool IsDicePattern(Mat subject, int lowNum, int highNum, PatternID& pID)
     {
         Mat img;
-        cvtColor(subject, img, COLOR_RGB2GRAY);
+        cvtColor(subject, img, COLOR_BGR2GRAY);
         //GaussianBlur(img, img, Size(5,5), 2, 2, BORDER_CONSTANT);    //Blurring image
         //erode(img, img, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));   //Highlighting lines
 
@@ -738,8 +738,8 @@ private:
         Mat img;
         _img.copyTo(img);
         bool ind = false;
-        cvtColor(img,img, COLOR_RGB2GRAY);
-        threshold(img, img, 160, 255, THRESH_BINARY);
+        cvtColor(img,img, COLOR_BGR2GRAY);
+        threshold(img, img, 100, 255, THRESH_BINARY);
         //DETECT 6,5,4
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;

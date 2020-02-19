@@ -49,7 +49,7 @@ struct color_range
     Scalar highViolet = Scalar(174,255,255);
 
     /*White color*/
-    Scalar lowWhite = Scalar(0,0,168);
+    Scalar lowWhite = Scalar(0,0,120);
     Scalar lowDiceWhite = Scalar(0,0,120);
     Scalar highDiceWhite = Scalar(180,80,255);
     Scalar highWhite = Scalar(180,50,255);
@@ -146,7 +146,7 @@ public:
             Rect tmpBound = boundingRect(contours[i]);
             //filter contours && find fitting contours
             //TODO: Instead of bound.width use bound.height when image is being rotated correctly
-            if(tmpBound.area() > 30000 && tmpBound.width > 100){
+            if(tmpBound.area() > 30000 && tmpBound.height > 100){
                 //Store the lowest fitting contour
                 if(tmpBound.area() < bound.area() || bound.width == 0){
                     bound = tmpBound;
