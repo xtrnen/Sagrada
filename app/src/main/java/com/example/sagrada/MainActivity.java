@@ -2,8 +2,10 @@ package com.example.sagrada;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.camera2.CameraDevice;
+import android.media.ExifInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.TextureView;
@@ -37,10 +39,11 @@ public class MainActivity extends AppCompatActivity {
         Mat img = null;
         Mat retImg = new Mat();
         try {
-            img = Utils.loadResource(this, R.drawable.venus);
+            img = Utils.loadResource(this, R.drawable.boring);
         } catch (IOException e){
             e.printStackTrace();
         }
+
 
         Bitmap bitmap = convMatToBitmap(img);
         Matrix matrix = new Matrix();
@@ -49,25 +52,27 @@ public class MainActivity extends AppCompatActivity {
 
         Utils.bitmapToMat(bit, img);
         ImageProcessor imgProcessor = new ImageProcessor(img, this);
-        Slot[] slots = imgProcessor.PatternDetector(retImg.getNativeObjAddr());
-        /*Dice[] dices = imgProcessor.DiceDetector(retImg.getNativeObjAddr());
+        imgProcessor.AddDiceImg(img);
+        //Slot[] slots = imgProcessor.PatternDetector(retImg.getNativeObjAddr());
+        Dice[] dices = imgProcessor.DiceDetector(retImg.getNativeObjAddr());
 
-        if(slots.length != 20){
+        /*if(slots.length != 20){
             Log.println(Log.ERROR, "Slot array", "Length doesn't fit");
         }
         if(dices.length == 0){
             Log.println(Log.ERROR, "Dice array", "No dice detected");
         }*/
 
-        for(Slot slot : slots){
+        /*for(Slot slot : slots){
             Log.println(Log.INFO, "slot", slot.row + " | " + slot.col + " - " + slot.info);
+        }*/
+        for(Dice dice : dices){
+            Log.println(Log.INFO, "dice", dice.row + " | " + dice.col + " - " + dice.number + " | " + dice.color);
         }
 
         imageView = (ImageView)findViewById(R.id.testDice);
         imageView.setImageBitmap(convMatToBitmap(retImg));
-        /*for(Dice dice : dices){
-            Log.println(Log.INFO, "dice", dice.row + " | " + dice.col + " - " + dice.number + " | " + dice.color);
-        }*/
+
         /*TEST*/
         /*GameBoard gameBoard = new GameBoard(dices, slots, 4, 5);
         RuleHandler hand = new RuleHandler(gameBoard.diceArray, gameBoard.slotArray);

@@ -14,8 +14,6 @@
 using namespace cv;
 using namespace std;
 
-Mat tp;
-
 Mat GetObjectImg(JNIEnv *env, jobject obj, string _propTypeRoute, string _propName);
 
 jobjectArray BuildDicesOutput(JNIEnv *env, vector<Dice_s> dices);
@@ -37,121 +35,11 @@ JNIEXPORT jobjectArray JNICALL Java_Model_ImageProcessor_PatternDetector(JNIEnv 
     //Correction in grid creater
     patternAnalyzer.GetCardPattern(grid);
 
+    //patternAnalyzer.Test(grid[6]).copyTo(outputImg);
+
     patternAnalyzer.tmp.copyTo(outputImg);
 
     return BuildSlotsOutput(env, patternAnalyzer.slots);
-
-    /*Mat labImg;
-    Mat mask;
-    Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
-    double scaleWidth;
-    double scaleHeight;
-    Rect bound = Rect(0,0,0,0);
-    int L1 = 0;
-    int L2 = 35;
-    int a1 = -20;
-    int a2 = 20;
-    int b1 = -10;
-    int b2 = 10;
-    //convert image to Lab color space
-    cvtColor(patternImg, labImg, COLOR_BGR2Lab);
-    //Set scale values for resized image
-    DiceAnalyzer::SetScaleValues(patternImg.size().width, patternImg.size().height, scaleWidth, scaleHeight, 512, 512);
-    //Set OpenCV Lab values for black
-    DiceAnalyzer::CalculateLabValues(L1, a1, b1); //lower bound
-    DiceAnalyzer::CalculateLabValues(L2, a2, b2); //upper bound
-    //Create black color mask
-    inRange(labImg, Scalar(L1, a1, b1), Scalar(L2, a2, b2), mask);
-    //resize mask
-    resize(mask, mask, Size(512,512));
-    //erode
-    //erode(mask, mask, kernel, Point(-1,-1), 5);
-    //Find contours
-    vector<vector<Point>> contours;
-    findContours(mask, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
-    for(size_t i = 0; i < contours.size(); i++){
-        Rect tmpBound = boundingRect(contours[i]);
-        //filter contours && find fitting contours
-        //TODO: Instead of bound.width use bound.height when image is being rotated correctly
-        if(tmpBound.area() > 30000 && tmpBound.width > 100){
-            //Store the lowest fitting contour
-            if(tmpBound.area() < bound.area() || bound.width == 0){
-                bound = tmpBound;
-            }
-        }
-    }
-    //scale bound to fit diceImg size
-    bound.width =(int) (bound.width * scaleWidth);
-    bound.height =(int) (bound.height * scaleHeight);
-    bound.x =(int) (bound.x * scaleWidth);
-    bound.y =(int) (bound.y * scaleHeight);
-    mask.copyTo(outputImg);*/
-
-    /*Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
-    Mat img;
-    int ind = 0;
-    int c = 0;
-    grid[ind].copyTo(img);
-
-    cvtColor(img, img, COLOR_BGR2GRAY);
-
-    vector<s_circle> circles;
-
-    threshold(img, img, 0, 255, THRESH_BINARY|THRESH_OTSU);
-    dilate(img,img, kernel, Point(-1,-1), 2);
-
-    vector<vector<Point>> contours;
-    findContours(img, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
-    for(int i = 0; i < contours.size(); i++)
-    {
-        vector<Point> polyContour;
-        Point2f center;
-        float radius;
-        double epsilon = 0.01*arcLength(contours[i],true);
-        approxPolyDP( contours[i], polyContour, epsilon, true );
-        int area = (int)contourArea(polyContour);
-        minEnclosingCircle(contours[i], center, radius);
-        int circleArea = (int)(radius*radius*3.14);
-        int offsetArea = (int)(circleArea* 0.25);
-        if(polyContour.size() > 5 && area > 100 && area >= circleArea - offsetArea && area <= circleArea + offsetArea){
-            circle(grid[ind], center, (int)radius, Scalar(255,0,0), 5);
-            //drawContours(img, contours, i, Scalar(0,0,255), 3);
-            //circles.push_back(s_circle{(int)radius, Point((int)center.x, (int)center.y)});
-            c++;
-        }
-    }
-
-    if(c == 0){
-        threshold(img, img, 0, 255, THRESH_BINARY_INV);
-        dilate(img,img, kernel, Point(-1,-1), 4);
-        distanceTransform(img, img, DIST_L2, 3);
-        normalize(img, img, 0, 1.0, NORM_MINMAX);
-        threshold(img, img, 0.5, 1.0, THRESH_BINARY);
-        img.convertTo(img, CV_8U, 255.0);
-
-        findContours(img, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
-
-        for(int i = 0; i < contours.size(); i++)
-        {
-            vector<Point> polyContour;
-            Point2f center;
-            float radius;
-            double epsilon = 0.01*arcLength(contours[i],true);
-            approxPolyDP( contours[i], polyContour, epsilon, true );
-            int area = (int)contourArea(contours[i]);
-            minEnclosingCircle(contours[i], center, radius);
-            int circleArea = (int)(radius*radius*3.14);
-            int offsetArea = (int)(circleArea* 0.25);
-            //__android_log_print(ANDROID_LOG_INFO, "CIRCLE", "%d | %d", area, circleArea);
-            if(polyContour.size() > 5 && area > 100 && area >= circleArea - offsetArea && area <= circleArea + offsetArea){
-                circle(grid[ind], center, (int)radius, Scalar(0,255,0), 5);
-                //drawContours(img, contours, i, Scalar(0,0,255), 3);
-                //circles.push_back(s_circle{(int)radius, Point((int)center.x, (int)center.y)});
-            }
-        }
-    }
-
-    grid[ind].copyTo(outputImg);*/
 };
 extern "C"
 JNIEXPORT jobjectArray JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *env, jobject obj, jlong output)
@@ -162,12 +50,14 @@ JNIEXPORT jobjectArray JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *en
     cvtColor(diceImg, diceImg, COLOR_BGR2RGB);
     DiceAnalyzer diceAnalyzer = DiceAnalyzer(diceImg);
     diceAnalyzer.DetectDiceGrid();
+    //diceAnalyzer.BoostDices();
     diceAnalyzer.DetectDiceSlots();
     diceAnalyzer.DetectDices();
     //diceAnalyzer.DiceOutput();
     jobjectArray outputArray = BuildDicesOutput(env, diceAnalyzer.dices);
 
     diceAnalyzer.diceBoundImg.copyTo(outputImg);
+    //tp.copyTo(outputImg);
     return outputArray;
 };
 Mat GetObjectImg(JNIEnv *env, jobject obj, string _propTypeRoute, string _propName){

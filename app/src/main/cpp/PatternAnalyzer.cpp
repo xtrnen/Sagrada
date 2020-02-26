@@ -11,6 +11,8 @@
 using namespace std;
 using namespace cv;
 
+Mat tt;
+
 enum PatternID {
     PATID_ONE = 1,
     PATID_TWO = 2,
@@ -156,6 +158,59 @@ public:
                 col = 0;
             }
         }
+    }
+
+    Mat Test(Mat _img){
+        Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
+        Mat img;
+        Mat draw;
+
+        cvtColor(_img, img, COLOR_BGR2HSV);
+        _img.copyTo(draw);
+        vector<Mat> splits;
+        split(_img, splits);
+        splits[2].copyTo(img);
+
+        GaussianBlur(img, img, Size(3,3), 0);
+        equalizeHist(img, img);
+
+        bool ind = false;
+        threshold(img, img, 128, 255, THRESH_BINARY);
+        erode(img, img, kernel, Point(-1,-1), 1);
+        //DETECT 6,5,4
+        vector<vector<Point>> contours;
+        vector<Vec4i> hierarchy;
+
+        findContours(img, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+
+        vector<vector<Point>> contours_poly( contours.size());
+        vector<Rect> boundRect( contours.size());
+        vector<Point2f>centers( contours.size());
+
+        Scalar color = Scalar( 0,0,0 );
+        Scalar color1 = Scalar (255,255,255);
+        int counter = 0;
+        int sumArea = 0;
+        for( size_t i = 0; i < contours.size(); i++ )
+        {
+            double epsilon = 0.01*arcLength(contours[i],true);
+            approxPolyDP( contours[i], contours_poly[i], epsilon, true );
+
+            double area = contourArea(contours_poly[i]);
+            Point2f center;
+            float radius;
+            minEnclosingCircle(contours_poly[i], center, radius);
+            double cArea = radius * radius * 3.14;
+
+            drawContours(draw, contours, i, Scalar(255,0,0), 2);
+            if(area > 100 && cArea <= area + area*0.25 && hierarchy[i][3] == -1)
+            {
+                drawContours(draw, contours, i, Scalar(0,0,255), 2);
+                counter++;
+            }
+        }
+
+        return draw;
     }
 
 private:
@@ -716,8 +771,6 @@ private:
     {
         Mat img;
         cvtColor(subject, img, COLOR_BGR2GRAY);
-        //GaussianBlur(img, img, Size(5,5), 2, 2, BORDER_CONSTANT);    //Blurring image
-        //erode(img, img, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));   //Highlighting lines
 
         Mat otsuThreshImg;
         double otsuThresh = threshold(img, otsuThreshImg, 0, 255, THRESH_BINARY + THRESH_OTSU);
@@ -728,6 +781,7 @@ private:
         }
         else
         {
+            cvtColor(subject, img, COLOR_BGR2HSV);
             pID = DetectLowerNumber(img);
         }
         return pID != PATID_NONE;
@@ -736,10 +790,21 @@ private:
     bool DetectWhiteBlobNumber(Mat _img, PatternID& _pID)
     {
         Mat img;
-        _img.copyTo(img);
+        //_img.copyTo(img);
         bool ind = false;
-        cvtColor(img,img, COLOR_BGR2GRAY);
-        threshold(img, img, 100, 255, THRESH_BINARY);
+        //cvtColor(img,img, COLOR_BGR2GRAY);
+        cvtColor(_img, img, COLOR_BGR2HSV);
+
+        vector<Mat> splits;
+        split(_img, splits);
+        splits[2].copyTo(img);
+
+        GaussianBlur(img, img, Size(3,3), 0);
+        equalizeHist(img, img);
+
+        threshold(img, img, 128, 255, THRESH_BINARY);
+        Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
+        erode(img, img, kernel, Point(-1,-1), 1);
         //DETECT 6,5,4
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
@@ -766,14 +831,14 @@ private:
             minEnclosingCircle(contours_poly[i], center, radius);
             double cArea = radius * radius * 3.14;
 
-            if(cArea > 100.0 && cArea >= area && cArea < area * 2)
+            if(cArea > 100.0 && cArea < area + area*0.25 && hierarchy[i][3] == -1)
             {
-                circles.push_back(radius);
-                sumArea += area;
+                //circles.push_back(radius);
+                //sumArea += area;
                 counter++;
             }
         }
-        if(counter != 0){
+        /*if(counter != 0){
             sumArea = sumArea / counter;
             double offsetArea = sumArea * 0.3;
 
@@ -785,9 +850,9 @@ private:
                     counter--;
                 }
             }
-        }
+        }*/
 
-        if(counter == 6 || counter == 4 || counter == 5){
+        if(counter == 6 || counter == 5 || counter == 4){
             _pID = PatternID(counter);
             return true;
         }
@@ -801,50 +866,42 @@ private:
     {
         Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
         Mat img;
-        _img.copyTo(img);
+        Mat mask;
+        vector<Mat> splits;
+        split(_img, splits);
+        splits[2].copyTo(img);
+        splits.clear();
         vector<s_circle> circles;
 
-        threshold(img, img, 0, 255, THRESH_BINARY|THRESH_OTSU);
-        dilate(img,img, kernel, Point(-1,-1), 2);
+        mask = LowerNumMask(img, false, 50);
 
-        Point split = Point(img.cols/2, img.rows/2);
-
-        circles = DetectLowerNumberContour(img);
-
-        int number = ControlBlobPosition(circles, split);
-
-        if(number == -42)
-        {
-            //__android_log_print(ANDROID_LOG_INFO, "NUMBER Part 1", "%d", number);
-            threshold(img, img, 0, 255, THRESH_BINARY_INV);
-            dilate(img,img, kernel, Point(-1,-1), 4);
-            distanceTransform(img, img, DIST_L2, 3);
-            normalize(img, img, 0, 1.0, NORM_MINMAX);
-            threshold(img, img, 0.5, 1.0, THRESH_BINARY);
-            img.convertTo(img, CV_8U, 255.0);
-
-            circles = DetectLowerNumberContour(img);
-
-            number = ControlBlobPosition(circles, split);
-            if(number != -42)
-            {
-                //__android_log_print(ANDROID_LOG_INFO, "NUMBER Part 2", "%d", number);
-            }
-            else
-            {
-                //__android_log_print(ANDROID_LOG_INFO, "NUMBER", "-42");
-            }
+        int number = DetectLowerNumberContour(mask);
+        if(number == 3 || number == 2){
+            return PatternID(number);
         }
+        else{
+            mask = LowerNumMask(img, true, 50);
+            number = DetectLowerNumberContour(mask);
+            if(number == 1 || number == 2 || number == 3){
+                return PatternID(number);
+            }
+            else{
+                mask = LowerNumMask(img, false, 40);
+                number = DetectLowerNumberContour(mask);
+                return PatternID(number);
+            }
 
-        return PatternID(number);
+        }
     }
 
-    vector<s_circle> DetectLowerNumberContour(Mat _img)
+    int DetectLowerNumberContour(Mat _img)
     {
         int c = 0;
+        Point split = Point(_img.cols/2, _img.rows/2);
+
         vector<s_circle> circles;
         vector<vector<Point>> contours;
-        findContours(_img, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
+        findContours(_img, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
         for(int i = 0; i < contours.size(); i++)
         {
             vector<Point> polyContour;
@@ -852,21 +909,17 @@ private:
             float radius;
             double epsilon = 0.01*arcLength(contours[i],true);
             approxPolyDP( contours[i], polyContour, epsilon, true );
-            int area = (int)contourArea(polyContour);
+            int area = (int)contourArea(contours[i]);
             minEnclosingCircle(contours[i], center, radius);
             int circleArea = (int)(radius*radius*3.14);
-            int offsetArea = (int)(circleArea* 0.25);
-            if(polyContour.size() > 5 && area > 100 && area >= circleArea - offsetArea && area <= circleArea + offsetArea){
-                //circle(tp, center, radius + 5, Scalar(0,255,0), 5);
-                //drawContours(img, contours, i, Scalar(0,0,255), 3);
+            int offsetArea = (int)(circleArea* 0.3);
+            if(area > 50 && area >= circleArea - offsetArea && area <= circleArea + offsetArea){
                 circles.push_back(s_circle{(int)radius, Point((int)center.x, (int)center.y)});
                 c++;
             }
         }
 
-        //__android_log_print(ANDROID_LOG_INFO, "NUMBER Contour", "%d", c);
-
-        return circles;
+        return ControlBlobPosition(circles, split);
     }
 
     int ControlNumber(bool q1,bool q2,bool q3,bool q4,bool qC)
@@ -934,11 +987,6 @@ private:
         {
             return -42;
         }
-        /*int number = circles.size();
-        if(number > 0 && number < 4)
-            return number;
-
-        return -42;*/
     }
 
     Mat FindHsvColor(Mat inputImage, SagradaColor color)
@@ -975,6 +1023,27 @@ private:
 
         return output;
 
+    }
+
+    Mat LowerNumMask(Mat img, bool reversThreshType, int threshValue)
+    {
+        Mat workImg;
+
+        GaussianBlur(img, workImg, Size(3,3), 0);
+        equalizeHist(workImg, workImg);
+
+        if(reversThreshType){
+            threshold(workImg, workImg, threshValue, 255, THRESH_BINARY_INV);//35-50
+            distanceTransform(workImg, workImg, DIST_L2, 3);
+            normalize(workImg, workImg, 0, 1.0, NORM_MINMAX);
+            threshold(workImg, workImg, 0.5, 1.0, THRESH_BINARY);
+            workImg.convertTo(workImg, CV_8U, 255.0);
+        }
+        else{
+            threshold(workImg, workImg, threshValue, 255, THRESH_BINARY);//35-50
+        }
+
+        return workImg;
     }
 
     char* PIDName(PatternID _pid)
@@ -1050,5 +1119,4 @@ private:
 
         return this->refWidth / 8;
     }
-
 };

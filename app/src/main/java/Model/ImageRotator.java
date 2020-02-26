@@ -36,7 +36,7 @@ public class ImageRotator {
                 break;
         }
         Matrix matrix = new Matrix();
-        matrix.postRotate(90);
+        matrix.postRotate(rotate);
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
