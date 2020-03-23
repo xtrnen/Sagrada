@@ -4,4 +4,9 @@
     <string name="game_title">Start game</string>
     <string name="settings_title">Settings</string>
     <string name="quitApp_title">Quit</string>
+    <string name="gameModeDialog_title">Play single mode?</string>
+    <string name="gameModeDialogMsg">Single player mode does not give option to manage more than one user in single game. If you want to use this device for more users use \"No\" button.</string>
+    <string name="gameModeDialogNeutral_title">Cancel</string>
+    <string name="gameModeDialogNegative_title">No</string>
+    <string name="gameModeDialogPositive_title">Yes</string>
 </resources>
