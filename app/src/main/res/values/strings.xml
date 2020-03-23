@@ -9,4 +9,5 @@
     <string name="gameModeDialogNeutral_title">Cancel</string>
     <string name="gameModeDialogNegative_title">No</string>
     <string name="gameModeDialogPositive_title">Yes</string>
+    <string name="playerPoints_title">Player points \:</string>
 </resources>
