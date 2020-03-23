@@ -43,6 +43,8 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.println(Log.INFO, "StartQuitAppListener", "Quit App");
+                finish();
+                System.exit(0);
             }
         });
     }
