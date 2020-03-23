@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Sagrada</string>
+    <string name="app_title">Sagrada Helper</string>
+    <string name="game_title">Start game</string>
+    <string name="settings_title">Settings</string>
+    <string name="quitApp_title">Quit</string>
 </resources>
