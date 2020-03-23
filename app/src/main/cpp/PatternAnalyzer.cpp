@@ -584,6 +584,8 @@ private:
             tl.y = prevRect.tl().y;
         }
 
+        //TODO: Control that rectangle doesn't exceed image boundries
+
         return Rect(tl, br);
     }
 

@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         Mat img = null;
         Mat retImg = new Mat();
         try {
-            img = Utils.loadResource(this, R.drawable.boring);
+            img = Utils.loadResource(this, R.drawable.sagrada_up_color);
         } catch (IOException e){
             e.printStackTrace();
         }
