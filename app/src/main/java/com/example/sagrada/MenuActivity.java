@@ -1,6 +1,7 @@
 package com.example.sagrada;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -31,8 +32,10 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.println(Log.INFO, "StartGameListener", "Starting game");
-                DialogFragment gameModeDialog = new GameModeDialogFragment();
-                gameModeDialog.show(getSupportFragmentManager(), "GameModeDialog");
+                //DialogFragment gameModeDialog = new GameModeDialogFragment();
+                //gameModeDialog.show(getSupportFragmentManager(), "GameModeDialog");
+                Intent intent = new Intent(MenuActivity.this, GameActivity.class);
+                startActivity(intent);
             }
         });
 
