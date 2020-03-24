@@ -28,31 +28,20 @@ public class MenuActivity extends AppCompatActivity {
         assert quitAppButton != null;
 
         //Set listeners
-        startGameButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.println(Log.INFO, "StartGameListener", "Starting game");
-                //DialogFragment gameModeDialog = new GameModeDialogFragment();
-                //gameModeDialog.show(getSupportFragmentManager(), "GameModeDialog");
-                Intent intent = new Intent(MenuActivity.this, GameActivity.class);
-                startActivity(intent);
-            }
+        startGameButton.setOnClickListener(v -> {
+            Log.println(Log.INFO, "StartGameListener", "Starting game");
+            Intent intent = new Intent(MenuActivity.this, GameActivity.class);
+            startActivity(intent);
         });
 
-        settingsButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.println(Log.INFO, "StartSettingsListener", "Settings");
-            }
+        settingsButton.setOnClickListener(v -> {
+            Log.println(Log.INFO, "StartSettingsListener", "Settings");
         });
 
-        quitAppButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.println(Log.INFO, "StartQuitAppListener", "Quit App");
-                finish();
-                System.exit(0);
-            }
+        quitAppButton.setOnClickListener(v -> {
+            Log.println(Log.INFO, "StartQuitAppListener", "Quit App");
+            finish();
+            System.exit(0);
         });
     }
 }

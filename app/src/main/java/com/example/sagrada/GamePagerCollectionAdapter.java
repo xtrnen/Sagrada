@@ -7,6 +7,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
 public class GamePagerCollectionAdapter extends FragmentStatePagerAdapter {
+
+
     public GamePagerCollectionAdapter(FragmentManager fm){
         super(fm);
     }
