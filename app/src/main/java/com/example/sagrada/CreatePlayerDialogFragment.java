@@ -41,8 +41,9 @@ public class CreatePlayerDialogFragment extends DialogFragment {
 
         builder.setTitle(R.string.createPlayerDialog_title);
 
-        builder.setNegativeButton(R.string.gameModeDialogNeutral_title, (dialog, which) ->
-                listener.onCreatePlayerCanceled());
+        builder.setNegativeButton(R.string.gameModeDialogNeutral_title, (dialog, which) -> {
+            listener.onCreatePlayerCanceled();
+        });
 
         builder.setPositiveButton(R.string.gameModeDialogPositive_title, (dialog, which) -> {
             EditText username = (EditText)getDialog().findViewById(R.id.createUsernameID);

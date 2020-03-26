@@ -9,9 +9,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
-public class PlayerObjectFragment extends Fragment {
-    public static final String SObject = "object";
+public class PlayerFragment extends Fragment {
+    //private PlayerViewModel playerViewModel;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -20,7 +21,12 @@ public class PlayerObjectFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
-        Bundle args = getArguments();
-        ((TextView) view.findViewById(R.id.playerNameID)).setText(Integer.toString(args.getInt(SObject)));
+        //playerViewModel = new ViewModelProvider(requireActivity()).get(PlayerViewModel.class);
+        ((TextView) view.findViewById(R.id.playerNameID)).setText("");
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
     }
 }
