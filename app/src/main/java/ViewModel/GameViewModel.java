@@ -36,8 +36,6 @@ public class GameViewModel extends ViewModel {
         }
         newPlayers.add(player);
         players.setValue(newPlayers);
-
-        Log.d("Array", "Arr: " + newPlayers.toString());
     }
 
     public void removePlayer(String name){
@@ -58,4 +56,5 @@ public class GameViewModel extends ViewModel {
         }
         players.setValue(newPlayerList);
     }
+
 }
