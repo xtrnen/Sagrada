@@ -4,13 +4,16 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModelProvider;
+
+import java.util.List;
+
+import Model.GameBoard.Player;
+import ViewModel.GameViewModel;
 
 
 public class CreatePlayerDialogFragment extends DialogFragment {
@@ -19,6 +22,7 @@ public class CreatePlayerDialogFragment extends DialogFragment {
         public void onCreatePlayerSubmit(String username);
         public void onCreatePlayerCanceled();
     }
+    //TODO: On empty username string don't close dialog
 
     ICreatePlayerDialogListener listener;
 
@@ -47,12 +51,32 @@ public class CreatePlayerDialogFragment extends DialogFragment {
 
         builder.setPositiveButton(R.string.gameModeDialogPositive_title, (dialog, which) -> {
             EditText username = (EditText)getDialog().findViewById(R.id.createUsernameID);
-            if(!username.getText().toString().trim().isEmpty() && !username.getText().toString().equals("")){
-                listener.onCreatePlayerSubmit(username.getText().toString());
+            String playerUsername = username.getText().toString();
+
+            GameViewModel gameViewModel = new ViewModelProvider(getActivity()).get(GameViewModel.class);
+
+            List<Player> players = gameViewModel.getPlayers().getValue();
+
+            boolean userExist = false;
+            if(players != null){
+                for (Player player:players) {
+                    if(player.name.equalsIgnoreCase(playerUsername)){
+                        userExist = true;
+                        break;
+                    }
+                }
+            }
+
+            if(!userExist && !usernameIsEmpty(playerUsername)){
+                listener.onCreatePlayerSubmit(playerUsername);
                 this.dismiss();
             }
         });
 
         return builder.create();
+    }
+
+    boolean usernameIsEmpty(String username){
+            return (username.trim().isEmpty() || username.equals(""));
     }
 }

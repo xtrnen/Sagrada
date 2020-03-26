@@ -13,14 +13,13 @@
             android:layout_height="wrap_content"
             android:id="@+id/GameMenuToolbar"/>
     </com.google.android.material.appbar.AppBarLayout>
-    <androidx.viewpager.widget.ViewPager
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabMode="scrollable"/>
+    <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/GamePager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tab_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:tabMode="scrollable"/>
-    </androidx.viewpager.widget.ViewPager>
+        android:layout_height="match_parent" />
 </LinearLayout>

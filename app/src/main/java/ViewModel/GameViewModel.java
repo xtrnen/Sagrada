@@ -49,7 +49,7 @@ public class GameViewModel extends ViewModel {
         int index = -1;
         for(int i = 0; i < newPlayerList.size(); i++){
             Player player = newPlayerList.get(i);
-            if(player.name.equals(name)){
+            if(player.name.equals(name.toLowerCase())){
                 index = i;
             }
         }

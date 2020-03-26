@@ -11,11 +11,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
-import java.util.List;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import Model.GameBoard.Player;
 import ViewModel.GameViewModel;
@@ -23,7 +23,9 @@ import ViewModel.GameViewModel;
 public class GameActivity extends AppCompatActivity implements CreatePlayerDialogFragment.ICreatePlayerDialogListener {
     GamePagerCollectionAdapter gamePagerCollectionAdapter;
     GameViewModel gameViewModel;
-
+    ViewPager2 viewPager;
+    TabLayout tabLayout;
+    //TODO: Dialog reacts to click anywhere with dismiss of dialog...
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -36,9 +38,18 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         /*Show Creation Dialog so we create first user*/
         ShowCreatePlayerDialog();
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.GamePager);
-        gamePagerCollectionAdapter = new GamePagerCollectionAdapter(getSupportFragmentManager());
+        viewPager = (ViewPager2) findViewById(R.id.GamePager);
+        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        gamePagerCollectionAdapter = new GamePagerCollectionAdapter(this);
+        //gamePagerCollectionAdapter = new GamePagerCollectionAdapter(getSupportFragmentManager());
         viewPager.setAdapter(gamePagerCollectionAdapter);
+        new TabLayoutMediator(tabLayout, viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
+            @Override
+            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                String title = gamePagerCollectionAdapter.getTitle(position);
+                tab.setText(title);
+            }
+        }).attach();
 
         gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
     }
@@ -85,9 +96,16 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
                 startActivity(intent);
             case R.id.GameMenuCurrentUserDelete:
                 Log.println(Log.INFO, "MenuOption", "Delete clicked");
-                //RemovePlayerPage();
+                //TODO
+                //removePlayerPage(gamePagerCollectionAdapter.getCurre);
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    /*private void removePlayerPage(int position){
+        String currentUsername = gamePagerCollectionAdapter.//gamePagerCollectionAdapter.getPageTitle(position).toString();
+        gamePagerCollectionAdapter.removeFragment(position);
+        gameViewModel.removePlayer(currentUsername);
+    }*/
 }

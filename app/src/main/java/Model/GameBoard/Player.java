@@ -1,5 +1,7 @@
 package Model.GameBoard;
 
+import androidx.annotation.Nullable;
+
 public class Player {
     public String name;
     public int points;
@@ -11,11 +13,10 @@ public class Player {
     }
 
     public void ChangeName(String newName){
-        name = newName;
+        name = newName.toLowerCase();
     }
 
     public void ChangePoints(int newPoints){
         points = newPoints;
     }
-
 }

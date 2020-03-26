@@ -1,25 +1,22 @@
 package com.example.sagrada;
 
-import android.view.View;
-import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import ViewModel.GameViewModel;
 
-public class GamePagerCollectionAdapter extends FragmentStatePagerAdapter {
+public class GamePagerCollectionAdapter extends FragmentStateAdapter {
     private List<Fragment> pages = new ArrayList<>();
     private List<CharSequence> pagesTitle = new ArrayList<>();
     private GameViewModel gameViewModel;
 
-    public GamePagerCollectionAdapter(FragmentManager fm){
-        super(fm);
+    public GamePagerCollectionAdapter(FragmentActivity fa){
+        super(fa);
     }
 
     public void addFragment(Fragment fragment, String title){
@@ -34,7 +31,7 @@ public class GamePagerCollectionAdapter extends FragmentStatePagerAdapter {
         notifyDataSetChanged();
     }
 
-    @Override
+    /*@Override
     public Fragment getItem(int i){
         return pages.get(i);
     }
@@ -49,12 +46,22 @@ public class GamePagerCollectionAdapter extends FragmentStatePagerAdapter {
     }
 
     @Override
-    public int getCount() {
-        return pages.size();
+    public CharSequence getPageTitle(int position){
+        return pagesTitle.get(position);
+    }*/
+
+    @NonNull
+    @Override
+    public Fragment createFragment(int position) {
+        return PlayerFragment.newInstance(position);
     }
 
     @Override
-    public CharSequence getPageTitle(int position){
-        return pagesTitle.get(position);
+    public int getItemCount() {
+       return pages.size();
+    }
+
+    public String getTitle(int position){
+        return pagesTitle.get(position).toString();
     }
 }
