@@ -31,25 +31,6 @@ public class GamePagerCollectionAdapter extends FragmentStateAdapter {
         notifyDataSetChanged();
     }
 
-    /*@Override
-    public Fragment getItem(int i){
-        return pages.get(i);
-    }
-
-    @Override
-    public int getItemPosition(Object object){
-        if (pages.contains(object)){
-            return pages.indexOf(object);
-        } else {
-            return POSITION_NONE;
-        }
-    }
-
-    @Override
-    public CharSequence getPageTitle(int position){
-        return pagesTitle.get(position);
-    }*/
-
     @NonNull
     @Override
     public Fragment createFragment(int position) {

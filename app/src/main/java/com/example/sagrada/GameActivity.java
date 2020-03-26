@@ -96,16 +96,15 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
                 startActivity(intent);
             case R.id.GameMenuCurrentUserDelete:
                 Log.println(Log.INFO, "MenuOption", "Delete clicked");
-                //TODO
-                //removePlayerPage(gamePagerCollectionAdapter.getCurre);
+                removePlayerPage(viewPager.getCurrentItem());
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    /*private void removePlayerPage(int position){
-        String currentUsername = gamePagerCollectionAdapter.//gamePagerCollectionAdapter.getPageTitle(position).toString();
+    private void removePlayerPage(int position){
+        String currentUsername = gamePagerCollectionAdapter.getTitle(position);
         gamePagerCollectionAdapter.removeFragment(position);
         gameViewModel.removePlayer(currentUsername);
-    }*/
+    }
 }
