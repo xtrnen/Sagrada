@@ -9,4 +9,7 @@
     <string name="gameModeDialogNeutral_title">Cancel</string>
     <string name="gameModeDialogPositive_title">Confirm</string>
     <string name="playerPoints_title">Points \:</string>
+    <string name="gameMenuCreatePlayet_title">Create Player</string>
+    <string name="gameMenuDeleteCurrentPlayer_title">Delete Current Player</string>
+    <string name="gameMenuQuitGame_title">Quit game</string>
 </resources>

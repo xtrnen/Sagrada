@@ -3,8 +3,13 @@ package com.example.sagrada;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -23,6 +28,10 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.game_layout);
+
+        /*Toolbar*/
+        Toolbar toolbar = (Toolbar)findViewById(R.id.GameMenuToolbar);
+        setSupportActionBar(toolbar);
 
         /*Show Creation Dialog so we create first user*/
         ShowCreatePlayerDialog();
@@ -52,5 +61,33 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         Intent intent = new Intent(GameActivity.this, MenuActivity.class);
         this.finish();
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        //return super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.game_menu_layout, menu);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.GameMenuNewUserItem:
+                ShowCreatePlayerDialog();
+                return true;
+            case R.id.GameMenuQuitGame:
+                Log.println(Log.INFO, "MenuOption", "Quit clicked");
+                Intent intent = new Intent(GameActivity.this, MenuActivity.class);
+                this.finish();
+                startActivity(intent);
+            case R.id.GameMenuCurrentUserDelete:
+                Log.println(Log.INFO, "MenuOption", "Delete clicked");
+                //RemovePlayerPage();
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
