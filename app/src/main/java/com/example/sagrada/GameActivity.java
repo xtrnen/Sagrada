@@ -66,6 +66,7 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         gameViewModel.addPlayer(new Player(username));
         PlayerFragment playerFragment = new PlayerFragment();
         gamePagerCollectionAdapter.addFragment(playerFragment, username);
+        viewPager.setCurrentItem(gamePagerCollectionAdapter.getItemCount());
     }
 
     @Override

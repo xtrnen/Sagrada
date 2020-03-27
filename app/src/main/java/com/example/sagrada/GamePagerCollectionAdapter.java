@@ -1,7 +1,5 @@
 package com.example.sagrada;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -9,7 +7,6 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class GamePagerCollectionAdapter extends FragmentStateAdapter {
     private List<Fragment> pages = new ArrayList<>();
