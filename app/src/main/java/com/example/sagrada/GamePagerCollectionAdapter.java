@@ -1,5 +1,7 @@
 package com.example.sagrada;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -8,12 +10,9 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-import ViewModel.GameViewModel;
-
 public class GamePagerCollectionAdapter extends FragmentStateAdapter {
     private List<Fragment> pages = new ArrayList<>();
     private List<CharSequence> pagesTitle = new ArrayList<>();
-    private GameViewModel gameViewModel;
 
     public GamePagerCollectionAdapter(FragmentActivity fa){
         super(fa);
@@ -34,7 +33,7 @@ public class GamePagerCollectionAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        return PlayerFragment.newInstance(position);
+        return PlayerFragment.newInstance(position, pagesTitle.get(position).toString());
     }
 
     @Override
