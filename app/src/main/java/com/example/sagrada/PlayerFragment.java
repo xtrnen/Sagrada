@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment;
 
 import com.example.sagrada.databinding.PlayerObjectLayoutBinding;
 
-import Model.GameBoard.Player;
 import ViewModel.PlayerViewModel;
 
 public class PlayerFragment extends Fragment {

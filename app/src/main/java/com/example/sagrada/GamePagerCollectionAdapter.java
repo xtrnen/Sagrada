@@ -9,6 +9,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class GamePagerCollectionAdapter extends FragmentStateAdapter {
     private List<Fragment> pages = new ArrayList<>();
@@ -27,7 +28,7 @@ public class GamePagerCollectionAdapter extends FragmentStateAdapter {
     public void removeFragment(int index){
         pages.remove(index);
         pagesTitle.remove(index);
-        notifyDataSetChanged();
+        notifyItemRemoved(index);
     }
 
     @NonNull
@@ -39,6 +40,21 @@ public class GamePagerCollectionAdapter extends FragmentStateAdapter {
     @Override
     public int getItemCount() {
        return pages.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return pages.get(position).hashCode();
+    }
+
+    @Override
+    public boolean containsItem(long itemId) {
+        for (Fragment fragment: pages) {
+            if ((long)fragment.hashCode() == itemId){
+                return true;
+            }
+        }
+        return false;
     }
 
     public String getTitle(int position){
