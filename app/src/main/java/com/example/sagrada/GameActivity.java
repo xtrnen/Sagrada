@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,6 +38,33 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         /*Toolbar*/
         Toolbar toolbar = (Toolbar)findViewById(R.id.GameMenuToolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        /*ImageButtons in ActionBar*/
+        ImageButton deletePlayerButton = (ImageButton) findViewById(R.id.playerToolbarDeleteButton);
+        //ImageButton addPlayerButton = (ImageButton) findViewById(R.id.playerT)
+        ImageButton playerImageInfoButton = (ImageButton) findViewById(R.id.playerToolbarInfoButton);
+        ImageButton playerCameraButton = (ImageButton) findViewById(R.id.playerToolbarCameraButton);
+        //set onClick actions
+        deletePlayerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.println(Log.INFO, "MenuOption", "Delete clicked");
+                removePlayerPage(viewPager.getCurrentItem());
+            }
+        });
+        playerImageInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.println(Log.INFO, "Toolbar", "Player info");
+            }
+        });
+        playerCameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.println(Log.INFO, "MenuOption", "Take picture");
+            }
+        });
 
         /*Show Creation Dialog so we create first user*/
         ShowCreatePlayerDialog();

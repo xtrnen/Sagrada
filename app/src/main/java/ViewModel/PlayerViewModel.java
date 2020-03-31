@@ -22,6 +22,7 @@ public class PlayerViewModel extends ViewModel {
     public Integer getPoints(){
         return points.getValue();
     }
+    public String getPointsString() { return getPoints().toString(); }
 
     public void setPoints(Integer newPoints){
         points.setValue(newPoints);
