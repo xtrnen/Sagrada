@@ -12,4 +12,7 @@
     <string name="gameMenuCreatePlayet_title">Create Player</string>
     <string name="gameMenuDeleteCurrentPlayer_title">Delete Current Player</string>
     <string name="gameMenuQuitGame_title">Quit game</string>
+    <string name="deletePlayerDialogMsg">Do you want to remove this player?</string>
+    <string name="deletePlayerDialogPositiveButton">Yes</string>
+    <string name="deletePlayerDialogNegativeButton">No</string>
 </resources>

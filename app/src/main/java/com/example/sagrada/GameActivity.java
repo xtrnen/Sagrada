@@ -24,7 +24,7 @@ import java.util.List;
 import Model.GameBoard.Player;
 import ViewModel.GameViewModel;
 
-public class GameActivity extends AppCompatActivity implements CreatePlayerDialogFragment.ICreatePlayerDialogListener {
+public class GameActivity extends AppCompatActivity implements CreatePlayerDialogFragment.ICreatePlayerDialogListener, DeletePlayerDialogFragment.IDeletePlayerDialogListener {
     GamePagerCollectionAdapter gamePagerCollectionAdapter;
     GameViewModel gameViewModel;
     ViewPager2 viewPager;
@@ -42,7 +42,6 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
 
         /*ImageButtons in ActionBar*/
         ImageButton deletePlayerButton = (ImageButton) findViewById(R.id.playerToolbarDeleteButton);
-        //ImageButton addPlayerButton = (ImageButton) findViewById(R.id.playerT)
         ImageButton playerImageInfoButton = (ImageButton) findViewById(R.id.playerToolbarInfoButton);
         ImageButton playerCameraButton = (ImageButton) findViewById(R.id.playerToolbarCameraButton);
         //set onClick actions
@@ -50,7 +49,7 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
             @Override
             public void onClick(View v) {
                 Log.println(Log.INFO, "MenuOption", "Delete clicked");
-                removePlayerPage(viewPager.getCurrentItem());
+                ShowDeletePlayerDialog();
             }
         });
         playerImageInfoButton.setOnClickListener(new View.OnClickListener() {
@@ -84,12 +83,17 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
     }
 
-    /*CREATE PLAYER DIALOG*/
+    /*Dialogs creation*/
     public void ShowCreatePlayerDialog(){
         DialogFragment gameModeDialog = new CreatePlayerDialogFragment();
         gameModeDialog.show(getSupportFragmentManager(), "CreatePlayerDialog");
     }
+    public void ShowDeletePlayerDialog(){
+        DialogFragment deletePlayerDialog = new DeletePlayerDialogFragment();
+        deletePlayerDialog.show(getSupportFragmentManager(), "DeletePlayerDialog");
+    }
 
+    /*Dialog interface functions implementation*/
     @Override
     public void onCreatePlayerSubmit(String username) {
         gameViewModel.addPlayer(new Player(username));
@@ -97,7 +101,6 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         gamePagerCollectionAdapter.addFragment(playerFragment, username);
         viewPager.setCurrentItem(gamePagerCollectionAdapter.getItemCount());
     }
-
     @Override
     public void onCreatePlayerCanceled() {
         List<Player> existingPlayers = gameViewModel.getPlayers().getValue();
@@ -107,6 +110,16 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
             startActivity(intent);
         }
     }
+    @Override
+    public void onDeletePlayerAgreed() {
+        removePlayerPage(viewPager.getCurrentItem());
+    }
+
+    @Override
+    public void onDeletePlayerCanceled() {
+
+    }
+
 
     /*APPBAR OPTIONS MENU*/
     @Override
