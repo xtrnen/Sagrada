@@ -25,11 +25,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Model.GameBoard.Player;
+import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
 import ViewModel.GameViewModel;
 
 public class GameActivity extends AppCompatActivity implements CreatePlayerDialogFragment.ICreatePlayerDialogListener, DeletePlayerDialogFragment.IDeletePlayerDialogListener {
     static final int REQUEST_SLOTS = 1;
+    static final int REQUEST_DICES = 2;
     GamePagerCollectionAdapter gamePagerCollectionAdapter;
     GameViewModel gameViewModel;
     ViewPager2 viewPager;
@@ -41,6 +43,9 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == REQUEST_SLOTS){
             ArrayList<Slot> slots = (ArrayList<Slot>)data.getSerializableExtra("Slots");
+        }
+        if(requestCode == REQUEST_DICES){
+            ArrayList<Dice> dices = (ArrayList<Dice>)data.getSerializableExtra("Dices");
         }
     }
 
