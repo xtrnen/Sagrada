@@ -83,6 +83,10 @@ jobjectArray BuildSlotsOutput(JNIEnv *env, vector<Slot> slots)
         __android_log_print(ANDROID_LOG_ERROR, "BuildSlotsOutput", "Cannot create init method!");
     }
 
+    if(slots.empty()){
+        return jSlotArray;
+    }
+
     for(int i = 0; i < slots.size(); i++){
         jstring slotInfo = env->NewStringUTF(slots[i].RetStr().c_str());
         jobject slot = env->NewObject(jSlot, jSlotInit, slotInfo, slots[i].row, slots[i].col);

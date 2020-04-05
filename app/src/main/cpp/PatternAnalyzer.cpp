@@ -96,9 +96,11 @@ public:
     vector<Mat> CreatePatternGrid()
     {
         //PrepGrayImg
+        __android_log_print(ANDROID_LOG_INFO, "MSG", "Prep Img");
         Mat gray = PrepGrayImg();
 
         //FindControlPoint
+        __android_log_print(ANDROID_LOG_INFO, "MSG", "Control Point");
         this->patternImg.copyTo(this->tmp);
         Point controlPoint = DetectControlPoint(gray);
         this->controlPoint = controlPoint;
@@ -112,13 +114,13 @@ public:
         //Find control Point
         controlPoint.x += oft;
         Rect rect = Rect(Point(0,0), controlPoint);
-
+        __android_log_print(ANDROID_LOG_INFO, "MSG", "Rects");
         //Find color slots & detect contours
         vector<Rect> boxes;
         boxes = ApplyColorMasks(this->patternImg(rect));
 
         this->refOffset = DetectRectOffset(boxes);
-
+        __android_log_print(ANDROID_LOG_INFO, "MSG", "Split");
         //SplitImg
         vector<Rect> matrixRect = RectPatternGrid(4, 5, controlPoint, boxes);
 
@@ -128,6 +130,7 @@ public:
         }
 
         return SplitImageToPattern(4, 5, matrixRect, this->patternImg);
+        return vector<Mat>();
     }
 
     void GetCardPattern(vector<Mat> _splittedImg)
@@ -232,7 +235,6 @@ private:
         Mat grayImg;
         //Mat tmp;
         threshold(_grayImg, grayImg, 100, 255, THRESH_BINARY);
-
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
 
@@ -253,11 +255,17 @@ private:
             double cArea = radius * radius * 3.14;
             double areaOffset = area * 0.5;
 
+            //__android_log_print(ANDROID_LOG_INFO, "DDD", "%f || %f", area, cArea);
+
             if(area > 500.0 && cArea >= area && cArea <= area + areaOffset){
                 //__android_log_print(ANDROID_LOG_INFO, "DDD", "%f || %f", area, cArea);
                 //circle(this->tmp, center, (int)radius, Scalar(0,255,0), 3);
                 centers.push_back(Point((int)center.x, (int)center.y));
             }
+        }
+
+        if(centers.empty()){
+            __android_log_print(ANDROID_LOG_ERROR, "CPoint", "Centers not found");
         }
 
         Point bottom = Point(0,0);

@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        Bitmap bitmap = convMatToBitmap(img);
+        /*Bitmap bitmap = convMatToBitmap(img);
         Matrix matrix = new Matrix();
         matrix.postRotate(90);
         Bitmap bit = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         //Slot[] slots = imgProcessor.PatternDetector(retImg.getNativeObjAddr());
         Dice[] dices = imgProcessor.DiceDetector(retImg.getNativeObjAddr());
 
-        /*if(slots.length != 20){
+        if(slots.length != 20){
             Log.println(Log.ERROR, "Slot array", "Length doesn't fit");
         }
         if(dices.length == 0){
@@ -65,10 +65,10 @@ public class MainActivity extends AppCompatActivity {
 
         /*for(Slot slot : slots){
             Log.println(Log.INFO, "slot", slot.row + " | " + slot.col + " - " + slot.info);
-        }*/
+        }
         for(Dice dice : dices){
             Log.println(Log.INFO, "dice", dice.row + " | " + dice.col + " - " + dice.number + " | " + dice.color);
-        }
+        }*/
 
         imageView = (ImageView)findViewById(R.id.testDice);
         imageView.setImageBitmap(convMatToBitmap(retImg));

@@ -1,5 +1,6 @@
 package com.example.sagrada;
 
+import android.app.Instrumentation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
@@ -19,50 +21,53 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import Activities.CameraApi;
 import Model.GameBoard.Player;
+import Model.GameBoard.Structs.Slot;
 import ViewModel.GameViewModel;
 
 public class GameActivity extends AppCompatActivity implements CreatePlayerDialogFragment.ICreatePlayerDialogListener, DeletePlayerDialogFragment.IDeletePlayerDialogListener {
+    static final int REQUEST_SLOTS = 1;
     GamePagerCollectionAdapter gamePagerCollectionAdapter;
     GameViewModel gameViewModel;
     ViewPager2 viewPager;
     TabLayout tabLayout;
     //TODO: Dialog reacts to click anywhere with dismiss of dialog...
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == REQUEST_SLOTS){
+            ArrayList<Slot> slots = (ArrayList<Slot>)data.getSerializableExtra("Slots");
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.game_layout);
-
         /*Toolbar*/
         Toolbar toolbar = (Toolbar)findViewById(R.id.GameMenuToolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         /*ImageButtons in ActionBar*/
-        ImageButton deletePlayerButton = (ImageButton) findViewById(R.id.playerToolbarDeleteButton);
-        ImageButton playerImageInfoButton = (ImageButton) findViewById(R.id.playerToolbarInfoButton);
-        ImageButton playerCameraButton = (ImageButton) findViewById(R.id.playerToolbarCameraButton);
+        ImageButton deletePlayerButton = findViewById(R.id.playerToolbarDeleteButton);
+        ImageButton playerImageInfoButton = findViewById(R.id.playerToolbarInfoButton);
+        ImageButton playerCameraButton = findViewById(R.id.playerToolbarCameraButton);
         //set onClick actions
-        deletePlayerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.println(Log.INFO, "MenuOption", "Delete clicked");
-                ShowDeletePlayerDialog();
-            }
+        deletePlayerButton.setOnClickListener(v -> {
+            Log.println(Log.INFO, "MenuOption", "Delete clicked");
+            ShowDeletePlayerDialog();
         });
-        playerImageInfoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.println(Log.INFO, "Toolbar", "Player info");
-            }
-        });
-        playerCameraButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.println(Log.INFO, "MenuOption", "Take picture");
-            }
+        playerImageInfoButton.setOnClickListener(v -> Log.println(Log.INFO, "Toolbar", "Player info"));
+        playerCameraButton.setOnClickListener(v -> {
+            Log.println(Log.INFO, "MenuOption", "Take picture");
+            Intent cameraIntent = new Intent(getApplicationContext(), CameraApi.class);
+            startActivityForResult(cameraIntent, REQUEST_SLOTS);
         });
 
         /*Show Creation Dialog so we create first user*/
@@ -72,12 +77,9 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         gamePagerCollectionAdapter = new GamePagerCollectionAdapter(this);
         viewPager.setAdapter(gamePagerCollectionAdapter);
-        new TabLayoutMediator(tabLayout, viewPager, new TabLayoutMediator.TabConfigurationStrategy() {
-            @Override
-            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-                String title = gamePagerCollectionAdapter.getTitle(position);
-                tab.setText(title);
-            }
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            String title = gamePagerCollectionAdapter.getTitle(position);
+            tab.setText(title);
         }).attach();
 
         gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
@@ -114,17 +116,13 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
     public void onDeletePlayerAgreed() {
         removePlayerPage(viewPager.getCurrentItem());
     }
-
     @Override
-    public void onDeletePlayerCanceled() {
-
-    }
+    public void onDeletePlayerCanceled() {}
 
 
     /*APPBAR OPTIONS MENU*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        //return super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.game_menu_layout, menu);
 
