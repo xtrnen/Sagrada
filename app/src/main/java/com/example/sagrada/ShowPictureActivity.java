@@ -3,6 +3,7 @@ package com.example.sagrada;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -47,10 +48,10 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
                 Utils.bitmapToMat(bitmap, mat);
                 ImageProcessor imageProcessor = new ImageProcessor(mat, ShowPictureActivity.this);
                 Slot[] slots = imageProcessor.PatternDetector(mat.getNativeObjAddr());
-                findViewById(R.id.LoadingPanelId).setVisibility(View.GONE);
                 for(Slot slot : slots){
                     Log.println(Log.INFO, "slot", slot.row + " | " + slot.col + " - " + slot.info);
                 }*/
+                findViewById(R.id.LoadingPanelId).setVisibility(View.GONE);
                 imageView.setImageBitmap(bitmap);
             });
         } catch (UnsupportedOperationException e){

@@ -24,7 +24,6 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import java.util.ArrayList;
 import java.util.List;
 
-import Activities.CameraApi;
 import Model.GameBoard.Player;
 import Model.GameBoard.Structs.Slot;
 import ViewModel.GameViewModel;
@@ -66,7 +65,7 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         playerImageInfoButton.setOnClickListener(v -> Log.println(Log.INFO, "Toolbar", "Player info"));
         playerCameraButton.setOnClickListener(v -> {
             Log.println(Log.INFO, "MenuOption", "Take picture");
-            Intent cameraIntent = new Intent(getApplicationContext(), CameraApi.class);
+            Intent cameraIntent = new Intent(getApplicationContext(), CamActivity.class);
             startActivityForResult(cameraIntent, REQUEST_SLOTS);
         });
 

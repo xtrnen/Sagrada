@@ -16,7 +16,6 @@ import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 import java.io.IOException;
 
-import Activities.CameraApi;
 import Model.GameBoard.GameBoard;
 import Model.GameBoard.Structs.Slot;
 import Model.GameBoard.Structs.SlotInfo;
