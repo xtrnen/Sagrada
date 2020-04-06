@@ -15,4 +15,26 @@
     <string name="deletePlayerDialogMsg">Do you want to remove this player?</string>
     <string name="deletePlayerDialogPositiveButton">Yes</string>
     <string name="deletePlayerDialogNegativeButton">No</string>
+    
+    <!--String values of quest cards-->
+    <string-array name="personalQuestStrings">
+        <item>Ametyst</item>
+        <item>Tyrkys</item>
+        <item>Smaragd</item>
+        <item>Topaz</item>
+        <item>Rubín</item>
+    </string-array>
+    <string-array name="groupQuestStrings">
+        <item>Světlé odstíny</item>
+        <item>Střední odstíny</item>
+        <item>Tmavé odstíny</item>
+        <item>Barevné diagonály</item>
+        <item>Světlo a stín</item>
+        <item>Všechny barvy duhy</item>
+        <item>Pestrobarevné sloupce</item>
+        <item>Různorodé sloupce</item>
+        <item>Pestrobarevné řádky</item>
+        <item>Různorodé řádky</item>
+    </string-array>
+
 </resources>

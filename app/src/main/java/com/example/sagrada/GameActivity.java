@@ -41,12 +41,12 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == REQUEST_SLOTS){
+        /*if(requestCode == REQUEST_SLOTS){
             ArrayList<Slot> slots = (ArrayList<Slot>)data.getSerializableExtra("Slots");
         }
         if(requestCode == REQUEST_DICES){
             ArrayList<Dice> dices = (ArrayList<Dice>)data.getSerializableExtra("Dices");
-        }
+        }*/
     }
 
     @Override
@@ -60,18 +60,14 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
 
         /*ImageButtons in ActionBar*/
         ImageButton deletePlayerButton = findViewById(R.id.playerToolbarDeleteButton);
-        ImageButton playerImageInfoButton = findViewById(R.id.playerToolbarInfoButton);
-        ImageButton playerCameraButton = findViewById(R.id.playerToolbarCameraButton);
+        ImageButton createPlayerButton = findViewById(R.id.playerToolbarCreatePlayer);
         //set onClick actions
         deletePlayerButton.setOnClickListener(v -> {
             Log.println(Log.INFO, "MenuOption", "Delete clicked");
             ShowDeletePlayerDialog();
         });
-        playerImageInfoButton.setOnClickListener(v -> Log.println(Log.INFO, "Toolbar", "Player info"));
-        playerCameraButton.setOnClickListener(v -> {
-            Log.println(Log.INFO, "MenuOption", "Take picture");
-            Intent cameraIntent = new Intent(getApplicationContext(), CamActivity.class);
-            startActivityForResult(cameraIntent, REQUEST_SLOTS);
+        createPlayerButton.setOnClickListener(v -> {
+            ShowCreatePlayerDialog();
         });
 
         /*Show Creation Dialog so we create first user*/
@@ -136,17 +132,19 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.GameMenuNewUserItem:
-                ShowCreatePlayerDialog();
+            case R.id.GameMenuHelp:
+                Log.println(Log.INFO, "MenuOption", "Help msg!");
+                //TODO: Dialog or activity with guidelines
                 return true;
             case R.id.GameMenuQuitGame:
                 Log.println(Log.INFO, "MenuOption", "Quit clicked");
                 Intent intent = new Intent(GameActivity.this, MenuActivity.class);
                 this.finish();
                 startActivity(intent);
-            case R.id.GameMenuCurrentUserDelete:
-                Log.println(Log.INFO, "MenuOption", "Delete clicked");
-                removePlayerPage(viewPager.getCurrentItem());
+            case R.id.GameMenuSettings:
+                Log.println(Log.INFO, "MenuOption", "Settings clicked");
+                //TODO: Go to settings activity
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
