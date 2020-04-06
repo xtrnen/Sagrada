@@ -46,5 +46,5 @@ public class DeletePlayerDialogFragment extends DialogFragment {
             }
         });
         return builder.create();
-    }
+}
 }

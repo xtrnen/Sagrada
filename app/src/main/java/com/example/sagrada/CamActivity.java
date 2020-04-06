@@ -3,6 +3,7 @@ package com.example.sagrada;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +11,7 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.otaliastudios.cameraview.CameraException;
 import com.otaliastudios.cameraview.CameraListener;
@@ -17,9 +19,15 @@ import com.otaliastudios.cameraview.CameraOptions;
 import com.otaliastudios.cameraview.CameraView;
 import com.otaliastudios.cameraview.PictureResult;
 
+import java.util.ArrayList;
+
+import Model.GameBoard.Structs.Slot;
+
 public class CamActivity extends AppCompatActivity implements View.OnClickListener {
     private Button takePictureBtn;
     private CameraView cameraView;
+    static final int REQUEST_SLOTS = 1;
+    static final int REQUEST_DICES = 2;
     private Bitmap resultBitmap;
 
     CameraListener cameraListener = new CameraListener() {
@@ -63,6 +71,18 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cam_layout);
+        Toolbar toolbar = (Toolbar)findViewById(R.id.CameraToolbarID);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> {
+            Intent data = new Intent();
+            ArrayList<Slot> slots = new ArrayList<Slot>();
+            slots.add(new Slot("RED", 1,1));
+            data.putParcelableArrayListExtra("Slots", slots);
+            setResult(REQUEST_SLOTS, data);
+            finish();
+        });
+
         cameraView = (CameraView) findViewById(R.id.camViewID);
         takePictureBtn = (Button) findViewById(R.id.takePicBtn);
 

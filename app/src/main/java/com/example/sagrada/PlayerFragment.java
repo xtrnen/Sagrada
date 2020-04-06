@@ -1,5 +1,6 @@
 package com.example.sagrada;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,10 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.example.sagrada.databinding.PlayerLayoutBinding;
@@ -45,13 +46,16 @@ public class PlayerFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == REQUEST_SLOTS){
-            ArrayList<Slot> slots = (ArrayList<Slot>)data.getSerializableExtra("Slots");
+            assert data != null;
+            ArrayList<Slot> slots = data.getParcelableArrayListExtra("Slots");
+            assert slots != null;
             for (Slot slot : slots){
                 Log.d("SLOT", slot.infoType);
             }
         }
         if(requestCode == REQUEST_DICES){
-            ArrayList<Dice> dices = (ArrayList<Dice>)data.getSerializableExtra("Dices");
+            assert data != null;
+            ArrayList<Dice> dices = data.getParcelableArrayListExtra("Dices");
         }
     }
 
@@ -79,8 +83,9 @@ public class PlayerFragment extends Fragment {
         playerImageInfoButton.setOnClickListener(v -> Log.println(Log.INFO, "Toolbar", "Player info"));
         playerCameraButton.setOnClickListener(v -> {
             Log.println(Log.INFO, "MenuOption", "Take picture");
-            Intent cameraIntent = new Intent(getActivity(), CamActivity.class);
-            startActivityForResult(cameraIntent, REQUEST_SLOTS);
+            createCaptureModeDialog();
+            //Intent cameraIntent = new Intent(getActivity(), CamActivity.class);
+            //startActivityForResult(cameraIntent, REQUEST_SLOTS);
         });
         playerPointsButton.setOnClickListener(v -> {
             Log.println(Log.INFO, "PointsButton", "Points clicked");
@@ -90,5 +95,27 @@ public class PlayerFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+    }
+
+    /*Capture Mode dialog*/
+
+    private void createCaptureModeDialog(){
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
+        dialogBuilder.setMessage("Do you want to capture Pattern card or Dices?");
+        dialogBuilder.setNeutralButton("Cancel", (dialog, which) -> {
+            //Nothing
+        });
+        dialogBuilder.setNegativeButton("Pattern", (dialog, which) -> {
+           callCameraActivity(REQUEST_SLOTS);
+        });
+        dialogBuilder.setPositiveButton("Dices", (dialog, which) -> {
+           callCameraActivity(REQUEST_DICES);
+        });
+        dialogBuilder.show();
+    }
+
+    private void callCameraActivity(int requestCode){
+        Intent cameraIntent = new Intent(getActivity(), CamActivity.class);
+        startActivityForResult(cameraIntent, requestCode);
     }
 }
