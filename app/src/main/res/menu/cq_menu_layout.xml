@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--<item android:id="@+id/cqLightShadeID" android:title="Světlé odstíny"/>
+    <item android:id="@+id/cqMediumShadeID" android:title="Střední odstíny"/>
+    <item android:id="@+id/cqDarkShadeID" android:title="Tmavé odstíny"/>
+    <item android:id="@+id/cqColorDiagonalID" android:title="Barevné diagonály"/>
+    <item android:id="@+id/cqLightAndShadeID" android:title="Světlo a stín"/>
+    <item android:id="@+id/cqAllRainbowID" android:title="Všechny barvy duhy"/>
+    <item android:id="@+id/cqColorfulColID" android:title="Pestrobarevné sloupce"/>
+    <item android:id="@+id/cqOddColID" android:title="Různorodé sloupce"/>
+    <item android:id="@+id/cqColorfulRowID" android:title="Pestrobarevné řádky"/>
+    <item android:id="@+id/cqOddRowID" android:title="Různorodé řádky"/>-->
+</menu>

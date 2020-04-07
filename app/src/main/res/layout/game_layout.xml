@@ -17,6 +17,13 @@
                 android:weightSum="1"
                 android:gravity="end">
                 <ImageButton
+                    android:id="@+id/gameToolbarAddCQID"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layoutDirection="rtl"
+                    android:src="@android:drawable/ic_menu_my_calendar" />
+                <ImageButton
                     android:id="@+id/playerToolbarCreatePlayer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -13,14 +13,17 @@
         android:layout_height="match_parent">
 
         <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/playerNameID"
             app:layout_constraintTop_toTopOf="parent">
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
                 <ImageButton
                     android:id="@+id/playerToolbarCameraButton"
                     android:layout_width="wrap_content"
@@ -46,7 +49,7 @@
             android:id="@+id/playerNameID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="50dp"
             android:text="@{player.getName()}"
             android:textSize="40sp"
             android:textStyle="bold"
@@ -69,5 +72,67 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/playerNameID" />
 
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="20dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID">
+
+            <TextView
+                android:id="@+id/pqTextID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{player.personalQ}"
+                android:textSize="22sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID"
+                android:layout_weight="1"/>
+
+            <ImageButton
+                android:id="@+id/personalQuestBtnID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="pqPopupMenu"
+                android:src="@android:drawable/ic_menu_my_calendar"
+                app:layout_constraintStart_toEndOf="@+id/pqTextID"
+                app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+            <TextView
+                android:id="@+id/cqTextID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{player.commonQ}"
+                android:textSize="22sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID"
+                android:layout_weight="1"/>
+
+            <ImageButton
+                android:id="@+id/cqBtnID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_my_calendar"
+                app:layout_constraintStart_toEndOf="@+id/pqTextID"
+                app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID"
+                />
+        </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

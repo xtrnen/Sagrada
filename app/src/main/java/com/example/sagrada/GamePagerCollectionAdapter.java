@@ -11,14 +11,18 @@ import java.util.List;
 public class GamePagerCollectionAdapter extends FragmentStateAdapter {
     private List<Fragment> pages = new ArrayList<>();
     private List<CharSequence> pagesTitle = new ArrayList<>();
+    private int cq;
+    private int pq;
 
     public GamePagerCollectionAdapter(FragmentActivity fa){
         super(fa);
     }
 
-    public void addFragment(Fragment fragment, String title){
+    public void addFragment(Fragment fragment, String title, int _cq, int _pq){
         pages.add(fragment);
         pagesTitle.add(title);
+        cq = _cq;
+        pq = _pq;
         notifyDataSetChanged();
     }
 
@@ -31,7 +35,7 @@ public class GamePagerCollectionAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        return PlayerFragment.newInstance(position, pagesTitle.get(position).toString());
+        return PlayerFragment.newInstance(position, pagesTitle.get(position).toString(), cq, pq);
     }
 
     @Override

@@ -25,16 +25,16 @@
         <item>Rubín</item>
     </string-array>
     <string-array name="groupQuestStrings">
-        <item>Světlé odstíny</item>
-        <item>Střední odstíny</item>
-        <item>Tmavé odstíny</item>
-        <item>Barevné diagonály</item>
-        <item>Světlo a stín</item>
-        <item>Všechny barvy duhy</item>
         <item>Pestrobarevné sloupce</item>
         <item>Různorodé sloupce</item>
         <item>Pestrobarevné řádky</item>
         <item>Různorodé řádky</item>
+        <item>Světlé odstíny</item>
+        <item>Střední odstíny</item>
+        <item>Tmavé odstíny</item>
+        <item>Všechny barvy duhy</item>
+        <item>Barevné diagonály</item>
+        <item>Světlo a stín</item>
     </string-array>
 
 </resources>

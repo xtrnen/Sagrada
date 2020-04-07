@@ -8,7 +8,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,8 +33,6 @@ import Model.GameBoard.Structs.Slot;
 import ViewModel.GameViewModel;
 
 public class GameActivity extends AppCompatActivity implements CreatePlayerDialogFragment.ICreatePlayerDialogListener, DeletePlayerDialogFragment.IDeletePlayerDialogListener {
-    static final int REQUEST_SLOTS = 1;
-    static final int REQUEST_DICES = 2;
     GamePagerCollectionAdapter gamePagerCollectionAdapter;
     GameViewModel gameViewModel;
     ViewPager2 viewPager;
@@ -41,12 +42,6 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        /*if(requestCode == REQUEST_SLOTS){
-            ArrayList<Slot> slots = (ArrayList<Slot>)data.getSerializableExtra("Slots");
-        }
-        if(requestCode == REQUEST_DICES){
-            ArrayList<Dice> dices = (ArrayList<Dice>)data.getSerializableExtra("Dices");
-        }*/
     }
 
     @Override
@@ -54,20 +49,26 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.game_layout);
         /*Toolbar*/
-        Toolbar toolbar = (Toolbar)findViewById(R.id.GameMenuToolbar);
+        Toolbar toolbar = findViewById(R.id.GameMenuToolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         /*ImageButtons in ActionBar*/
         ImageButton deletePlayerButton = findViewById(R.id.playerToolbarDeleteButton);
         ImageButton createPlayerButton = findViewById(R.id.playerToolbarCreatePlayer);
+        ImageButton addCQButton = findViewById(R.id.gameToolbarAddCQID);
         //set onClick actions
-        deletePlayerButton.setOnClickListener(v -> {
-            Log.println(Log.INFO, "MenuOption", "Delete clicked");
-            ShowDeletePlayerDialog();
-        });
-        createPlayerButton.setOnClickListener(v -> {
-            ShowCreatePlayerDialog();
+        deletePlayerButton.setOnClickListener(v -> ShowDeletePlayerDialog());
+        createPlayerButton.setOnClickListener(v -> ShowCreatePlayerDialog());
+        addCQButton.setOnClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(this, v);
+            MenuInflater menuInflater = popupMenu.getMenuInflater();
+            menuInflater.inflate(R.menu.cq_menu_layout, popupMenu.getMenu());
+            popupMenu.setOnMenuItemClickListener(item -> {
+                Log.println(Log.INFO, "CQ ITEM", item.getTitle().toString());
+                return true;
+            });
+            popupMenu.show();
         });
 
         /*Show Creation Dialog so we create first user*/
@@ -87,7 +88,12 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
 
     /*Dialogs creation*/
     public void ShowCreatePlayerDialog(){
-        DialogFragment gameModeDialog = new CreatePlayerDialogFragment();
+        DialogFragment gameModeDialog;
+        if(gameViewModel == null){
+            gameModeDialog = new CreatePlayerDialogFragment(true);
+        } else {
+            gameModeDialog = new CreatePlayerDialogFragment(false);
+        }
         gameModeDialog.show(getSupportFragmentManager(), "CreatePlayerDialog");
     }
     public void ShowDeletePlayerDialog(){
@@ -97,10 +103,10 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
 
     /*Dialog interface functions implementation*/
     @Override
-    public void onCreatePlayerSubmit(String username) {
+    public void onCreatePlayerSubmit(String username, int cqIndex, int pqIndex) {
         gameViewModel.addPlayer(new Player(username));
         PlayerFragment playerFragment = new PlayerFragment();
-        gamePagerCollectionAdapter.addFragment(playerFragment, username);
+        gamePagerCollectionAdapter.addFragment(playerFragment, username, cqIndex, pqIndex);
         viewPager.setCurrentItem(gamePagerCollectionAdapter.getItemCount());
     }
     @Override
