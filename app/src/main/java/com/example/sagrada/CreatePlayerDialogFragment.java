@@ -85,7 +85,7 @@ public class CreatePlayerDialogFragment extends DialogFragment {
             addItemsToMenu(popupMenu.getMenu(), Arrays.asList(getResources().getStringArray(R.array.groupQuestStrings)));
             popupMenu.setOnMenuItemClickListener(item -> {
                 cqTextView.setText(item.getTitle());
-                cqIndex = item.getOrder();
+                cqIndex = item.getItemId();
                 return true;
             });
             popupMenu.show();

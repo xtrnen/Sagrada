@@ -82,9 +82,10 @@ public class PlayerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         PlayerLayoutBinding binding = PlayerLayoutBinding.inflate(inflater, container, false);
         player = new PlayerViewModel(getArguments().getString(FRAGMENT_NAME), getContext());
-        player.setCqIndex(getArguments().getInt(FRAGMENT_CQ));
+        GameActivity gameActivity = (GameActivity) getActivity();
         player.setPqIndex(getArguments().getInt(FRAGMENT_PQ));
         binding.setPlayer(player);
+        binding.setGame(gameActivity.gameViewModel);
         binding.setLifecycleOwner(this);
         return binding.getRoot();
     }
@@ -94,7 +95,7 @@ public class PlayerFragment extends Fragment {
         ImageButton playerImageInfoButton = view.findViewById(R.id.playerToolbarInfoButton);
         ImageButton playerCameraButton = view.findViewById(R.id.playerToolbarCameraButton);
         ImageButton playerPersonalQuestButton = view.findViewById(R.id.personalQuestBtnID);
-        ImageButton playerCommonQuestButton = view.findViewById(R.id.cqBtnID);
+        //ImageButton playerCommonQuestButton = view.findViewById(R.id.cqBtnID);
         Button playerPointsButton = view.findViewById(R.id.playerPointsBtnID);
         playerImageInfoButton.setOnClickListener(v -> Log.println(Log.INFO, "Toolbar", "Player info"));
         playerCameraButton.setOnClickListener(v -> createCaptureModeDialog());
@@ -114,7 +115,7 @@ public class PlayerFragment extends Fragment {
             });
             popupMenu.show();
         });
-        playerCommonQuestButton.setOnClickListener(v -> {
+        /*playerCommonQuestButton.setOnClickListener(v -> {
             PopupMenu popupMenu = new PopupMenu(getContext(), v);
             MenuInflater inflater = popupMenu.getMenuInflater();
             inflater.inflate(R.menu.cq_menu_layout, popupMenu.getMenu());
@@ -125,7 +126,7 @@ public class PlayerFragment extends Fragment {
                 return true;
             });
             popupMenu.show();
-        });
+        });*/
     }
 
     @Override

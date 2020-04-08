@@ -25,6 +25,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import Model.GameBoard.Player;
@@ -37,6 +38,7 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
     GameViewModel gameViewModel;
     ViewPager2 viewPager;
     TabLayout tabLayout;
+    public int cqFlag;
     //TODO: Dialog reacts to click anywhere with dismiss of dialog...
 
     @Override
@@ -53,6 +55,9 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
+        gameViewModel.addContext(this);
+
         /*ImageButtons in ActionBar*/
         ImageButton deletePlayerButton = findViewById(R.id.playerToolbarDeleteButton);
         ImageButton createPlayerButton = findViewById(R.id.playerToolbarCreatePlayer);
@@ -64,13 +69,14 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
             PopupMenu popupMenu = new PopupMenu(this, v);
             MenuInflater menuInflater = popupMenu.getMenuInflater();
             menuInflater.inflate(R.menu.cq_menu_layout, popupMenu.getMenu());
+            popupMenu.getMenu().clear();
+            addItemsToMenu(popupMenu.getMenu(), Arrays.asList(getResources().getStringArray(R.array.groupQuestStrings)));
             popupMenu.setOnMenuItemClickListener(item -> {
-                Log.println(Log.INFO, "CQ ITEM", item.getTitle().toString());
+                gameViewModel.addCommonQuest(item.getItemId());
                 return true;
             });
             popupMenu.show();
         });
-
         /*Show Creation Dialog so we create first user*/
         ShowCreatePlayerDialog();
 
@@ -82,14 +88,12 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
             String title = gamePagerCollectionAdapter.getTitle(position);
             tab.setText(title);
         }).attach();
-
-        gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
     }
 
     /*Dialogs creation*/
     public void ShowCreatePlayerDialog(){
         DialogFragment gameModeDialog;
-        if(gameViewModel == null){
+        if(gameViewModel.getPlayers().getValue() == null){
             gameModeDialog = new CreatePlayerDialogFragment(true);
         } else {
             gameModeDialog = new CreatePlayerDialogFragment(false);
@@ -106,7 +110,11 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
     public void onCreatePlayerSubmit(String username, int cqIndex, int pqIndex) {
         gameViewModel.addPlayer(new Player(username));
         PlayerFragment playerFragment = new PlayerFragment();
-        gamePagerCollectionAdapter.addFragment(playerFragment, username, cqIndex, pqIndex);
+        if(cqIndex != -42){
+            //cqFlag = cqIndex;
+            gameViewModel.addCommonQuest(cqIndex);
+        }
+        gamePagerCollectionAdapter.addFragment(playerFragment, username, cqFlag, pqIndex);
         viewPager.setCurrentItem(gamePagerCollectionAdapter.getItemCount());
     }
     @Override
@@ -161,5 +169,11 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         String currentUsername = gamePagerCollectionAdapter.getTitle(position);
         gamePagerCollectionAdapter.removeFragment(position);
         gameViewModel.removePlayer(currentUsername);
+    }
+
+    private void addItemsToMenu(Menu menu, List<String>titles){
+        for (int order = 0; order < titles.size(); order++){
+            menu.add(0,order, 0, titles.get(order));
+        }
     }
 }

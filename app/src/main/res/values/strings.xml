@@ -15,6 +15,8 @@
     <string name="deletePlayerDialogMsg">Do you want to remove this player?</string>
     <string name="deletePlayerDialogPositiveButton">Yes</string>
     <string name="deletePlayerDialogNegativeButton">No</string>
+    <string name="cqTitleString"><u>Společný úkol:</u></string>
+    <string name="pqTitleString"><u>Osobní úkol:</u></string>
     
     <!--String values of quest cards-->
     <string-array name="personalQuestStrings">
@@ -33,8 +35,8 @@
         <item>Střední odstíny</item>
         <item>Tmavé odstíny</item>
         <item>Všechny barvy duhy</item>
-        <item>Barevné diagonály</item>
         <item>Světlo a stín</item>
+        <item>Barevné diagonály</item>
     </string-array>
 
 </resources>

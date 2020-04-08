@@ -22,7 +22,6 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<ArrayList<Slot>> slots;
     private MutableLiveData<ArrayList<Dice>> dices;
     public MutableLiveData<String> personalQ;
-    public MutableLiveData<String> commonQ;
     private Context context;
 
     public PlayerViewModel(String username, Context _context){
@@ -38,12 +37,11 @@ public class PlayerViewModel extends ViewModel {
 
         cqIndex = new MutableLiveData<Integer>();
         pqIndex = new MutableLiveData<Integer>();
+        cqIndex.setValue(-42);
+        pqIndex.setValue(-42);
 
         personalQ = new MutableLiveData<String>();
         personalQ.setValue("Nevybráno");
-
-        commonQ = new MutableLiveData<String>();
-        commonQ.setValue("Nevybráno");
 
         context = _context;
     }
@@ -60,22 +58,15 @@ public class PlayerViewModel extends ViewModel {
     public int getSlotArraySize(){ return getSlots().getValue().size(); }
     public int getDiceArraySize(){ return getDices().getValue().size(); }
     public MutableLiveData<Integer> getPQIndex(){ return pqIndex; }
-    public MutableLiveData<Integer> getCQIndex(){ return cqIndex; }
 
     public void setPoints(Integer newPoints){ points.setValue(newPoints); }
     public void setName(String newName){ name.setValue(newName); }
     public void setSlots(ArrayList<Slot> newSlots){ slots.setValue(newSlots); }
     public void setDices(ArrayList<Dice> newDices){ dices.setValue(newDices); }
     public void setPqIndex(int index){ pqIndex.setValue(index); setPersonalQ();}
-    public void setCqIndex(int index){ cqIndex.setValue(index); setCommonQ();}
     private void setPersonalQ(){
-        if(pqIndex.getValue() == null) {
+        if(pqIndex.getValue() == -42) {
             return;
         }
         personalQ.setValue(Arrays.asList(context.getResources().getStringArray(R.array.personalQuestStrings)).get(pqIndex.getValue())); }
-    private void setCommonQ(){
-        if(cqIndex.getValue() == null){
-            return;
-        }
-        commonQ.setValue(Arrays.asList(context.getResources().getStringArray(R.array.groupQuestStrings)).get(cqIndex.getValue()));}
 }

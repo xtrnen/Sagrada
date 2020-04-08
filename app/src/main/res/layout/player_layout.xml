@@ -6,6 +6,9 @@
         <variable
             name="player"
             type="ViewModel.PlayerViewModel" />
+        <variable
+            name="game"
+            type="ViewModel.GameViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -72,37 +75,62 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/playerNameID" />
 
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID"
+            android:textSize="20sp"
+            android:text="@string/pqTitleString"/>
+
         <LinearLayout
             android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID">
+            app:layout_constraintTop_toBottomOf="@+id/textView2">
 
             <TextView
                 android:id="@+id/pqTextID"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="@{player.personalQ}"
                 android:textSize="22sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID"
-                android:layout_weight="1"/>
+                app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID" />
 
             <ImageButton
                 android:id="@+id/personalQuestBtnID"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="pqPopupMenu"
                 android:src="@android:drawable/ic_menu_my_calendar"
                 app:layout_constraintStart_toEndOf="@+id/pqTextID"
                 app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+            android:textSize="20sp"
+            android:text="@string/cqTitleString" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -113,26 +141,17 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+            app:layout_constraintTop_toBottomOf="@+id/textView3">
 
             <TextView
                 android:id="@+id/cqTextID"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@{player.commonQ}"
+                android:layout_weight="1"
+                android:text="@{game.cqString}"
                 android:textSize="22sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID"
-                android:layout_weight="1"/>
-
-            <ImageButton
-                android:id="@+id/cqBtnID"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_menu_my_calendar"
-                app:layout_constraintStart_toEndOf="@+id/pqTextID"
-                app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID"
-                />
+                app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
