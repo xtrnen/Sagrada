@@ -55,6 +55,10 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        toolbar.setNavigationOnClickListener(v -> {
+            onBackPressed();
+        });
+
         gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
         gameViewModel.addContext(this);
 

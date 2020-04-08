@@ -7,44 +7,61 @@
     android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:ignore="MissingConstraints"
-        android:orientation="vertical">
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:layout_gravity="center_horizontal"
-            android:id="@+id/LoadingPanelId"/>
-        <ImageView
-            android:id="@+id/imageViewID"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
+        <androidx.appcompat.widget.Toolbar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:adjustViewBounds="true"
-            android:keepScreenOn="true"/>
-        <androidx.constraintlayout.widget.ConstraintLayout
+            android:background="@android:color/holo_green_light"
+            android:id="@+id/PicturePreviewToolbarID">
+        </androidx.appcompat.widget.Toolbar>
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/confirmImgBtnID"
+            android:layout_height="0dp"
+            tools:ignore="MissingConstraints"
+            android:orientation="vertical"
+            android:layout_weight="1">
+            <ProgressBar
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="left"
-                android:text="Valid"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginStart="80dp"/>
-
-            <Button
-                android:id="@+id/declineImgBtnID"
-                android:layout_width="wrap_content"
+                android:indeterminate="true"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:id="@+id/LoadingPanelId"/>
+            <ImageView
+                android:id="@+id/imageViewID"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_gravity="center_horizontal"
+                android:adjustViewBounds="true"
+                android:keepScreenOn="true"
+                android:layout_weight="1"
+                tools:ignore="NestedWeights" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Invalid"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginEnd="80dp"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:layout_gravity="bottom"
+                android:orientation="horizontal"
+                android:layout_marginBottom="20dp">
+
+                <Button
+                    android:id="@+id/confirmImgBtnID"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:text="Valid"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginStart="80dp"
+                    tools:ignore="RtlHardcoded" />
+
+                <Button
+                    android:id="@+id/declineImgBtnID"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Invalid"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginEnd="80dp" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

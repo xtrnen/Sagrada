@@ -4,32 +4,43 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    <androidx.appcompat.widget.Toolbar
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/holo_green_light"
-        android:id="@+id/CameraToolbarID">
-    </androidx.appcompat.widget.Toolbar>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <androidx.appcompat.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/holo_green_light"
+            android:id="@+id/CameraToolbarID">
+        </androidx.appcompat.widget.Toolbar>
 
-    <com.otaliastudios.cameraview.CameraView
-        android:id="@+id/camViewID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:keepScreenOn="true"
-        android:layout_gravity="center"
-        android:soundEffectsEnabled="false"
-        app:cameraAudio="off"
-        app:cameraFacing="back"
-        app:cameraPreview="glSurface"
-        app:cameraEngine="camera1"
-        app:cameraMode="picture">
-    </com.otaliastudios.cameraview.CameraView>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <com.otaliastudios.cameraview.CameraView
+                android:id="@+id/camViewID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:keepScreenOn="true"
+                android:layout_gravity="center"
+                android:soundEffectsEnabled="false"
+                android:layout_weight="1"
+                app:cameraAudio="off"
+                app:cameraFacing="back"
+                app:cameraPreview="glSurface"
+                app:cameraEngine="camera1"
+                app:cameraMode="picture">
+            </com.otaliastudios.cameraview.CameraView>
 
-    <Button
-        android:id="@+id/takePicBtn"
-        android:layout_width="130dp"
-        android:layout_height="70dp"
-        android:layout_gravity="bottom|center" />
-
+            <Button
+                android:id="@+id/takePicBtn"
+                android:layout_width="130dp"
+                android:layout_height="70dp"
+                android:layout_gravity="bottom|center"
+                android:text="Take picture"/>
+        </LinearLayout>
+    </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

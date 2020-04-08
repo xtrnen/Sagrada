@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.otaliastudios.cameraview.PictureResult;
 import com.otaliastudios.cameraview.size.Size;
@@ -31,6 +32,15 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.picture_preview_activity);
+
+        Toolbar toolbar = findViewById(R.id.PicturePreviewToolbarID);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        toolbar.setNavigationOnClickListener(v -> {
+            onBackPressed();
+        });
+
         System.loadLibrary("native-lib");
         final PictureResult result = picture;
         if(result == null){

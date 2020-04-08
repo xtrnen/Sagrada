@@ -135,7 +135,7 @@ public class CreatePlayerDialogFragment extends DialogFragment {
         return builder.create();
     }
 
-    boolean usernameIsEmpty(String username){
+    private boolean usernameIsEmpty(String username){
             return (username.trim().isEmpty() || username.equals(""));
     }
 

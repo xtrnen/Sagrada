@@ -75,12 +75,13 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> {
-            Intent data = new Intent();
+            /*Intent data = new Intent();
             ArrayList<Slot> slots = new ArrayList<Slot>();
             slots.add(new Slot("RED", 1,1));
             data.putParcelableArrayListExtra("Slots", slots);
             setResult(REQUEST_SLOTS, data);
-            finish();
+            finish();*/
+            onBackPressed();
         });
 
         cameraView = (CameraView) findViewById(R.id.camViewID);
