@@ -2,9 +2,8 @@ package com.example.sagrada;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -24,11 +23,9 @@ import java.util.ArrayList;
 import Model.GameBoard.Structs.Slot;
 
 public class CamActivity extends AppCompatActivity implements View.OnClickListener {
-    private Button takePictureBtn;
     private CameraView cameraView;
-    static final int REQUEST_SLOTS = 1;
-    static final int REQUEST_DICES = 2;
-    private Bitmap resultBitmap;
+    public static int VALID_PREVIEW = 10;
+    private int requestC;
 
     CameraListener cameraListener = new CameraListener() {
         @Override
@@ -51,7 +48,8 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
             super.onPictureTaken(result);
             ShowPictureActivity.setPictureResult(result);
             Intent intent = new Intent(CamActivity.this, ShowPictureActivity.class);
-            startActivity(intent);
+            intent.putExtra("Data", requestC);
+            startActivityForResult(intent, VALID_PREVIEW);
         }
 
         @Override
@@ -71,7 +69,11 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cam_layout);
-        Toolbar toolbar = (Toolbar)findViewById(R.id.CameraToolbarID);
+        Toolbar toolbar = findViewById(R.id.CameraToolbarID);
+        requestC = getIntent().getIntExtra("Data", 0);
+        if(requestC == 0){
+            finish();
+        }
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> {
@@ -84,8 +86,8 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
             onBackPressed();
         });
 
-        cameraView = (CameraView) findViewById(R.id.camViewID);
-        takePictureBtn = (Button) findViewById(R.id.takePicBtn);
+        cameraView = findViewById(R.id.camViewID);
+        Button takePictureBtn = findViewById(R.id.takePicBtn);
 
         cameraView.setLifecycleOwner(this);
         cameraView.addCameraListener(cameraListener);
@@ -107,6 +109,23 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         }
         if(valid && !cameraView.isOpened()){
             cameraView.open();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == VALID_PREVIEW){
+            Intent retData = new Intent();
+            if(requestC == GameActivity.REQUEST_SLOTS){
+                retData.putParcelableArrayListExtra("slots", data.getParcelableArrayListExtra("slots"));
+            }
+            if(requestC == GameActivity.REQUEST_DICES){
+                retData.putParcelableArrayListExtra("dices", data.getParcelableArrayListExtra("dices"));
+            }
+
+            setResult(requestC, retData);
+            finish();
         }
     }
 }

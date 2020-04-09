@@ -1,12 +1,16 @@
 package com.example.sagrada;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -17,12 +21,15 @@ import com.otaliastudios.cameraview.size.Size;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
+import java.util.ArrayList;
+
 import Model.GameBoard.Structs.Slot;
 import Model.ImageProcessor;
 
 public class ShowPictureActivity extends AppCompatActivity implements InvalidDetectionDialogFragment.IDetectionFailedDialogListener {
     private static PictureResult picture;
     private ImageProcessor imageProcessor;
+    private int requestCode;
 
     public static void setPictureResult(@Nullable PictureResult pictureResult){
         picture = pictureResult;
@@ -32,6 +39,8 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.picture_preview_activity);
+
+        requestCode = getIntent().getIntExtra("Data", 0);
 
         Toolbar toolbar = findViewById(R.id.PicturePreviewToolbarID);
         setSupportActionBar(toolbar);
@@ -47,6 +56,24 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
             finish();
             return;
         }
+        Button validButton = findViewById(R.id.confirmImgBtnID);
+        Button invalidButton = findViewById(R.id.declineImgBtnID);
+        validButton.setOnClickListener(v -> {
+            Intent data = new Intent();
+            ArrayList<Slot> slots = new ArrayList<Slot>();
+            slots.add(new Slot("RED", 1,1));
+            if(requestCode == GameActivity.REQUEST_DICES){
+                data.putParcelableArrayListExtra("dices", slots);
+            }
+            if(requestCode == GameActivity.REQUEST_SLOTS){
+                data.putParcelableArrayListExtra("slots", slots);
+            }
+            setResult(CamActivity.VALID_PREVIEW, data);
+            finish();
+        });
+        invalidButton.setOnClickListener(b -> {
+
+        });
         imageProcessor = new ImageProcessor();
         final ImageView imageView = findViewById(R.id.imageViewID);
         try {
@@ -97,5 +124,7 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
     @Override
     public void onCancel() {
         //TODO: Return to GameActivity
+        onBackPressed();
     }
+
 }

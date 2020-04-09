@@ -1,23 +1,20 @@
 package com.example.sagrada;
 
-import android.app.Instrumentation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -33,12 +30,13 @@ import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
 import ViewModel.GameViewModel;
 
-public class GameActivity extends AppCompatActivity implements CreatePlayerDialogFragment.ICreatePlayerDialogListener, DeletePlayerDialogFragment.IDeletePlayerDialogListener {
+public class GameActivity extends AppCompatActivity implements CreatePlayerDialogFragment.ICreatePlayerDialogListener, DeletePlayerDialogFragment.IDeletePlayerDialogListener, IPlayerPointsCallback {
     GamePagerCollectionAdapter gamePagerCollectionAdapter;
     GameViewModel gameViewModel;
     ViewPager2 viewPager;
     TabLayout tabLayout;
-    public int cqFlag;
+    public static int REQUEST_SLOTS = 1;
+    public static int REQUEST_DICES = 2;
     //TODO: Dialog reacts to click anywhere with dismiss of dialog...
 
     @Override
@@ -84,8 +82,8 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         /*Show Creation Dialog so we create first user*/
         ShowCreatePlayerDialog();
 
-        viewPager = (ViewPager2) findViewById(R.id.GamePager);
-        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        viewPager = findViewById(R.id.GamePager);
+        tabLayout = findViewById(R.id.tab_layout);
         gamePagerCollectionAdapter = new GamePagerCollectionAdapter(this);
         viewPager.setAdapter(gamePagerCollectionAdapter);
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
@@ -115,11 +113,11 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         gameViewModel.addPlayer(new Player(username));
         PlayerFragment playerFragment = new PlayerFragment();
         if(cqIndex != -42){
-            //cqFlag = cqIndex;
             gameViewModel.addCommonQuest(cqIndex);
         }
-        gamePagerCollectionAdapter.addFragment(playerFragment, username, cqFlag, pqIndex);
+        gamePagerCollectionAdapter.addFragment(playerFragment, username, pqIndex);
         viewPager.setCurrentItem(gamePagerCollectionAdapter.getItemCount());
+        gameViewModel.output();
     }
     @Override
     public void onCreatePlayerCanceled() {
@@ -179,5 +177,12 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         for (int order = 0; order < titles.size(); order++){
             menu.add(0,order, 0, titles.get(order));
         }
+    }
+
+    @Override
+    public int callbackPoints(ArrayList<Slot> slots, ArrayList<Dice> dices) {
+        //TODO: GameBoard calculation
+
+        return 0;
     }
 }

@@ -38,6 +38,7 @@ public class GameViewModel extends ViewModel {
         }
         return commonQuest;
     }
+    public int getPlayersCount(){ return players.getValue().size(); }
 
     public void addPlayer(Player player){
         List<Player> currentPlayers = players.getValue();
@@ -85,5 +86,13 @@ public class GameViewModel extends ViewModel {
             return "Nevybráno";
         }
         return Arrays.asList(context.getResources().getStringArray(R.array.groupQuestStrings)).get(commonQuest.getValue());
+    }
+
+    public void output(){
+        if(players.getValue() != null){
+            for(Player player : players.getValue()){
+                Log.println(Log.INFO, "HOSE", Integer.toString(player.points));
+            }
+        }
     }
 }

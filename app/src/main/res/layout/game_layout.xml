@@ -17,24 +17,28 @@
                 android:weightSum="1"
                 android:gravity="end">
                 <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/gameToolbarCalculateID"
+                    android:src="@android:drawable/ic_lock_lock"
+                    android:layoutDirection="rtl"
+                    android:visibility="invisible"/>
+                <ImageButton
                     android:id="@+id/gameToolbarAddCQID"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
                     android:layoutDirection="rtl"
                     android:src="@android:drawable/ic_menu_my_calendar" />
                 <ImageButton
                     android:id="@+id/playerToolbarCreatePlayer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
                     android:layoutDirection="rtl"
                     android:src="@android:drawable/ic_menu_add" />
                 <ImageButton
                     android:id="@+id/playerToolbarDeleteButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
                     android:layoutDirection="rtl"
                     android:src="@android:drawable/ic_menu_delete" />
             </LinearLayout>

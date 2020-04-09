@@ -17,6 +17,7 @@
     <string name="deletePlayerDialogNegativeButton">No</string>
     <string name="cqTitleString"><u>Společný úkol:</u></string>
     <string name="pqTitleString"><u>Osobní úkol:</u></string>
+    <string name="craftsmanTitleString"><u>Kameny řemeslníků</u></string>
     
     <!--String values of quest cards-->
     <string-array name="personalQuestStrings">

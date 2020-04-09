@@ -33,8 +33,8 @@ public class CreatePlayerDialogFragment extends DialogFragment {
     private int pqIndex;
 
     public interface ICreatePlayerDialogListener{
-        public void onCreatePlayerSubmit(String username, int cqIndex, int pqIndex);
-        public void onCreatePlayerCanceled();
+        void onCreatePlayerSubmit(String username, int cqIndex, int pqIndex);
+        void onCreatePlayerCanceled();
     }
     //TODO: On empty username string don't close dialog
 

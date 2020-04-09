@@ -22,6 +22,7 @@ public class PlayerViewModel extends ViewModel {
     private MutableLiveData<ArrayList<Slot>> slots;
     private MutableLiveData<ArrayList<Dice>> dices;
     public MutableLiveData<String> personalQ;
+    public MutableLiveData<Integer> craftsmanPoints;
     private Context context;
 
     public PlayerViewModel(String username, Context _context){
@@ -43,6 +44,8 @@ public class PlayerViewModel extends ViewModel {
         personalQ = new MutableLiveData<String>();
         personalQ.setValue("Nevybráno");
 
+        craftsmanPoints = new MutableLiveData<Integer>();
+
         context = _context;
     }
 
@@ -53,10 +56,18 @@ public class PlayerViewModel extends ViewModel {
         return points.getValue();
     }
     public String getPointsString() { return "Points:" + getPoints().toString(); }
-    public MutableLiveData<ArrayList<Slot>> getSlots(){ return slots; }
-    public MutableLiveData<ArrayList<Dice>> getDices(){ return dices; }
-    public int getSlotArraySize(){ return getSlots().getValue().size(); }
-    public int getDiceArraySize(){ return getDices().getValue().size(); }
+    public MutableLiveData<ArrayList<Slot>> getSlots(){
+        if(slots.getValue() == null){
+            slots.setValue(new ArrayList<Slot>());
+        }
+        return slots;
+    }
+    public MutableLiveData<ArrayList<Dice>> getDices(){
+        if(dices.getValue() == null){
+            dices.setValue(new ArrayList<Dice>());
+        }
+        return dices;
+    }
     public MutableLiveData<Integer> getPQIndex(){ return pqIndex; }
 
     public void setPoints(Integer newPoints){ points.setValue(newPoints); }
@@ -68,5 +79,22 @@ public class PlayerViewModel extends ViewModel {
         if(pqIndex.getValue() == -42) {
             return;
         }
-        personalQ.setValue(Arrays.asList(context.getResources().getStringArray(R.array.personalQuestStrings)).get(pqIndex.getValue())); }
+        personalQ.setValue(Arrays.asList(context.getResources().getStringArray(R.array.personalQuestStrings)).get(pqIndex.getValue()));
+    }
+    public boolean isPlayerSet(){ return isDiceSet() && isSlotSet() && isCraftsmanSet() && areCardsSet(); }
+    public void setCraftsmanPoints(int points){
+        craftsmanPoints.setValue(points);
+    }
+    public MutableLiveData<Integer> getCraftsman(){
+        if(craftsmanPoints.getValue() == null){
+            craftsmanPoints.setValue(0);
+        }
+        return craftsmanPoints;
+    }
+
+    /*CHECK PLAYER STATS*/
+    private boolean isDiceSet(){ return dices.getValue() != null && dices.getValue().size() > 0; }
+    private boolean isSlotSet(){ return slots.getValue() != null && slots.getValue().size() > 0; }
+    private boolean isCraftsmanSet(){ return craftsmanPoints.getValue() != null && craftsmanPoints.getValue() > 0; }
+    private boolean areCardsSet(){ return (cqIndex.getValue() != null && pqIndex.getValue() != null); }
 }
