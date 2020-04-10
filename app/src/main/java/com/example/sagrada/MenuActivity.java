@@ -11,6 +11,8 @@ public class MenuActivity extends AppCompatActivity {
     private Button startGameButton;
     private Button settingsButton;
     private Button quitAppButton;
+    public final static int GAME_ROWS = 4;
+    public final static int GAME_COLS = 5;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -455,7 +455,19 @@ public class Quest {
         return (count == prefSize);
     }
 
-    public int RunEvaluation(Dice[][] dices)
+    private int emptySpacePoints(Dice[][] dices){
+        int negativePoints = 0;
+        for (Dice[] row: dices) {
+            for(Dice dice: row){
+                if(dice.color.equals("NONE")){
+                    negativePoints--;
+                }
+            }
+        }
+        return negativePoints;
+    }
+
+    public int RunEvaluation(Dice[][] dices, int craftsmanPoints)
     {
         int points = 0;
 
@@ -465,6 +477,9 @@ public class Quest {
         if(commonQCalculator != null){
             points += commonQCalculator.Calculate(dices);
         }
+
+        points += emptySpacePoints(dices);
+        points += craftsmanPoints;
 
         return points;
     }

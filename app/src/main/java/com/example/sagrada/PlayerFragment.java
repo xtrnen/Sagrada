@@ -1,21 +1,18 @@
 package com.example.sagrada;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,9 +27,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import Model.GameBoard.Player;
 import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
+import Model.Points.Quests.CQ_TYPES;
+import Model.Points.Quests.PQ_TYPES;
 import ViewModel.GameViewModel;
 import ViewModel.PlayerViewModel;
 
@@ -43,6 +41,7 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
     private static final String FRAGMENT_PQ = "PQ";
     private Integer counter;
     private Button playerPointsButton;
+    private GameViewModel gameViewModel;
     IPlayerPointsCallback pointsCallback;
 
     public PlayerFragment(){}
@@ -90,6 +89,7 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
         if(getArguments() != null){
             counter = getArguments().getInt(FRAGMENT_POSITION);
         }
+        gameViewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
             if(player.isPlayerSet()){
                 //pointsCallback.callbackPoints(player.getSlots().getValue(), player.getDices().getValue());
                 if(isOnlyPlayer()){
-                    //TODO: Calculate Points
+                    calculateThis();
                 } else {
                     createCalculationDialog();
                 }
@@ -172,10 +172,8 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
 
         dialog.setNeutralButton("Zrušit", (dialogV, which) -> {});
         dialog.setPositiveButton("Potvrdit", (dialogV, which) -> {
-            ArrayList<Slot> slots = new ArrayList<Slot>();
-            ArrayList<Dice> dices = new ArrayList<Dice>();
-            slots.add(new Slot("RED", 1,1));
-            dices.add(new Dice("RED", 5, 1,1));
+            ArrayList<Slot> slots = testSlots();
+            ArrayList<Dice> dices = testDices();
             player.setSlots(slots);
             player.setDices(dices);
             player.setCraftsmanPoints(Integer.parseInt(editText.getText().toString()));
@@ -188,7 +186,7 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
         builder.setMessage("Chcete vyhodnotit body pro všechny hráče, nebo pouze aktuálního hráče?");
         builder.setNeutralButton("Zrušit", (dialog, which) -> {});
         builder.setPositiveButton("Aktuálního hráče", (dialog, which) -> {
-            //TODO: Calculate Points
+            calculateThis();
         });
         builder.setNegativeButton("Všechny hráče", (dialog, which) -> {
             //TODO: Send mesage to GameActivity to Calculate game!
@@ -263,7 +261,61 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
 
     private void playerReady(){ playerPointsButton.setBackgroundResource(R.drawable.points_btn_background_green);}
     private boolean isOnlyPlayer(){
-        GameViewModel gameViewModel = new ViewModelProvider(requireActivity()).get(GameViewModel.class);
         return gameViewModel.getPlayersCount() == 1;
     }
+    private void calculateThis(){
+        ArrayList<Dice> dicesArray = player.getDices().getValue();
+        ArrayList<Slot> slotsArray = player.getSlots().getValue();
+        gameViewModel.gameBoard.setDiceArray(dicesArray.toArray(new Dice[dicesArray.size()]));
+        gameViewModel.gameBoard.setSlotArray(slotsArray.toArray(new Slot[slotsArray.size()]));
+        gameViewModel.gameBoard.assignToRuleHandler();
+        int points = 0;
+        if(gameViewModel.gameBoard.ruleCheck()){
+            points = gameViewModel.gameBoard.Evaluation(PQ_TYPES.values()[player.getPQIndex().getValue()], CQ_TYPES.values()[gameViewModel.getCommonQuest().getValue()], player.getCraftsman().getValue());
+        } else {
+            playerPointsButton.setBackgroundResource(R.drawable.points_btn_background_red);
+        }
+        player.setPoints(points);
+        playerPointsButton.setText("Body: " + points);
+    }
+    private ArrayList<Dice> testDices(){
+        ArrayList<Dice> array = new ArrayList<Dice>();
+
+        array.add(new Dice("GREEN", 6, 0,2));
+        array.add(new Dice("BLUE", 2, 1,2));
+        array.add(new Dice("YELLOW", 3, 2,2));
+        array.add(new Dice("RED", 1, 3,2));
+
+        return array;
+    }
+    private ArrayList<Slot> testSlots(){
+        ArrayList<Slot> array = new ArrayList<Slot>();
+
+        array.add(new Slot("WHITE",0,0));
+        array.add(new Slot("WHITE", 0,1));
+        array.add(new Slot("SIX", 0,2));
+        array.add(new Slot("WHITE",0 ,3));
+        array.add(new Slot("WHITE", 0,4));
+
+        array.add(new Slot("WHITE", 1,0));
+        array.add(new Slot("FIVE", 1,1));
+        array.add(new Slot("BLUE", 1,2));
+        array.add(new Slot("FOUR", 1,3));
+        array.add(new Slot("WHITE", 1,4));
+
+        array.add(new Slot("THREE", 2,0));
+        array.add(new Slot("GREEN", 2,1));
+        array.add(new Slot("YELLOW", 2,2));
+        array.add(new Slot("VIOLET", 2,3));
+        array.add(new Slot("TWO", 2,4));
+
+        array.add(new Slot("ONE", 3,0));
+        array.add(new Slot("FOUR", 3,1));
+        array.add(new Slot("RED", 3,2));
+        array.add(new Slot("FIVE", 3,3));
+        array.add(new Slot("THREE", 3,4));
+
+        return array;
+    }
+    //TODO: Dialog pro potvrzení jedné ze dvou karet pro porušení pravidla "Rydlo na eglomisé - lze porušit barvu políčka", "Brusný papír - lze porušit číslo pole"
 }

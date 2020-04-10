@@ -12,11 +12,10 @@ import java.util.Arrays;
 
 import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
-import Model.Points.Quests.PQ_TYPES;
 
 public class PlayerViewModel extends ViewModel {
     private MutableLiveData<String> name;
-    private MutableLiveData<Integer> points;
+    public MutableLiveData<Integer> points;
     private MutableLiveData<Integer> cqIndex;
     private MutableLiveData<Integer> pqIndex;
     private MutableLiveData<ArrayList<Slot>> slots;
@@ -55,7 +54,6 @@ public class PlayerViewModel extends ViewModel {
     public Integer getPoints(){
         return points.getValue();
     }
-    public String getPointsString() { return "Points:" + getPoints().toString(); }
     public MutableLiveData<ArrayList<Slot>> getSlots(){
         if(slots.getValue() == null){
             slots.setValue(new ArrayList<Slot>());
@@ -70,7 +68,7 @@ public class PlayerViewModel extends ViewModel {
     }
     public MutableLiveData<Integer> getPQIndex(){ return pqIndex; }
 
-    public void setPoints(Integer newPoints){ points.setValue(newPoints); }
+    public void setPoints(int newPoints){ points.setValue(newPoints); }
     public void setName(String newName){ name.setValue(newName); }
     public void setSlots(ArrayList<Slot> newSlots){ slots.setValue(newSlots); }
     public void setDices(ArrayList<Dice> newDices){ dices.setValue(newDices); }

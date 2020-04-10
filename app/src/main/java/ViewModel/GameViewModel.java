@@ -6,12 +6,14 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.sagrada.MenuActivity;
 import com.example.sagrada.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import Model.GameBoard.GameBoard;
 import Model.GameBoard.Player;
 
 public class GameViewModel extends ViewModel {
@@ -19,11 +21,13 @@ public class GameViewModel extends ViewModel {
     private MutableLiveData<Integer> commonQuest;
     private Context context;
     public MutableLiveData<String> cqString;
+    public GameBoard gameBoard;
 
     public GameViewModel(){
         players = new MutableLiveData<List<Player>>();
         commonQuest = new MutableLiveData<Integer>();
         cqString = new MutableLiveData<String>();
+        gameBoard = new GameBoard(MenuActivity.GAME_ROWS, MenuActivity.GAME_COLS);
     }
 
     public MutableLiveData<List<Player>> getPlayers(){

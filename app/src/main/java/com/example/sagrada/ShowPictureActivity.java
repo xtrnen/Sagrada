@@ -1,6 +1,7 @@
 package com.example.sagrada;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.otaliastudios.cameraview.PictureResult;
 import com.otaliastudios.cameraview.size.Size;
 
+import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
@@ -35,10 +37,17 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
         picture = pictureResult;
     }
 
+    static {
+        if (!OpenCVLoader.initDebug()) {
+            // Handle initialization error
+        }
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.picture_preview_activity);
+        System.loadLibrary("native-lib");
 
         requestCode = getIntent().getIntExtra("Data", 0);
 
@@ -50,7 +59,6 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
             onBackPressed();
         });
 
-        System.loadLibrary("native-lib");
         final PictureResult result = picture;
         if(result == null){
             finish();
@@ -83,12 +91,15 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
                 //TODO: Handle error msg -> Display InvalidDetectionDialog
                 /*Mat mat = new Mat();
                 Utils.bitmapToMat(bitmap, mat);
-                ImageProcessor imageProcessor = new ImageProcessor(mat, ShowPictureActivity.this);
                 Slot[] slots = imageProcessor.PatternDetector(mat.getNativeObjAddr());
                 for(Slot slot : slots){
                     Log.println(Log.INFO, "slot", slot.row + " | " + slot.col + " - " + slot.info);
                 }*/
+                if(requestCode == GameActivity.REQUEST_SLOTS){
+                   bitmap = MainActivity.convMatToBitmap(doPatternDetection(bitmap));
+                }
                 findViewById(R.id.LoadingPanelId).setVisibility(View.GONE);
+                //Utils.matToBitmap(mat, bitmap);
                 imageView.setImageBitmap(bitmap);
             });
         } catch (UnsupportedOperationException e){
@@ -126,5 +137,20 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
         //TODO: Return to GameActivity
         onBackPressed();
     }
+
+    private Mat doPatternDetection(Bitmap bitmap){
+        Mat mat = new Mat();
+        Utils.bitmapToMat(bitmap, mat);
+        imageProcessor.AddPatternImg(mat);
+        Slot[] slots = imageProcessor.PatternDetector(mat.getNativeObjAddr());
+        for(Slot slot : slots){
+            Log.println(Log.INFO, "slot", slot.row + " | " + slot.col + " - " + slot.info);
+        }
+
+        return mat;
+    }
+    /*private Mat doDiceDetection(Bitmap bitmap){
+
+    }*/
 
 }

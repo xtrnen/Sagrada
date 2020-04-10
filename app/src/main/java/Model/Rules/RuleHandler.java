@@ -21,6 +21,7 @@ public class RuleHandler {
         diceArray = dices;
         slotArray = slots;
     }
+    public RuleHandler(){}
 
     public boolean CheckRules()
     {
@@ -195,4 +196,7 @@ public class RuleHandler {
     {
         return dice1.number != dice2.number;
     }
+
+    public void assignArray(Dice[][] dices){ diceArray = dices; }
+    public void assignArray(Slot[][] slots){ slotArray = slots; }
 }

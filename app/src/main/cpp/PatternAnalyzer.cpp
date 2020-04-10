@@ -580,19 +580,27 @@ private:
         Point tl = Point(0,0);
 
         if(reverseDirection){
-            br.x = prevRect.br().x + prevRect.width + offset;
-            br.y = prevRect.br().y;
+            //br.x = prevRect.br().x + prevRect.width + offset;
+            //br.y = prevRect.br().y;
             tl.x = prevRect.tl().x + prevRect.width + offset;
             tl.y = prevRect.tl().y;
         }
         else{
-            br.x = prevRect.br().x - prevRect.width - offset;
-            br.y = prevRect.br().y;
+            //br.x = prevRect.br().x - prevRect.width - offset;
+            //br.y = prevRect.br().y;
             tl.x = prevRect.tl().x - prevRect.width - offset;
             tl.y = prevRect.tl().y;
         }
 
-        //TODO: Control that rectangle doesn't exceed image boundries
+        if(tl.x > patternImg.cols){
+            tl.x = patternImg.cols;
+        }
+        if(tl.x < 0){
+            tl.x = 0;
+        }
+        if(tl.x + prevRect.width > patternImg.cols){
+            br.x = patternImg.cols;
+        }
 
         return Rect(tl, br);
     }
@@ -862,6 +870,9 @@ private:
             }
         }*/
 
+        if(counter != 0){
+            __android_log_print(ANDROID_LOG_INFO, "FUK", "%d", counter);
+        }
         if(counter == 6 || counter == 5 || counter == 4){
             _pID = PatternID(counter);
             return true;
