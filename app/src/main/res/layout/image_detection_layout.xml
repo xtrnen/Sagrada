@@ -18,13 +18,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/confirmDetBtnID"
-            android:text="Confirm"
+            android:text="@string/confirmString"
             android:layout_gravity="end"/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/declineDetBtnID"
-            android:text="Decline"
+            android:text="@string/declineString"
             android:layout_gravity="end"/>
     </androidx.appcompat.widget.Toolbar>
     <ProgressBar

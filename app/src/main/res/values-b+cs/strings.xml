@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sagrada</string>
+    <string name="app_title">Pomocník Sagrady</string>
+    <string name="game_title">Začít hru</string>
+    <string name="settings_title">Nastavení</string>
+    <string name="quitApp_title">Ukončit</string>
+    <string name="createPlayer_username">Přezdívka</string>
+    <string name="createPlayerDialog_title">Vytvořit</string>
+    <string name="cancelString">Zrušit</string>
+    <string name="confirmString">Potvrdit</string>
+    <string name="playerPoints_title">Body \:</string>
+    <string name="gameMenuCreatePlayet_title">Vytvořit hráče</string>
+    <string name="gameMenuDeleteCurrentPlayer_title">Odstranit hráče</string>
+    <string name="gameMenuQuitGame_title">Ukončit hru</string>
+    <string name="deletePlayerDialogMsg">Chcete odstranit tohoto hráče?</string>
+    <string name="deletePlayerDialogPositiveButton">Ano</string>
+    <string name="deletePlayerDialogNegativeButton">Ne</string>
+    <string name="cqTitleString"><u>Společný úkol:</u></string>
+    <string name="pqTitleString"><u>Osobní úkol:</u></string>
+    <string name="craftsmanTitleString"><u>Kameny řemeslníků</u></string>
+    <string name="captureDiceSlotString">Chcete detekovat klíč, nebo kostky?</string>
+    <string name="diceString">Kostky</string>
+    <string name="patternString">Klíč</string>
+    <string name="calculateDialogTitle">Vyhodnotit hru</string>
+    <string name="calculateDialogMsg">Vyhodnotit hru pro aktuálního hráče, nebo všechny hráče?</string>
+    <string name="calculateDialogPlayer">Aktuálního hráče</string>
+    <string name="calculateDialogAll">Všichny hráče</string>
+    <string name="takePictureString">Vyfotit</string>
+    <string name="personalQString">Osobní úkol</string>
+    <string name="commonQString">Společný úkol</string>
+    <string name="declineString">Odmítnout</string>
+    <string name="helpString">Nápověda</string>
+
+    <string-array name="personalQuestStrings">
+        <item>Ametyst</item>
+        <item>Tyrkys</item>
+        <item>Smaragd</item>
+        <item>Topaz</item>
+        <item>Rubín</item>
+    </string-array>
+    <string-array name="groupQuestStrings">
+        <item>Pestrobarevné sloupce</item>
+        <item>Různorodé sloupce</item>
+        <item>Pestrobarevné řádky</item>
+        <item>Různorodé řádky</item>
+        <item>Světlé odstíny</item>
+        <item>Střední odstíny</item>
+        <item>Tmavé odstíny</item>
+        <item>Všechny barvy duhy</item>
+        <item>Světlo a stín</item>
+        <item>Barevné diagonály</item>
+    </string-array>
+</resources>

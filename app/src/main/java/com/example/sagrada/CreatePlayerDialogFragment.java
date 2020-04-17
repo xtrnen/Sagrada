@@ -4,11 +4,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,7 +14,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -104,11 +101,9 @@ public class CreatePlayerDialogFragment extends DialogFragment {
             popupMenu.show();
         });
 
-        builder.setNegativeButton(R.string.gameModeDialogNeutral_title, (dialog, which) -> {
-            listener.onCreatePlayerCanceled();
-        });
+        builder.setNegativeButton(R.string.cancelString, (dialog, which) -> listener.onCreatePlayerCanceled());
 
-        builder.setPositiveButton(R.string.gameModeDialogPositive_title, (dialog, which) -> {
+        builder.setPositiveButton(R.string.confirmString, (dialog, which) -> {
             EditText username = (EditText)getDialog().findViewById(R.id.createUsernameID);
             String playerUsername = username.getText().toString();
 

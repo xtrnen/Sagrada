@@ -33,18 +33,8 @@ public class DeletePlayerDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.deletePlayerDialogMsg);
-        builder.setPositiveButton(R.string.deletePlayerDialogPositiveButton, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                listener.onDeletePlayerAgreed();
-            }
-        });
-        builder.setNegativeButton(R.string.deletePlayerDialogNegativeButton, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                listener.onDeletePlayerCanceled();
-            }
-        });
+        builder.setPositiveButton(R.string.deletePlayerDialogPositiveButton, (dialog, which) -> listener.onDeletePlayerAgreed());
+        builder.setNegativeButton(R.string.deletePlayerDialogNegativeButton, (dialog, which) -> listener.onDeletePlayerCanceled());
         return builder.create();
 }
 }

@@ -6,8 +6,8 @@
     <string name="quitApp_title">Quit</string>
     <string name="createPlayer_username">Username</string>
     <string name="createPlayerDialog_title">Create</string>
-    <string name="gameModeDialogNeutral_title">Cancel</string>
-    <string name="gameModeDialogPositive_title">Confirm</string>
+    <string name="cancelString">Cancel</string>
+    <string name="confirmString">Confirm</string>
     <string name="playerPoints_title">Points \:</string>
     <string name="gameMenuCreatePlayet_title">Create Player</string>
     <string name="gameMenuDeleteCurrentPlayer_title">Delete Current Player</string>
@@ -15,29 +15,41 @@
     <string name="deletePlayerDialogMsg">Do you want to remove this player?</string>
     <string name="deletePlayerDialogPositiveButton">Yes</string>
     <string name="deletePlayerDialogNegativeButton">No</string>
-    <string name="cqTitleString"><u>Společný úkol:</u></string>
-    <string name="pqTitleString"><u>Osobní úkol:</u></string>
-    <string name="craftsmanTitleString"><u>Kameny řemeslníků</u></string>
+    <string name="cqTitleString"><u>Common quest:</u></string>
+    <string name="pqTitleString"><u>Personal quest:</u></string>
+    <string name="craftsmanTitleString"><u>Craftsman stones</u></string>
+    <string name="captureDiceSlotString">Do you want to capture Pattern card or Dices?</string>
+    <string name="diceString">Dices</string>
+    <string name="patternString">Pattern</string>
+    <string name="calculateDialogTitle">Game evaluation</string>
+    <string name="calculateDialogMsg">Evaluate game for current player or all players?</string>
+    <string name="calculateDialogPlayer">Current player</string>
+    <string name="calculateDialogAll">All players</string>
+    <string name="takePictureString">Take picture</string>
+    <string name="personalQString">Personal quest</string>
+    <string name="commonQString">Common quest</string>
+    <string name="declineString">Decline</string>
+    <string name="helpString">Help</string>
 
     <!--String values of quest cards-->
     <string-array name="personalQuestStrings">
-        <item>Ametyst</item>
-        <item>Tyrkys</item>
-        <item>Smaragd</item>
+        <item>Amethyst</item>
+        <item>Turquoise</item>
+        <item>Emerald</item>
         <item>Topaz</item>
-        <item>Rubín</item>
+        <item>Ruby</item>
     </string-array>
     <string-array name="groupQuestStrings">
-        <item>Pestrobarevné sloupce</item>
-        <item>Různorodé sloupce</item>
-        <item>Pestrobarevné řádky</item>
-        <item>Různorodé řádky</item>
-        <item>Světlé odstíny</item>
-        <item>Střední odstíny</item>
-        <item>Tmavé odstíny</item>
-        <item>Všechny barvy duhy</item>
-        <item>Světlo a stín</item>
-        <item>Barevné diagonály</item>
+        <item>Brightly colored columns</item>
+        <item>Diverse columns</item>
+        <item>Brightly colored rows</item>
+        <item>Diverse rows</item>
+        <item>Light shades</item>
+        <item>Medium shades</item>
+        <item>Dark shades</item>
+        <item>All colors of the rainbow</item>
+        <item>Light &amp; shadow</item>
+        <item>Colorful diagonals</item>
     </string-array>
 
 </resources>

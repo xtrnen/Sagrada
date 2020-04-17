@@ -41,8 +41,8 @@ public class CraftsmanPointsDialogFragment extends DialogFragment {
 
         EditText editText = view.findViewById(R.id.craftsmanEditTextID);
 
-        builder.setNeutralButton("Zrušit", (dialog, which) -> {});
-        builder.setPositiveButton("Potvrdit", (dialog, which) -> {
+        builder.setNeutralButton(R.string.cancelString, (dialog, which) -> {});
+        builder.setPositiveButton(R.string.confirmString, (dialog, which) -> {
             listener.AddPoints(Integer.parseInt(editText.getText().toString()));
         });
         return builder.create();

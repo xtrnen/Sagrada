@@ -154,14 +154,14 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
     /*Dialogs*/
     private void createCaptureModeDialog(){
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
-        dialogBuilder.setMessage("Do you want to capture Pattern card or Dices?");
-        dialogBuilder.setNeutralButton("Cancel", (dialog, which) -> {
+        dialogBuilder.setMessage(R.string.captureDiceSlotString);
+        dialogBuilder.setNeutralButton(R.string.cancelString, (dialog, which) -> {
             //Nothing
         });
-        dialogBuilder.setNegativeButton("Pattern", (dialog, which) -> {
+        dialogBuilder.setNegativeButton(R.string.patternString, (dialog, which) -> {
            callCameraActivity(GameActivity.REQUEST_SLOTS);
         });
-        dialogBuilder.setPositiveButton("Dices", (dialog, which) -> {
+        dialogBuilder.setPositiveButton(R.string.diceString, (dialog, which) -> {
            callCameraActivity(GameActivity.REQUEST_DICES);
         });
         dialogBuilder.show();
@@ -188,13 +188,13 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
     }
     private void createCalculationDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Vyhodnocení hry");
-        builder.setMessage("Chcete vyhodnotit body pro všechny hráče, nebo pouze aktuálního hráče?");
-        builder.setNeutralButton("Zrušit", (dialog, which) -> {});
-        builder.setPositiveButton("Aktuálního hráče", (dialog, which) -> {
+        builder.setTitle(R.string.calculateDialogTitle);
+        builder.setMessage(R.string.calculateDialogMsg);
+        builder.setNeutralButton(R.string.cancelString, (dialog, which) -> {});
+        builder.setPositiveButton(R.string.calculateDialogPlayer, (dialog, which) -> {
             calculateThis();
         });
-        builder.setNegativeButton("Všechny hráče", (dialog, which) -> {
+        builder.setNegativeButton(R.string.calculateDialogAll, (dialog, which) -> {
             //TODO: Send mesage to GameActivity to Calculate game!
         });
         builder.show();

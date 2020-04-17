@@ -23,7 +23,7 @@
             android:id="@+id/pqChooseBtnID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Personal Quest"/>
+            android:text="@string/personalQString"/>
         <TextView
             android:id="@+id/choosePQID"
             android:layout_width="match_parent"
@@ -41,7 +41,7 @@
             android:id="@+id/cqChooseBtnID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Common quest" />
+            android:text="@string/commonQString" />
         <TextView
             android:id="@+id/chooseCQID"
             android:layout_width="match_parent"
