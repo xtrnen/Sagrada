@@ -69,17 +69,23 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == GameActivity.REQUEST_SLOTS){
+        if(resultCode == GameActivity.REQUEST_SLOTS){
             assert data != null;
-            ArrayList<Slot> slots = data.getParcelableArrayListExtra("slots");
+            ArrayList<Slot> slots = data.getParcelableArrayListExtra(GameActivity.DATA_SLOTS);
             assert slots != null;
             for (Slot slot : slots){
                 Log.d("SLOT", slot.infoType);
             }
+            player.setSlots(slots);
         }
-        if(requestCode == GameActivity.REQUEST_DICES){
+        if(resultCode == GameActivity.REQUEST_DICES){
             assert data != null;
-            ArrayList<Dice> dices = data.getParcelableArrayListExtra("dices");
+            ArrayList<Dice> dices = data.getParcelableArrayListExtra(GameActivity.DATA_DICES);
+            assert dices != null;
+            for(Dice dice : dices){
+                Log.println(Log.INFO, "DICES", dice.color + "|" + dice.number + "( " + dice.row + "|" + dice.col + ")");
+            }
+            player.setDices(dices);
         }
     }
 

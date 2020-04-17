@@ -35,8 +35,10 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
     GameViewModel gameViewModel;
     ViewPager2 viewPager;
     TabLayout tabLayout;
-    public static int REQUEST_SLOTS = 1;
-    public static int REQUEST_DICES = 2;
+    public final static int REQUEST_SLOTS = 1;
+    public final static int REQUEST_DICES = 2;
+    public final static String DATA_SLOTS = "Slots";
+    public final static String DATA_DICES = "Dices";
     //TODO: Dialog reacts to click anywhere with dismiss of dialog...
 
     @Override

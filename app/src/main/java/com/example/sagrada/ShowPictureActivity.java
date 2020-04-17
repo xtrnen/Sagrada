@@ -21,6 +21,9 @@ import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
 import Model.ImageProcessor;
@@ -35,6 +38,8 @@ public class ShowPictureActivity extends AppCompatActivity {
     private Button declineBtn;
     private ImageView imageView;
     private int requestCode;
+    private ArrayList<Slot> slotArray;
+    private ArrayList<Dice> diceArray;
 
     public static void setPictureResult(@Nullable PictureResult pictureResult){
         picture = pictureResult;
@@ -72,7 +77,16 @@ public class ShowPictureActivity extends AppCompatActivity {
         declineBtn.setOnClickListener(v -> {//TODO: Blbost
         });
         confirmBtn.setOnClickListener(v -> {
-            //TODO: return
+            Intent data = new Intent();
+            if(requestCode == GameActivity.REQUEST_SLOTS){
+                data.putParcelableArrayListExtra(GameActivity.DATA_SLOTS, slotArray);
+            } else if(requestCode == GameActivity.REQUEST_DICES){
+                data.putParcelableArrayListExtra(GameActivity.DATA_DICES, diceArray);
+            } else {
+                return;
+            }
+            setResult(CamActivity.VALID_PREVIEW, data);
+            finish();
         });
 
         final PictureResult result = picture;
@@ -80,6 +94,7 @@ public class ShowPictureActivity extends AppCompatActivity {
             finish();
             return;
         }
+
         try {
             Size resultSize = result.getSize();
             result.toBitmap(resultSize.getWidth(), resultSize.getHeight(), bitmap -> {
@@ -98,12 +113,14 @@ public class ShowPictureActivity extends AppCompatActivity {
                     for(Slot slot : slots){
                         Log.println(Log.INFO, "SLOTS", String.valueOf(slot.info));
                     }
+                    slotArray = new ArrayList<>(Arrays.asList(slots));
                 } else if(requestCode == GameActivity.REQUEST_DICES){
                     imageProcessor.AddDiceImg(mat);
                     Dice[] dices = imageProcessor.DiceDetector(mat.getNativeObjAddr());
-                    for(Dice dice : dices){
+                    /*for(Dice dice : dices){
                         Log.println(Log.INFO, "DICES", dice.color + "|" + dice.number + "( " + dice.row + "|" + dice.col + ")");
-                    }
+                    }*/
+                    diceArray = new ArrayList<>(Arrays.asList(dices));
                 }
 
                 newBitmap = MainActivity.convMatToBitmap(mat);

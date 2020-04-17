@@ -24,6 +24,10 @@ import com.otaliastudios.cameraview.CameraView;
 import com.otaliastudios.cameraview.PictureResult;
 import com.otaliastudios.cameraview.overlay.OverlayLayout;
 
+import java.util.ArrayList;
+
+import Model.GameBoard.Structs.Dice;
+
 public class CamActivity extends AppCompatActivity implements View.OnClickListener {
     private CameraView cameraView;
     public static int VALID_PREVIEW = 10;
@@ -87,15 +91,7 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(v -> {
-            /*Intent data = new Intent();
-            ArrayList<Slot> slots = new ArrayList<Slot>();
-            slots.add(new Slot("RED", 1,1));
-            data.putParcelableArrayListExtra("Slots", slots);
-            setResult(REQUEST_SLOTS, data);
-            finish();*/
-            onBackPressed();
-        });
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         cameraView = findViewById(R.id.camViewID);
 
@@ -142,17 +138,17 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        /*if(requestCode == VALID_PREVIEW){
+        if (resultCode == VALID_PREVIEW) {
             Intent retData = new Intent();
-            if(requestC == GameActivity.REQUEST_SLOTS){
-                retData.putParcelableArrayListExtra("slots", data.getParcelableArrayListExtra("slots"));
+            if (requestC == GameActivity.REQUEST_SLOTS) {
+                retData.putParcelableArrayListExtra(GameActivity.DATA_SLOTS, data.getParcelableArrayListExtra(GameActivity.DATA_SLOTS));
             }
-            if(requestC == GameActivity.REQUEST_DICES){
-                retData.putParcelableArrayListExtra("dices", data.getParcelableArrayListExtra("dices"));
-            }
+            if (requestC == GameActivity.REQUEST_DICES) {
+                retData.putParcelableArrayListExtra(GameActivity.DATA_DICES, data.getParcelableArrayListExtra(GameActivity.DATA_DICES));
 
+            }
             setResult(requestC, retData);
             finish();
-        }*/
+        }
     }
 }
