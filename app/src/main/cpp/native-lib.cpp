@@ -28,14 +28,14 @@ JNIEXPORT jobjectArray JNICALL Java_Model_ImageProcessor_PatternDetector(JNIEnv 
     patternImg = GetObjectImg(env, obj, "org/opencv/core/Mat", "patternImg");
 
     cvtColor(patternImg, patternImg, COLOR_BGR2RGB);
+    resize(patternImg, patternImg, Size(1024,720));
     PatternAnalyzer patternAnalyzer = PatternAnalyzer(patternImg);
 
+    //Detect Control Point
     vector<Mat> grid = patternAnalyzer.CreatePatternGrid();
-
-    //Correction in grid creater
+    //Detect Slots
+    //Detect attribute
     patternAnalyzer.GetCardPattern(grid);
-
-    //patternAnalyzer.Test(grid[6]).copyTo(outputImg);
 
     patternAnalyzer.tmp.copyTo(outputImg);
 
@@ -48,10 +48,13 @@ JNIEXPORT jobjectArray JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *en
     Mat diceImg = GetObjectImg(env, obj, "org/opencv/core/Mat", "diceImg");
 
     cvtColor(diceImg, diceImg, COLOR_BGR2RGB);
+    __android_log_print(ANDROID_LOG_INFO, "DICE_MSG", "Init");
     DiceAnalyzer diceAnalyzer = DiceAnalyzer(diceImg);
-    diceAnalyzer.DetectDiceGrid();
+    //diceAnalyzer.DetectDiceGrid();
     //diceAnalyzer.BoostDices();
-    diceAnalyzer.DetectDiceSlots();
+    __android_log_print(ANDROID_LOG_INFO, "DICE_MSG", "Dice slots");
+    //diceAnalyzer.DetectDiceSlots();
+    //__android_log_print(ANDROID_LOG_INFO, "DICE_MSG", "Dices");
     diceAnalyzer.DetectDices();
     //diceAnalyzer.DiceOutput();
     jobjectArray outputArray = BuildDicesOutput(env, diceAnalyzer.dices);

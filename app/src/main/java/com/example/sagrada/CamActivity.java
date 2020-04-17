@@ -1,11 +1,16 @@
 package com.example.sagrada;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Size;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,15 +22,15 @@ import com.otaliastudios.cameraview.CameraListener;
 import com.otaliastudios.cameraview.CameraOptions;
 import com.otaliastudios.cameraview.CameraView;
 import com.otaliastudios.cameraview.PictureResult;
-
-import java.util.ArrayList;
-
-import Model.GameBoard.Structs.Slot;
+import com.otaliastudios.cameraview.overlay.OverlayLayout;
 
 public class CamActivity extends AppCompatActivity implements View.OnClickListener {
     private CameraView cameraView;
     public static int VALID_PREVIEW = 10;
     private int requestC;
+    private ImageView frame;
+    static final int CROP_WIDTH = 1080;
+    static final int CROP_HEIGHT = 720;
 
     CameraListener cameraListener = new CameraListener() {
         @Override
@@ -47,6 +52,11 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         public void onPictureTaken(@NonNull PictureResult result) {
             super.onPictureTaken(result);
             ShowPictureActivity.setPictureResult(result);
+            int[] location = new int[2];
+            frame.getLocationOnScreen(location);
+            int[] view = new int[2];
+            cameraView.getLocationOnScreen(view);
+            ShowPictureActivity.setRectCoord(location[0], location[1] - view[1], cameraView.getWidth(), cameraView.getHeight());
             Intent intent = new Intent(CamActivity.this, ShowPictureActivity.class);
             intent.putExtra("Data", requestC);
             startActivityForResult(intent, VALID_PREVIEW);
@@ -74,6 +84,7 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         if(requestC == 0){
             finish();
         }
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> {
@@ -87,6 +98,16 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         });
 
         cameraView = findViewById(R.id.camViewID);
+
+        frame = new ImageView(this);
+        frame.setImageDrawable(getDrawable(R.drawable.camera_frame));
+
+        OverlayLayout.LayoutParams params = new OverlayLayout.LayoutParams(CROP_WIDTH, CROP_HEIGHT);
+        params.drawOnPreview = true;
+        params.gravity = Gravity.CENTER;
+        frame.setLayoutParams(params);
+        cameraView.addView(frame);
+
         Button takePictureBtn = findViewById(R.id.takePicBtn);
 
         cameraView.setLifecycleOwner(this);
@@ -94,8 +115,14 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
         takePictureBtn.setOnClickListener(this);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
     private void takePicture(){
         if(cameraView.isTakingPicture()) return;
+
         cameraView.takePicture();
     }
 
@@ -115,7 +142,7 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == VALID_PREVIEW){
+        /*if(requestCode == VALID_PREVIEW){
             Intent retData = new Intent();
             if(requestC == GameActivity.REQUEST_SLOTS){
                 retData.putParcelableArrayListExtra("slots", data.getParcelableArrayListExtra("slots"));
@@ -126,6 +153,6 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
 
             setResult(requestC, retData);
             finish();
-        }
+        }*/
     }
 }

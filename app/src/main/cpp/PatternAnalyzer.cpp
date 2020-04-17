@@ -11,8 +11,6 @@
 using namespace std;
 using namespace cv;
 
-Mat tt;
-
 enum PatternID {
     PATID_ONE = 1,
     PATID_TWO = 2,
@@ -82,6 +80,7 @@ class PatternAnalyzer
 public:
     Mat patternImg;
     vector<Slot> slots;
+    vector<Rect> matrix;
     Point controlPoint;
     int refOffset;
     int refHeight;
@@ -104,9 +103,10 @@ public:
         this->patternImg.copyTo(this->tmp);
         Point controlPoint = DetectControlPoint(gray);
         this->controlPoint = controlPoint;
+        __android_log_print(ANDROID_LOG_INFO, "Control Point", "%d|%d", controlPoint.x, controlPoint.y);
 
         //Crop image rectangle
-        int oft = 200;
+        int oft = 50;
         while(controlPoint.x + oft > this->patternImg.cols){
             oft -=10;
         }
@@ -123,14 +123,17 @@ public:
         __android_log_print(ANDROID_LOG_INFO, "MSG", "Split");
         //SplitImg
         vector<Rect> matrixRect = RectPatternGrid(4, 5, controlPoint, boxes);
+        __android_log_print(ANDROID_LOG_INFO, "MSG", "Rect");
 
         for(Rect rect : matrixRect)
         {
-            rectangle(this->tmp, rect, Scalar(0,0,255), 10);
+            if(!rect.empty())
+                rectangle(this->tmp, rect, Scalar(0,0,255), 3);
         }
 
+        matrix = matrixRect;
+
         return SplitImageToPattern(4, 5, matrixRect, this->patternImg);
-        return vector<Mat>();
     }
 
     void GetCardPattern(vector<Mat> _splittedImg)
@@ -140,19 +143,13 @@ public:
         int row = 0;
         for (int i = 0; i < _splittedImg.size(); i++) {
             Mat img = _splittedImg[i];
-            if((i % 5) == 0 && i != 0){
-                //__android_log_print(ANDROID_LOG_INFO, "TREE ", "---------");
-            }
             if(IsColorPattern(img, pID)){
-                //__android_log_print(ANDROID_LOG_INFO, "TREE ", "IS COLOR %s | %d/%d", PIDName(pID), row, col);
                 slots.push_back(Slot(row, col, pID));
             }
             else if(IsDicePattern(img, 1, 6, pID)){
-                //__android_log_print(ANDROID_LOG_INFO, "TREE ", "IS DICE %s | %d/%d", PIDName(pID), row, col);
                 slots.push_back(Slot(row, col, pID));
             }
             else{
-                //__android_log_print(ANDROID_LOG_INFO, "TREE ", "IS UNKNOWN %s | %d/%d", PIDName(pID), row, col);
                 slots.push_back(Slot(row, col, pID));
             }
             col++;
@@ -160,60 +157,9 @@ public:
                 row++;
                 col = 0;
             }
+            Point *point = new Point(matrix[i].tl().x + matrix[i].width / 2, matrix[i].br().y);
+            putText(tmp, patternIdType(pID), Point(point->x, point->y), FONT_HERSHEY_PLAIN, 5, Scalar(0,0,255), LINE_AA);
         }
-    }
-
-    Mat Test(Mat _img){
-        Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
-        Mat img;
-        Mat draw;
-
-        cvtColor(_img, img, COLOR_BGR2HSV);
-        _img.copyTo(draw);
-        vector<Mat> splits;
-        split(_img, splits);
-        splits[2].copyTo(img);
-
-        GaussianBlur(img, img, Size(3,3), 0);
-        equalizeHist(img, img);
-
-        bool ind = false;
-        threshold(img, img, 128, 255, THRESH_BINARY);
-        erode(img, img, kernel, Point(-1,-1), 1);
-        //DETECT 6,5,4
-        vector<vector<Point>> contours;
-        vector<Vec4i> hierarchy;
-
-        findContours(img, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-
-        vector<vector<Point>> contours_poly( contours.size());
-        vector<Rect> boundRect( contours.size());
-        vector<Point2f>centers( contours.size());
-
-        Scalar color = Scalar( 0,0,0 );
-        Scalar color1 = Scalar (255,255,255);
-        int counter = 0;
-        int sumArea = 0;
-        for( size_t i = 0; i < contours.size(); i++ )
-        {
-            double epsilon = 0.01*arcLength(contours[i],true);
-            approxPolyDP( contours[i], contours_poly[i], epsilon, true );
-
-            double area = contourArea(contours_poly[i]);
-            Point2f center;
-            float radius;
-            minEnclosingCircle(contours_poly[i], center, radius);
-            double cArea = radius * radius * 3.14;
-
-            drawContours(draw, contours, i, Scalar(255,0,0), 2);
-            if(area > 100 && cArea <= area + area*0.25 && hierarchy[i][3] == -1)
-            {
-                drawContours(draw, contours, i, Scalar(0,0,255), 2);
-                counter++;
-            }
-        }
-
-        return draw;
     }
 
 private:
@@ -221,11 +167,12 @@ private:
     {
         Mat prepImg;
         this->patternImg.copyTo(prepImg);
+        //resize(prepImg, prepImg, Size(720,720));
 
         cvtColor(prepImg, prepImg, COLOR_BGR2GRAY);
         equalizeHist(prepImg, prepImg);
         GaussianBlur(prepImg, prepImg, Size(5,5), 2, 2, BORDER_CONSTANT);
-        erode(prepImg, prepImg, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));
+        //erode(prepImg, prepImg, getStructuringElement(MORPH_RECT, Size(5,5) , Point(0,0)));
 
         return prepImg;
     }
@@ -235,31 +182,31 @@ private:
         Mat grayImg;
         //Mat tmp;
         threshold(_grayImg, grayImg, 100, 255, THRESH_BINARY);
+        Canny(grayImg, grayImg, 100, 180);
+        //grayImg.copyTo(tmp);
+
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
 
         findContours(grayImg, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
-        vector<vector<Point>> contours_poly( contours.size());
+        vector<Point> poly;
         vector<Point> centers;
 
         for( size_t i = 0; i < contours.size(); i++ )
         {
             double epsilon = 0.01*arcLength(contours[i],true);
-            approxPolyDP( contours[i], contours_poly[i], epsilon, true );
+            approxPolyDP( contours[i], poly, epsilon, true );
 
-            double area = contourArea(contours_poly[i]);
+            double area = contourArea(poly);
             Point2f center;
             float radius;
-            minEnclosingCircle(contours_poly[i], center, radius);
+            minEnclosingCircle(poly, center, radius);
             double cArea = radius * radius * 3.14;
             double areaOffset = area * 0.5;
 
-            //__android_log_print(ANDROID_LOG_INFO, "DDD", "%f || %f", area, cArea);
-
-            if(area > 500.0 && cArea >= area && cArea <= area + areaOffset){
-                //__android_log_print(ANDROID_LOG_INFO, "DDD", "%f || %f", area, cArea);
-                //circle(this->tmp, center, (int)radius, Scalar(0,255,0), 3);
+            if(area > 50.0 && cArea >= area && cArea <= area + areaOffset){
+                __android_log_print(ANDROID_LOG_INFO, "DDD", "%f || %f", area, cArea);
                 centers.push_back(Point((int)center.x, (int)center.y));
             }
         }
@@ -277,11 +224,11 @@ private:
         }
         for(Point cent : centers)
         {
-            if(cent.y >= bottom.y - 50 && cent.x > bottom.x)
+            if(cent.y >= bottom.y - 30 && cent.x > bottom.x)
                 bottom = cent;
         }
 
-        circle(this->tmp, bottom, 1, Scalar(0,0,255), 20);
+        circle(this->tmp, bottom, 1, Scalar(0,255,0), 5);
 
         return bottom;
     }
@@ -306,8 +253,8 @@ private:
         //Violet
         mask += FindHsvColor(hsv, S_VIOLET);
         mask += FindHsvColor(hsv, S_WHITE);
-        vector<Rect> boxes;
 
+        vector<Rect> boxes;
         //mask.copyTo(this->tmp);
         FindContours(mask, boxes);
 
@@ -341,7 +288,7 @@ private:
                 RotatedRect roRect = minAreaRect(contours_poly[i]);
                 int area = (int)contourArea(contours_poly[i]);
                 int roArea = roRect.boundingRect().area();
-                if(roRect.boundingRect().br().y < this->controlPoint.y && area > 100 /*&& hierarchy[i][2] != -1*/ && roArea >= area && roArea < area*2)
+                if(roRect.boundingRect().br().y < this->controlPoint.y && area > 50 /*&& hierarchy[i][2] != -1*/ && roArea >= area && roArea < area*2)
                 {
                     sum += area;
                     count++;
@@ -379,7 +326,7 @@ private:
         boxes.clear();
 
         return drawing;
-    }
+    }   //100
 
     vector<Rect> RectPatternGrid(int rows, int cols, Point controlPoint, vector<Rect> contourBoxes)
     {
@@ -424,6 +371,7 @@ private:
             retVector.insert(retVector.begin(), tmpVector.begin(), tmpVector.end());
 
             tmpVector.clear();
+
         }
 
         return retVector;
@@ -431,24 +379,13 @@ private:
 
     vector<Rect> CompleteRefRects(Rect controlRect, Point controlPoint)
     {
+        __android_log_print(ANDROID_LOG_INFO, "OFFSET", "%d", refOffset);
         int offset = this->refOffset;
         vector<Rect> outputVector;
         Point br;
         Point tl;
         Rect refRect = controlRect;
         Rect tmpRect;
-
-        //calculate y-distance between CPoint & cRect
-        //int yDist = abs(refRect.tl().y - refRect.height - offset);
-        //decide whether CPoint is in range of yDist
-        /*int yDistOffset = 10;
-        if(controlPoint.y >= yDist + yDistOffset && controlPoint.y <= yDist - yDistOffset)
-        {
-            //refRect is the lowest
-        }
-        else {
-            //there is a line beneath the refRect
-        }*/
 
         while(refRect.br().y < controlPoint.y - refRect.width - offset ) {
             br = Point(refRect.br().x, refRect.br().y + refRect.width + offset);
@@ -580,26 +517,21 @@ private:
         Point tl = Point(0,0);
 
         if(reverseDirection){
-            //br.x = prevRect.br().x + prevRect.width + offset;
-            //br.y = prevRect.br().y;
+            br.x = prevRect.br().x + prevRect.width + offset;
+            br.y = prevRect.br().y;
             tl.x = prevRect.tl().x + prevRect.width + offset;
             tl.y = prevRect.tl().y;
         }
         else{
-            //br.x = prevRect.br().x - prevRect.width - offset;
-            //br.y = prevRect.br().y;
+            br.x = prevRect.br().x - prevRect.width - offset;
+            br.y = prevRect.br().y;
             tl.x = prevRect.tl().x - prevRect.width - offset;
             tl.y = prevRect.tl().y;
         }
 
-        if(tl.x > patternImg.cols){
-            tl.x = patternImg.cols;
-        }
-        if(tl.x < 0){
-            tl.x = 0;
-        }
-        if(tl.x + prevRect.width > patternImg.cols){
-            br.x = patternImg.cols;
+        if(tl.x < 0 || br.x > patternImg.cols ){
+            tl = prevRect.tl();
+            br = prevRect.br();
         }
 
         return Rect(tl, br);
@@ -608,6 +540,7 @@ private:
     Rect GetClosestRect(vector<Rect> polyRects, Point controlPoint)
     {
         Rect tmpRect = Rect(Point(0,0),Point(0,0));
+
         int offset = this->refOffset;
 
         for(Rect rect : polyRects){
@@ -687,6 +620,9 @@ private:
         vector<Mat> outputMatrix;
 
         for(int i = 0; i < cellsNum; i++){
+            if(rectMatrix[i].empty()){
+                return outputMatrix;
+            }
             outputMatrix.push_back(image(rectMatrix[i]));
         }
         return outputMatrix;
@@ -794,7 +730,8 @@ private:
         double otsuThresh = threshold(img, otsuThreshImg, 0, 255, THRESH_BINARY + THRESH_OTSU);
 
         PatternID tmpPID;
-        if(DetectWhiteBlobNumber(subject, tmpPID)){
+        __android_log_print(ANDROID_LOG_INFO, "FUK", "WHITE");
+        if(DetectWhiteBlobNumber(img, tmpPID)){
             pID = tmpPID;
         }
         else
@@ -808,70 +745,57 @@ private:
     bool DetectWhiteBlobNumber(Mat _img, PatternID& _pID)
     {
         Mat img;
-        //_img.copyTo(img);
+        _img.copyTo(img);
         bool ind = false;
         //cvtColor(img,img, COLOR_BGR2GRAY);
-        cvtColor(_img, img, COLOR_BGR2HSV);
+        //cvtC  olor(_img, img, COLOR_BGR2HSV);
 
-        vector<Mat> splits;
+        /*vector<Mat> splits;
         split(_img, splits);
-        splits[2].copyTo(img);
+        splits[2].copyTo(img);*/
+
+        threshold(img, img, 128, 255, THRESH_BINARY);
 
         GaussianBlur(img, img, Size(3,3), 0);
         equalizeHist(img, img);
 
-        threshold(img, img, 128, 255, THRESH_BINARY);
-        Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
-        erode(img, img, kernel, Point(-1,-1), 1);
+        morphologyEx(img, img, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(9, 9), Point(-1, -1)));
+
+        /*Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
+        erode(img, img, kernel, Point(-1,-1), 1);*/
         //DETECT 6,5,4
-        vector<vector<Point>> contours;
-        vector<Vec4i> hierarchy;
+            vector<vector<Point>> contours;
+            vector<Vec4i> hierarchy;
 
-        findContours(img, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+            findContours(img, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 
-        vector<vector<Point>> contours_poly( contours.size());
-        vector<Rect> boundRect( contours.size());
-        vector<Point2f>centers( contours.size());
+            vector<vector<Point>> contours_poly( contours.size());
+            vector<Rect> boundRect( contours.size());
+            vector<Point2f>centers( contours.size());
 
-        Scalar color = Scalar( 0,0,0 );
-        Scalar color1 = Scalar (255,255,255);
-        int counter = 0;
-        int sumArea = 0;
-        vector<double> circles;
-        for( size_t i = 0; i < contours.size(); i++ )
-        {
-            double epsilon = 0.01*arcLength(contours[i],true);
-            approxPolyDP( contours[i], contours_poly[i], epsilon, true );
-
-            double area = contourArea(contours_poly[i]);
-            Point2f center;
-            float radius;
-            minEnclosingCircle(contours_poly[i], center, radius);
-            double cArea = radius * radius * 3.14;
-
-            if(cArea > 100.0 && cArea < area + area*0.25 && hierarchy[i][3] == -1)
+            Scalar color = Scalar( 0,0,0 );
+            Scalar color1 = Scalar (255,255,255);
+            int counter = 0;
+            int sumArea = 0;
+            vector<double> circles;
+            for( size_t i = 0; i < contours.size(); i++ )
             {
-                //circles.push_back(radius);
-                //sumArea += area;
-                counter++;
-            }
-        }
-        /*if(counter != 0){
-            sumArea = sumArea / counter;
-            double offsetArea = sumArea * 0.3;
+                double epsilon = 0.01*arcLength(contours[i],true);
+                approxPolyDP( contours[i], contours_poly[i], epsilon, true );
 
-            for(double center : circles)
-            {
-                double circleArea = center * center * 3.14;
-                if(circleArea < sumArea - offsetArea || circleArea > sumArea + offsetArea)
+                double area = contourArea(contours_poly[i]);
+                Point2f center;
+                float radius;
+                minEnclosingCircle(contours_poly[i], center, radius);
+                double cArea = radius * radius * 3.14;
+
+                if(cArea > 50.0 && cArea < area + area*0.3 && hierarchy[i][3] == -1)
                 {
-                    counter--;
+                    counter++;
                 }
             }
-        }*/
 
         if(counter != 0){
-            __android_log_print(ANDROID_LOG_INFO, "FUK", "%d", counter);
         }
         if(counter == 6 || counter == 5 || counter == 4){
             _pID = PatternID(counter);
@@ -1067,39 +991,6 @@ private:
         return workImg;
     }
 
-    char* PIDName(PatternID _pid)
-    {
-        switch (_pid)
-        {
-            case PATID_ONE :
-                return "ONE";
-            case PATID_TWO :
-                return "TWO";
-            case PATID_THREE :
-                return "THREE";
-            case PATID_FOUR :
-                return "FOUR";
-            case PATID_FIVE :
-                return "FIVE";
-            case PATID_SIX :
-                return "SIX";
-            case PATID_RED :
-                return "RED";
-            case PATID_BLUE :
-                return "BLUE";
-            case PATID_GREEN :
-                return "GREEN";
-            case PATID_YELLOW :
-                return "YELLOW";
-            case PATID_VIOLET :
-                return "VIOLET";
-            case PATID_WHITE :
-                return "WHITE";
-            case PATID_NONE :
-                return "UNKNOWN";
-        }
-    }
-
     int DetectRectOffset(vector<Rect> boxes)
     {
         int offset = 10;
@@ -1139,5 +1030,37 @@ private:
         }
 
         return this->refWidth / 8;
+    }
+
+    String patternIdType(PatternID id){
+        switch (id){
+            case PATID_ONE:
+                return "1";
+            case PATID_TWO:
+                return "2";
+            case PATID_THREE:
+                return "3";
+            case PATID_FOUR:
+                return "4";
+            case PATID_FIVE:
+                return "5";
+            case PATID_SIX:
+                return "6";
+            case PATID_RED:
+                return "C";
+            case PATID_BLUE:
+                return "M";
+            case PATID_GREEN:
+                return "Ze";
+            case PATID_YELLOW:
+                return "Zl";
+            case PATID_VIOLET:
+                return "F";
+            case PATID_WHITE:
+                return "B";
+            case PATID_NONE:
+            default:
+                return "?";
+        }
     }
 };

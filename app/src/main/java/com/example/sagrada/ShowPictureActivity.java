@@ -2,39 +2,48 @@ package com.example.sagrada;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.otaliastudios.cameraview.PictureResult;
 import com.otaliastudios.cameraview.size.Size;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
-import java.util.ArrayList;
-
+import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
 import Model.ImageProcessor;
 
-public class ShowPictureActivity extends AppCompatActivity implements InvalidDetectionDialogFragment.IDetectionFailedDialogListener {
+public class ShowPictureActivity extends AppCompatActivity {
     private static PictureResult picture;
-    private ImageProcessor imageProcessor;
+    private static int rectX;
+    private static int rectY;
+    private static int rectW;
+    private static int rectH;
+    private Button confirmBtn;
+    private Button declineBtn;
+    private ImageView imageView;
     private int requestCode;
 
     public static void setPictureResult(@Nullable PictureResult pictureResult){
         picture = pictureResult;
+    }
+    public static void setRectCoord(int x, int y, int width, int height){
+        rectX = x;
+        rectY = y;
+        rectW = width;
+        rectH = height;
     }
 
     static {
@@ -52,11 +61,18 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
         requestCode = getIntent().getIntExtra("Data", 0);
 
         Toolbar toolbar = findViewById(R.id.PicturePreviewToolbarID);
+        confirmBtn = findViewById(R.id.confirmDetBtnID);
+        declineBtn = findViewById(R.id.declineDetBtnID);
+        imageView = findViewById(R.id.DetectedViewID);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        toolbar.setNavigationOnClickListener(v -> {
-            onBackPressed();
+        declineBtn.setOnClickListener(v -> {//TODO: Blbost
+        });
+        confirmBtn.setOnClickListener(v -> {
+            //TODO: return
         });
 
         final PictureResult result = picture;
@@ -64,47 +80,39 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
             finish();
             return;
         }
-        Button validButton = findViewById(R.id.confirmImgBtnID);
-        Button invalidButton = findViewById(R.id.declineImgBtnID);
-        validButton.setOnClickListener(v -> {
-            Intent data = new Intent();
-            ArrayList<Slot> slots = new ArrayList<Slot>();
-            slots.add(new Slot("RED", 1,1));
-            if(requestCode == GameActivity.REQUEST_DICES){
-                data.putParcelableArrayListExtra("dices", slots);
-            }
-            if(requestCode == GameActivity.REQUEST_SLOTS){
-                data.putParcelableArrayListExtra("slots", slots);
-            }
-            setResult(CamActivity.VALID_PREVIEW, data);
-            finish();
-        });
-        invalidButton.setOnClickListener(b -> {
-
-        });
-        imageProcessor = new ImageProcessor();
-        final ImageView imageView = findViewById(R.id.imageViewID);
         try {
             Size resultSize = result.getSize();
             result.toBitmap(resultSize.getWidth(), resultSize.getHeight(), bitmap -> {
-                //TODO: Image recognition here
-                //TODO: Handle error msg -> Display InvalidDetectionDialog
-                /*Mat mat = new Mat();
-                Utils.bitmapToMat(bitmap, mat);
-                Slot[] slots = imageProcessor.PatternDetector(mat.getNativeObjAddr());
-                for(Slot slot : slots){
-                    Log.println(Log.INFO, "slot", slot.row + " | " + slot.col + " - " + slot.info);
-                }*/
+                int x = rectX * bitmap.getWidth() / rectW;
+                int y = rectY * bitmap.getHeight() / rectH;
+                int endX = (rectX + CamActivity.CROP_WIDTH) * bitmap.getWidth() / rectW;
+                int endY = (rectY + CamActivity.CROP_HEIGHT) * bitmap.getHeight() / rectH;
+                Bitmap newBitmap = Bitmap.createBitmap(bitmap, x, y, endX - x, endY - y);
+
+                Mat mat = new Mat();
+                Utils.bitmapToMat(newBitmap, mat);
+                ImageProcessor imageProcessor = new ImageProcessor();
                 if(requestCode == GameActivity.REQUEST_SLOTS){
-                   bitmap = MainActivity.convMatToBitmap(doPatternDetection(bitmap));
+                    imageProcessor.AddPatternImg(mat);
+                    Slot[] slots = imageProcessor.PatternDetector(mat.getNativeObjAddr());
+                    for(Slot slot : slots){
+                        Log.println(Log.INFO, "SLOTS", String.valueOf(slot.info));
+                    }
+                } else if(requestCode == GameActivity.REQUEST_DICES){
+                    imageProcessor.AddDiceImg(mat);
+                    Dice[] dices = imageProcessor.DiceDetector(mat.getNativeObjAddr());
+                    for(Dice dice : dices){
+                        Log.println(Log.INFO, "DICES", dice.color + "|" + dice.number + "( " + dice.row + "|" + dice.col + ")");
+                    }
                 }
-                findViewById(R.id.LoadingPanelId).setVisibility(View.GONE);
-                //Utils.matToBitmap(mat, bitmap);
-                imageView.setImageBitmap(bitmap);
+
+                newBitmap = MainActivity.convMatToBitmap(mat);
+                imageView.setImageBitmap(newBitmap);
             });
         } catch (UnsupportedOperationException e){
-            imageView.setImageDrawable(new ColorDrawable(Color.RED));
             Toast.makeText(this, "Cant show pic format:" + picture.getFormat(), Toast.LENGTH_LONG).show();
+        } catch (UnknownError e){
+            Log.println(Log.ERROR, "DETECT", ":(");
         }
     }
 
@@ -113,44 +121,16 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
         super.onDestroy();
         if(!isChangingConfigurations()){
             setPictureResult(null);
+            setRectCoord(0,0,0,0);
         }
     }
 
-    private void ShowInvalidDetectionDialog(){
-        InvalidDetectionDialogFragment dialogFragment = new InvalidDetectionDialogFragment();
-        dialogFragment.show(getSupportFragmentManager(), "InvalidDetectionDialog");
-    }
-
-    /*Invalid detection listener*/
-    @Override
-    public void onCaptureAgain() {
-        //TODO: Back to CamActivity
-    }
-
-    @Override
-    public void onUserHandle() {
-        //TODO: Custom creation
-    }
-
-    @Override
-    public void onCancel() {
-        //TODO: Return to GameActivity
-        onBackPressed();
-    }
-
-    private Mat doPatternDetection(Bitmap bitmap){
+    private Mat detectPattern(Bitmap bitmap){
         Mat mat = new Mat();
         Utils.bitmapToMat(bitmap, mat);
+        ImageProcessor imageProcessor = new ImageProcessor();
         imageProcessor.AddPatternImg(mat);
-        Slot[] slots = imageProcessor.PatternDetector(mat.getNativeObjAddr());
-        for(Slot slot : slots){
-            Log.println(Log.INFO, "slot", slot.row + " | " + slot.col + " - " + slot.info);
-        }
-
+        imageProcessor.PatternDetector(mat.getNativeObjAddr());
         return mat;
     }
-    /*private Mat doDiceDetection(Bitmap bitmap){
-
-    }*/
-
 }
