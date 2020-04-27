@@ -25,6 +25,7 @@ struct color_range
 {
     /*Yellow color*/
     Scalar lowYellow = Scalar(15,90,20);//,100,20
+    Scalar lowYellowSlot = Scalar(15,90,60);
     Scalar highYellow = Scalar(35,255,255);
 
     /*Green color*/

@@ -44,6 +44,7 @@ public class PlayerViewModel extends ViewModel {
         personalQ.setValue("Nevybráno");
 
         craftsmanPoints = new MutableLiveData<Integer>();
+        craftsmanPoints.setValue(0);
 
         context = _context;
     }
@@ -82,6 +83,18 @@ public class PlayerViewModel extends ViewModel {
     public boolean isPlayerSet(){ return isDiceSet() && isSlotSet() && isCraftsmanSet() && areCardsSet(); }
     public void setCraftsmanPoints(int points){
         craftsmanPoints.setValue(points);
+    }
+    public void addCraftsmanPoint(){
+        int points = craftsmanPoints.getValue();
+        craftsmanPoints.setValue(++points);
+    }
+    public void subCraftsmanPoint(){
+        int points = craftsmanPoints.getValue();
+        if(points == 0){
+            craftsmanPoints.setValue(0);
+        } else{
+            craftsmanPoints.setValue(--points);
+        }
     }
     public MutableLiveData<Integer> getCraftsman(){
         if(craftsmanPoints.getValue() == null){

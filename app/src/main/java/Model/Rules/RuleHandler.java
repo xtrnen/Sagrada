@@ -1,7 +1,7 @@
 package Model.Rules;
 
-import android.util.Log;
-
+import java.util.ArrayList;
+import java.util.Collections;
 import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
 
@@ -15,13 +15,17 @@ public class RuleHandler {
     * */
     private Dice[][] diceArray;
     private Slot[][] slotArray;
+    public ArrayList<RuleMsg> logList;
 
     public RuleHandler(Dice[][] dices, Slot[][] slots)
     {
         diceArray = dices;
         slotArray = slots;
+        logList = new ArrayList<>();
     }
-    public RuleHandler(){}
+    public RuleHandler(){
+        logList = new ArrayList<>();
+    }
 
     public boolean CheckRules()
     {
@@ -33,17 +37,19 @@ public class RuleHandler {
                 }
                 if(IsEdgeDiceRule(row, col)){
                     edgeRule = true;
+                } else{
+                    logList.add(new RuleMsg(row, col, RULE_ERR.EDGE_ERR));
                 }
                 if(!SlotConditionRule(row, col)){
-                    Log.println(Log.ERROR, "Slot Cond", row+" | "+col);
+                    logList.add(new RuleMsg(row, col, RULE_ERR.SLOT_ERR));
                     return false;
                 }
                 if(!IsNeighborRule(row, col)){
-                    Log.println(Log.ERROR, "Neighbor rule", row+" | "+col);
+                    logList.add(new RuleMsg(row, col, RULE_ERR.NEIGHBOR_ERR));
                     return false;
                 }
                 if(!IsDiffDice(row, col)){
-                    Log.println(Log.ERROR, "Diff dice rule", row+" | "+col);
+                    logList.add(new RuleMsg(row, col, RULE_ERR.DIFF_ERR));
                     return false;
                 }
             }

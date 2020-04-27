@@ -350,12 +350,11 @@ private:
             }
             tmpVector.push_back(refRects[i]);
             rectsOnRow = FindRectsOnRow(contourBoxes, refRects[i]);
+
             for(Rect rect : rectsOnRow){
                 tmpVector.push_back(rect);
             }
-            if(rectsOnRow.size() > 4){
-                __android_log_print(ANDROID_LOG_INFO, "ERROR-INFO", "RECTS ON ROW > 4");
-            }
+
             if(!rectsOnRow.empty()){
                 sort(rectsOnRow.begin(), rectsOnRow.end(), compareRectsOnRow);
             }
@@ -379,7 +378,6 @@ private:
 
     vector<Rect> CompleteRefRects(Rect controlRect, Point controlPoint)
     {
-        __android_log_print(ANDROID_LOG_INFO, "OFFSET", "%d", refOffset);
         int offset = this->refOffset;
         vector<Rect> outputVector;
         Point br;
@@ -754,12 +752,13 @@ private:
         split(_img, splits);
         splits[2].copyTo(img);*/
 
-        threshold(img, img, 128, 255, THRESH_BINARY);
-
         GaussianBlur(img, img, Size(3,3), 0);
+
+        threshold(img, img, 150, 255, THRESH_BINARY);//128
+
         equalizeHist(img, img);
 
-        morphologyEx(img, img, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(9, 9), Point(-1, -1)));
+        morphologyEx(img, img, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(3, 3), Point(-1, -1)));//9-9
 
         /*Mat kernel = Mat::ones(Size(3,3), CV_8UC1);
         erode(img, img, kernel, Point(-1,-1), 1);*/
@@ -783,13 +782,13 @@ private:
                 double epsilon = 0.01*arcLength(contours[i],true);
                 approxPolyDP( contours[i], contours_poly[i], epsilon, true );
 
-                double area = contourArea(contours_poly[i]);
+                int area = (int)contourArea(contours_poly[i]);//double
                 Point2f center;
                 float radius;
                 minEnclosingCircle(contours_poly[i], center, radius);
-                double cArea = radius * radius * 3.14;
+                int cArea = (int)(radius * radius * 3.14);//double
 
-                if(cArea > 50.0 && cArea < area + area*0.3 && hierarchy[i][3] == -1)
+                if(/*cArea > 50.0 &&*/ cArea < area + area*0.5 && hierarchy[i][3] == -1)//0,3
                 {
                     counter++;
                 }

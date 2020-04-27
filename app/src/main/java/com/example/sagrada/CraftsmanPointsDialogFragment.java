@@ -6,26 +6,28 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
+import android.widget.CheckBox;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 public class CraftsmanPointsDialogFragment extends DialogFragment {
-    public  interface ICraftsmanPointsListener{
-        void AddPoints(int points);
+    public interface ICraftsmanCards {
+        void getCraftValues(int sandpaper, int eglomise, boolean sandpaperCheck, boolean eglomiseCheck);
     }
 
-    ICraftsmanPointsListener listener;
+    ICraftsmanCards listener;
 
     @Override
-    public void onAttach(@NonNull Context context) {
+    public void onAttach(Context context){
         super.onAttach(context);
         try {
-            listener = (ICraftsmanPointsListener) context;
+            listener = (ICraftsmanCards) getTargetFragment();
         } catch (ClassCastException e){
-            throw new ClassCastException(getActivity().toString() + "No ICraftsmanPointsListener implementation");
+            throw new ClassCastException(getActivity().toString() + "No ICraftsmanCards implementation");
         }
     }
 
@@ -36,15 +38,46 @@ public class CraftsmanPointsDialogFragment extends DialogFragment {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.craftsman_point_layout, null);
 
-        builder.setView(view);
-        builder.setTitle("Konečný počet bodů řemeslníků");
+        ImageButton plusSandpaper = view.findViewById(R.id.addBtnSandpaper);
+        ImageButton plusEglomise = view.findViewById(R.id.addBtnEglomise);
+        ImageButton subSandpaper = view.findViewById(R.id.subBtnSandpaper);
+        ImageButton subEglomise = view.findViewById(R.id.subBtnEglomise);
+        TextView sandpaperText = view.findViewById(R.id.numberSandPaper);
+        TextView eglomiseText = view.findViewById(R.id.numberEglomise);
+        CheckBox sandpaper = view.findViewById(R.id.sandpaperID);
+        CheckBox eglomise = view.findViewById(R.id.eglomiseID);
 
-        EditText editText = view.findViewById(R.id.craftsmanEditTextID);
+        plusSandpaper.setOnClickListener(v -> {
+            int num = Integer.parseInt(sandpaperText.getText().toString());
+            sandpaperText.setText(Integer.toString(++num));
+        });
+        plusEglomise.setOnClickListener(v -> {
+            int num = Integer.parseInt(eglomiseText.getText().toString());
+            eglomiseText.setText(Integer.toString(++num));
+        });
+        subSandpaper.setOnClickListener(v -> {
+            int num = Integer.parseInt(sandpaperText.getText().toString());
+            if(num != 0){
+                sandpaperText.setText(Integer.toString(--num));
+            }
+        });
+        subEglomise.setOnClickListener(v -> {
+            int num = Integer.parseInt(eglomiseText.getText().toString());
+            if(num != 0){
+                eglomiseText.setText(Integer.toString(--num));
+            }
+        });
+
+        builder.setView(view);
+        builder.setTitle(R.string.craftsmanCardTitle);
+        builder.setMessage(R.string.craftsmanCardMsg);
 
         builder.setNeutralButton(R.string.cancelString, (dialog, which) -> {});
-        builder.setPositiveButton(R.string.confirmString, (dialog, which) -> {
-            listener.AddPoints(Integer.parseInt(editText.getText().toString()));
-        });
+        builder.setPositiveButton(R.string.confirmString, (dialog, which) -> listener.getCraftValues(
+                Integer.parseInt(sandpaperText.getText().toString()),
+                Integer.parseInt(eglomiseText.getText().toString()),
+                sandpaper.isChecked(),
+                eglomise.isChecked()));
         return builder.create();
     }
 }

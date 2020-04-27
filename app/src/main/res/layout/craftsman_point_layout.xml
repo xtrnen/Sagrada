@@ -1,17 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-    <EditText
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
-        android:layout_marginTop="16dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="4dp"
-        android:id="@+id/craftsmanEditTextID" />
-
+        android:orientation="horizontal">
+        <CheckBox
+            android:id="@+id/sandpaperID"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/cardBrushPaper"
+            android:layout_weight="0.50"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.50">
+            <ImageButton
+                android:id="@+id/subBtnSandpaper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icon_sub_small" />
+            <TextView
+                android:id="@+id/numberSandPaper"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:layout_weight="0.70"
+                android:text="0"
+                tools:ignore="NestedWeights" />
+            <ImageButton
+                android:id="@+id/addBtnSandpaper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icon_plus_small"/>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp">
+        <CheckBox
+            android:id="@+id/eglomiseID"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/cardEglomise"
+            android:layout_weight="0.50"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.50">
+            <ImageButton
+                android:id="@+id/subBtnEglomise"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icon_sub_small" />
+            <TextView
+                android:id="@+id/numberEglomise"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:layout_weight="0.70"
+                android:text="0"
+                tools:ignore="NestedWeights" />
+            <ImageButton
+                android:id="@+id/addBtnEglomise"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icon_plus_small"/>
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

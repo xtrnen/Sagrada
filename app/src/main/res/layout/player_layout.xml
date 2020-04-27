@@ -31,7 +31,7 @@
                     android:id="@+id/playerToolbarCameraButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@android:drawable/ic_menu_camera"
+                    android:src="@drawable/icon_camera"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/playerToolbarInfoButton"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -41,7 +41,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:src="@android:drawable/ic_menu_info_details"
+                    android:src="@drawable/icon_info"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -106,6 +106,7 @@
                 android:layout_weight="1"
                 android:text="@{player.personalQ}"
                 android:textSize="22sp"
+                android:gravity="center"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID" />
 
@@ -113,7 +114,7 @@
                 android:id="@+id/personalQuestBtnID"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_menu_my_calendar"
+                android:src="@drawable/icon_edit_small"
                 app:layout_constraintStart_toEndOf="@+id/pqTextID"
                 app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID" />
         </LinearLayout>
@@ -149,8 +150,15 @@
                 android:layout_weight="1"
                 android:text="@{game.cqString}"
                 android:textSize="22sp"
+                android:gravity="center"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/playerPointsBtnID" />
+            <ImageButton
+                android:id="@+id/gameToolbarAddCQID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layoutDirection="rtl"
+                android:src="@drawable/icon_edit_small" />
         </LinearLayout>
 
         <TextView
@@ -173,7 +181,11 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/craftsmanTitleID">
-
+            <ImageButton
+                android:id="@+id/craftsmanSubBtnID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icon_sub" />
             <TextView
                 android:id="@+id/craftsmanID"
                 android:layout_width="0dp"
@@ -181,13 +193,14 @@
                 android:layout_weight="1"
                 android:text="@{Integer.toString(player.craftsmanPoints)}"
                 android:textSize="22sp"
+                android:gravity="center"
                 app:layout_constraintStart_toStartOf="parent" />
 
             <ImageButton
-                android:id="@+id/craftsmanBtnID"
+                android:id="@+id/craftsmanPlusBtnID"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_menu_my_calendar" />
+                android:src="@drawable/icon_plus" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

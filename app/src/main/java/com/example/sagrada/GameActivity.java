@@ -65,11 +65,11 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         /*ImageButtons in ActionBar*/
         ImageButton deletePlayerButton = findViewById(R.id.playerToolbarDeleteButton);
         ImageButton createPlayerButton = findViewById(R.id.playerToolbarCreatePlayer);
-        ImageButton addCQButton = findViewById(R.id.gameToolbarAddCQID);
+        //ImageButton addCQButton = findViewById(R.id.gameToolbarAddCQID);
         //set onClick actions
         deletePlayerButton.setOnClickListener(v -> ShowDeletePlayerDialog());
         createPlayerButton.setOnClickListener(v -> ShowCreatePlayerDialog());
-        addCQButton.setOnClickListener(v -> {
+        /*.setOnClickListener(v -> {
             PopupMenu popupMenu = new PopupMenu(this, v);
             MenuInflater menuInflater = popupMenu.getMenuInflater();
             menuInflater.inflate(R.menu.cq_menu_layout, popupMenu.getMenu());
@@ -80,7 +80,7 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
                 return true;
             });
             popupMenu.show();
-        });
+        });*/
         /*Show Creation Dialog so we create first user*/
         ShowCreatePlayerDialog();
 

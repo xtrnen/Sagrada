@@ -13,28 +13,27 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.os.ConfigurationCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.example.sagrada.databinding.PlayerLayoutBinding;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
 import Model.Points.Quests.CQ_TYPES;
 import Model.Points.Quests.PQ_TYPES;
+import Model.Rules.RULE_ERR;
+import Model.Rules.RuleMsg;
 import ViewModel.GameViewModel;
 import ViewModel.PlayerViewModel;
 
-public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
+public class PlayerFragment extends Fragment implements IPlayerPointsCallback, CraftsmanPointsDialogFragment.ICraftsmanCards {
     private PlayerViewModel player;
     private static final String FRAGMENT_POSITION = "Pos";
     private static final String FRAGMENT_NAME = "Name";
@@ -43,6 +42,10 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
     private Button playerPointsButton;
     private GameViewModel gameViewModel;
     IPlayerPointsCallback pointsCallback;
+    private boolean isEglomise;
+    private boolean isSandpaper;
+    private int eglomiseValue;
+    private int sandpaperValue;
 
     public PlayerFragment(){}
 
@@ -113,18 +116,20 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
-        ImageButton playerImageInfoButton = view.findViewById(R.id.playerToolbarInfoButton);
         ImageButton playerCameraButton = view.findViewById(R.id.playerToolbarCameraButton);
         ImageButton playerPersonalQuestButton = view.findViewById(R.id.personalQuestBtnID);
-        ImageButton playerCraftsmanButton = view.findViewById(R.id.craftsmanBtnID);
+        ImageButton playerCraftsmanPlusButton = view.findViewById(R.id.craftsmanPlusBtnID);
+        ImageButton playerCraftsmanSubButton = view.findViewById(R.id.craftsmanSubBtnID);
+        ImageButton playerInfoButton = view.findViewById(R.id.playerToolbarInfoButton);
+        ImageButton addCQButton = view.findViewById(R.id.gameToolbarAddCQID);
         playerPointsButton = view.findViewById(R.id.playerPointsBtnID);
-        playerImageInfoButton.setOnClickListener(v -> Log.println(Log.INFO, "Toolbar", "Player info"));
+        playerPointsButton.setText(pointStringLocale() + "0");
         playerCameraButton.setOnClickListener(v -> createCaptureModeDialog());
         playerPointsButton.setOnClickListener(v -> {
             if(player.isPlayerSet()){
                 //pointsCallback.callbackPoints(player.getSlots().getValue(), player.getDices().getValue());
                 if(isOnlyPlayer()){
-                    calculateThis();
+                    createCraftsmanUseDialog();
                 } else {
                     createCalculationDialog();
                 }
@@ -142,7 +147,26 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
             });
             popupMenu.show();
         });
-        playerCraftsmanButton.setOnClickListener( v -> createCraftsmanPointsDialog());
+        addCQButton.setOnClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(getContext(), v);
+            MenuInflater menuInflater = popupMenu.getMenuInflater();
+            menuInflater.inflate(R.menu.cq_menu_layout, popupMenu.getMenu());
+            popupMenu.getMenu().clear();
+            addItemsToMenu(popupMenu.getMenu(), Arrays.asList(getResources().getStringArray(R.array.groupQuestStrings)));
+            popupMenu.setOnMenuItemClickListener(item -> {
+                gameViewModel.addCommonQuest(item.getItemId());
+                return true;
+            });
+            popupMenu.show();
+        });
+        playerInfoButton.setOnClickListener( v -> {
+            ArrayList<Slot> slots = testSlots();
+            ArrayList<Dice> dices = testDices();
+            player.setSlots(slots);
+            player.setDices(dices);
+        });
+        playerCraftsmanPlusButton.setOnClickListener( v -> player.addCraftsmanPoint());
+        playerCraftsmanSubButton.setOnClickListener(v -> player.subCraftsmanPoint());
         setVariableObservers();
     }
 
@@ -166,25 +190,12 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
         });
         dialogBuilder.show();
     }
-    private void createCraftsmanPointsDialog(){
-        AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
-        LayoutInflater inflater = requireActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.craftsman_point_layout, null);
-
-        dialog.setView(view);
-        dialog.setTitle("Konečný počet bodů řemeslníků");
-
-        EditText editText = view.findViewById(R.id.craftsmanEditTextID);
-
-        dialog.setNeutralButton("Zrušit", (dialogV, which) -> {});
-        dialog.setPositiveButton("Potvrdit", (dialogV, which) -> {
-            ArrayList<Slot> slots = testSlots();
-            ArrayList<Dice> dices = testDices();
-            player.setSlots(slots);
-            player.setDices(dices);
-            player.setCraftsmanPoints(Integer.parseInt(editText.getText().toString()));
-        });
-        dialog.show();
+    private void createCraftsmanUseDialog(){
+        //TODO: refactor to use for question if 2 specific craftsman cards were used
+        //TODO: Dialog pro potvrzení jedné ze dvou karet pro porušení pravidla "Rydlo na eglomisé - lze porušit barvu políčka", "Brusný papír - lze porušit číslo pole"
+        CraftsmanPointsDialogFragment craftsmanPointsDialogFragment = new CraftsmanPointsDialogFragment();
+        craftsmanPointsDialogFragment.setTargetFragment(this, 0);
+        craftsmanPointsDialogFragment.show(getActivity().getSupportFragmentManager(), "craftsmanDialog");
     }
     private void createCalculationDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -248,12 +259,9 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
         player.personalQ.observe(this, pqCardObserver);
     }
     private void craftsmanObserver(){
-        final Observer<Integer> craftsmanObserver = new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer integer) {
-                if(player.isPlayerSet()){
-                    playerReady();
-                }
+        final Observer<Integer> craftsmanObserver = integer -> {
+            if(player.isPlayerSet()){
+                playerReady();
             }
         };
         player.getCraftsman().observe(this, craftsmanObserver);
@@ -276,13 +284,23 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
         gameViewModel.gameBoard.setSlotArray(slotsArray.toArray(new Slot[slotsArray.size()]));
         gameViewModel.gameBoard.assignToRuleHandler();
         int points = 0;
+        if(isEglomise){
+            Log.println(Log.INFO, "Calculate", "isEglomise card " + eglomiseValue);
+        }
+        if(isSandpaper){
+            Log.println(Log.INFO, "Calculate", "isSandpaper card " + sandpaperValue);
+        }
         if(gameViewModel.gameBoard.ruleCheck()){
             points = gameViewModel.gameBoard.Evaluation(PQ_TYPES.values()[player.getPQIndex().getValue()], CQ_TYPES.values()[gameViewModel.getCommonQuest().getValue()], player.getCraftsman().getValue());
         } else {
             playerPointsButton.setBackgroundResource(R.drawable.points_btn_background_red);
+            //Check error types
+            ArrayList<RuleMsg> list = gameViewModel.gameBoard.getLogList();
         }
         player.setPoints(points);
-        playerPointsButton.setText("Body: " + points);
+        String text;
+        text = pointStringLocale();
+        playerPointsButton.setText(text + points);
     }
     private ArrayList<Dice> testDices(){
         ArrayList<Dice> array = new ArrayList<Dice>();
@@ -323,5 +341,23 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback{
 
         return array;
     }
-    //TODO: Dialog pro potvrzení jedné ze dvou karet pro porušení pravidla "Rydlo na eglomisé - lze porušit barvu políčka", "Brusný papír - lze porušit číslo pole"
+    private String pointStringLocale() {
+        String text;
+            if (ConfigurationCompat.getLocales(getResources().getConfiguration()).get(0).getDisplayLanguage().equals("cs")) {
+            text = "Body: ";
+        } else {
+            text = "Points: ";
+
+        }
+        return text;
+    }
+
+    @Override
+    public void getCraftValues(int sandpaper, int eglomise, boolean sandpaperCheck, boolean eglomiseCheck) {
+        isEglomise = eglomiseCheck;
+        isSandpaper = sandpaperCheck;
+        eglomiseValue = eglomise;
+        sandpaperValue = sandpaper;
+        calculateThis();
+    }
 }

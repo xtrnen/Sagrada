@@ -32,6 +32,19 @@
     <string name="declineString">Odmítnout</string>
     <string name="helpString">Nápověda</string>
 
+    <!--String values of error logs-->
+    <string name="edgeRuleError">Alespoň jedna kostka musí být na okraji hracího rámu</string>
+    <string name="slotConditionError">Kostka nesouhlasí s klíčem na pozici: </string>
+    <string name="neighborRuleError">Kostka nesousedící s žádnou kostkou na pozici: </string>
+    <string name="diffDicesError">Kostky se stejnou barvou/číslem okolo pozice: </string>
+
+    <!---->
+    <string name="craftsmanCardTitle">Byly použity karty měnící pravidlo?</string>
+    <string name="craftsmanCardMsg">Zvolte kartu a počet použití</string>
+
+    <string name="cardBrushPaper">Brusný papír</string>
+    <string name="cardEglomise">Rydlo na eglomisé</string>
+
     <string-array name="personalQuestStrings">
         <item>Ametyst</item>
         <item>Tyrkys</item>

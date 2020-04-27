@@ -31,6 +31,18 @@
     <string name="declineString">Decline</string>
     <string name="helpString">Help</string>
 
+    <!--String values of error logs-->
+    <string name="edgeRuleError">At least one dice has to be on edge slot.</string>
+    <string name="slotConditionError">Dice does not fit pattern on position: </string>
+    <string name="neighborRuleError">Dice without neighbor on position: </string>
+    <string name="diffDicesError">Dices with same color/number around position: </string>
+
+    <string name="craftsmanCardTitle">Rule bending cards were used?</string>
+    <string name="craftsmanCardMsg">Choose a card and times of use</string>
+
+    <string name="cardBrushPaper">Sandpaper</string>
+    <string name="cardEglomise">Eglomisé digger</string>
+    
     <!--String values of quest cards-->
     <string-array name="personalQuestStrings">
         <item>Amethyst</item>
