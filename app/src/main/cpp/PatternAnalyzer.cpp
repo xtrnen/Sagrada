@@ -207,7 +207,7 @@ private:
             float radius;
             minEnclosingCircle(poly, center, radius);
             double cArea = radius * radius * 3.14;
-            double areaOffset = area * 0.5;
+            double areaOffset = area * 0.7;
 
             if(area > 50.0 && cArea >= area && cArea <= area + areaOffset){
                 //__android_log_print(ANDROID_LOG_INFO, "DDD", "%f || %f", area, cArea);
@@ -232,7 +232,7 @@ private:
                 bottom = cent;
         }
 
-        circle(this->tmp, bottom, 1, Scalar(0,255,0), 5);
+        circle(this->tmp, bottom, 2, Scalar(0,255,0), 5);
 
         return bottom;
     }
@@ -293,7 +293,7 @@ private:
                 RotatedRect roRect = minAreaRect(contours_poly[i]);
                 int area = (int)contourArea(contours_poly[i]);
                 int roArea = roRect.boundingRect().area();
-                if(roRect.boundingRect().br().y < this->controlPoint.y && area > 50 /*&& hierarchy[i][2] != -1*/ && roArea >= area && roArea < area*2)
+                if(roRect.boundingRect().br().y < this->controlPoint.y && area > 1000 && area < 20000 && roArea >= area && roArea < area * 2)
                 {
                     sum += area;
                     count++;
@@ -321,7 +321,7 @@ private:
                 rectangle(drawing, boxes[i], Scalar(0,255,0), 5);
             }
         }
-        __android_log_print(ANDROID_LOG_INFO, "DD", "%d", count);
+
         if(count != 0)
         {
             this->refHeight = sumHeight / count;

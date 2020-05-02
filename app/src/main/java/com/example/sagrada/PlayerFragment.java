@@ -88,6 +88,7 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
             assert data != null;
             player.setDices(data.getParcelableArrayListExtra(GameActivity.DATA_DICES));
             player.setSlots(data.getParcelableArrayListExtra(GameActivity.DATA_SLOTS));
+
         }
     }
 
@@ -359,6 +360,13 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
 
         }
         return text;
+    }
+    private boolean checkRules(){
+        ArrayList<Dice> dicesArray = player.getDices().getValue();
+        ArrayList<Slot> slotsArray = player.getSlots().getValue();
+        gameViewModel.gameBoard.setDiceArray(dicesArray.toArray(new Dice[dicesArray.size()]));
+        gameViewModel.gameBoard.setSlotArray(slotsArray.toArray(new Slot[slotsArray.size()]));
+        gameViewModel.gameBoard.assignToRuleHandler();
     }
 
     @Override

@@ -24,20 +24,20 @@ enum SagradaColor {
 struct color_range
 {
     /*Yellow color*/
-    Scalar lowYellow = Scalar(15,90,20);//,100,20
-    Scalar lowYellowSlot = Scalar(15,90,60);
-    Scalar highYellow = Scalar(35,255,255);
+    Scalar lowYellow = Scalar(15, 90, 100);//,100,20
+    Scalar lowYellowSlot = Scalar(15, 90, 60);
+    Scalar highYellow = Scalar(35, 255, 255);
 
     /*Green color*/
-    Scalar lowDiceGreen = Scalar(40,100,35);
-    Scalar lowGreen = Scalar(35,50,35);//40
-    Scalar highGreen = Scalar(80,255,255);//90
-    Scalar highDiceGreen = Scalar(85,255,255);//90-255-255
+    Scalar lowDiceGreen = Scalar(40, 100, 35);
+    Scalar lowGreen = Scalar(35, 50, 35);//40
+    Scalar highGreen = Scalar(80, 255, 255);//90
+    Scalar highDiceGreen = Scalar(85, 255, 255);//90-255-255
 
     /*Blue color*/
-    Scalar lowDiceBlue = Scalar(85,80,40);//80-50-20
-    Scalar lowBlue = Scalar(80,50,20);
-    Scalar highBlue = Scalar(130,255,255);//127-255-255
+    Scalar lowDiceBlue = Scalar(85, 80, 40);//80-50-20
+    Scalar lowBlue = Scalar(80, 50, 40);
+    Scalar highBlue = Scalar(130, 255, 255);//127-255-255
 
     /*Red color*/
     Scalar lowRedFirstMask = Scalar(0, 135, 50);//(0, 150, 70)
@@ -46,14 +46,14 @@ struct color_range
     Scalar highRedSecondMask = Scalar(180, 255, 255);//(180, 255, 255)
 
     /*Violet color*/
-    Scalar lowViolet = Scalar(135,100,35);//135-50-20
-    Scalar highViolet = Scalar(170,255,255);
+    Scalar lowViolet = Scalar(135, 100, 35);//135-50-20
+    Scalar highViolet = Scalar(170, 255, 255);
 
     /*White color*/
-    Scalar lowWhite = Scalar(0,0,120);
-    Scalar lowDiceWhite = Scalar(0,0,120);
-    Scalar highDiceWhite = Scalar(180,80,255);
-    Scalar highWhite = Scalar(180,50,255);
+    Scalar lowWhite = Scalar(0, 0, 150);
+    Scalar lowDiceWhite = Scalar(0, 0, 120);
+    Scalar highDiceWhite = Scalar(180, 80, 255);
+    Scalar highWhite = Scalar(180, 50, 255);
 } COLOR_RANGES;
 
 struct s_circle
