@@ -38,18 +38,22 @@ public class RuleHandler {
                 if(IsEdgeDiceRule(row, col)){
                     edgeRule = true;
                 } else{
-                    logList.add(new RuleMsg(row, col, RULE_ERR.EDGE_ERR));
+                    diceArray[row][col].errType = RULE_ERR.EDGE_ERR;
+                    //logList.add(new RuleMsg(row, col, RULE_ERR.EDGE_ERR));
                 }
                 if(!SlotConditionRule(row, col)){
-                    logList.add(new RuleMsg(row, col, RULE_ERR.SLOT_ERR));
+                    diceArray[row][col].errType = RULE_ERR.SLOT_ERR;
+                    //logList.add(new RuleMsg(row, col, RULE_ERR.SLOT_ERR));
                     return false;
                 }
                 if(!IsNeighborRule(row, col)){
-                    logList.add(new RuleMsg(row, col, RULE_ERR.NEIGHBOR_ERR));
+                    diceArray[row][col].errType = RULE_ERR.NEIGHBOR_ERR;
+                    //logList.add(new RuleMsg(row, col, RULE_ERR.NEIGHBOR_ERR));
                     return false;
                 }
                 if(!IsDiffDice(row, col)){
-                    logList.add(new RuleMsg(row, col, RULE_ERR.DIFF_ERR));
+                    diceArray[row][col].errType = RULE_ERR.DIFF_ERR;
+                    //logList.add(new RuleMsg(row, col, RULE_ERR.DIFF_ERR));
                     return false;
                 }
             }
@@ -124,6 +128,7 @@ public class RuleHandler {
     }
     private Boolean IsDiffDice(int row, int col)
     {
+        //TODO: Zřejmě odebrat LT, RT, LB, RB
         if(diceArray.length == 1){
             return true;
         }

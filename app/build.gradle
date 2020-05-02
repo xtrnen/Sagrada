@@ -54,4 +54,5 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.0'
     api 'com.otaliastudios:cameraview:2.6.2'
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
+    implementation 'com.tomergoldst.android:tooltips:1.0.10'
 }

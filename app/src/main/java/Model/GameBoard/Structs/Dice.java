@@ -3,11 +3,14 @@ package Model.GameBoard.Structs;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import Model.Rules.RULE_ERR;
+
 public class Dice implements Parcelable {
     public int number;
     public int row;
     public int col;
     public String color;
+    public RULE_ERR errType;
 
     public static final Parcelable.Creator<Dice> CREATOR = new Parcelable.Creator<Dice>() {
 
@@ -28,6 +31,7 @@ public class Dice implements Parcelable {
         this.color = _color;
         this.row = _row;
         this.col = _col;
+        this.errType = RULE_ERR.NO_ERR;
     }
     /*Parceling methods*/
     public Dice(Parcel in){
@@ -35,6 +39,7 @@ public class Dice implements Parcelable {
         this.row = in.readInt();
         this.col = in.readInt();
         this.color = in.readString();
+        this.errType = RULE_ERR.values()[in.readInt()];
     }
 
     @Override
@@ -48,5 +53,10 @@ public class Dice implements Parcelable {
         dest.writeInt(this.row);
         dest.writeInt(this.col);
         dest.writeString(this.color);
+        dest.writeInt(this.errType.ordinal());
+    }
+
+    public void setErrType(RULE_ERR type){
+        this.errType = type;
     }
 }

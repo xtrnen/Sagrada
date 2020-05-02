@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
+import Model.GameBoard.Structs.SlotInfo;
 import Model.Points.Quests.CQ_TYPES;
 import Model.Points.Quests.PQ_TYPES;
 import Model.Rules.RULE_ERR;
@@ -38,6 +39,7 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
     private static final String FRAGMENT_POSITION = "Pos";
     private static final String FRAGMENT_NAME = "Name";
     private static final String FRAGMENT_PQ = "PQ";
+    final static int REQUEST_INFO = 42;
     private Integer counter;
     private Button playerPointsButton;
     private GameViewModel gameViewModel;
@@ -75,20 +77,17 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
         if(resultCode == GameActivity.REQUEST_SLOTS){
             assert data != null;
             ArrayList<Slot> slots = data.getParcelableArrayListExtra(GameActivity.DATA_SLOTS);
-            assert slots != null;
-            for (Slot slot : slots){
-                Log.d("SLOT", slot.infoType);
-            }
             player.setSlots(slots);
         }
         if(resultCode == GameActivity.REQUEST_DICES){
             assert data != null;
             ArrayList<Dice> dices = data.getParcelableArrayListExtra(GameActivity.DATA_DICES);
-            assert dices != null;
-            for(Dice dice : dices){
-                Log.println(Log.INFO, "DICES", dice.color + "|" + dice.number + "( " + dice.row + "|" + dice.col + ")");
-            }
             player.setDices(dices);
+        }
+        if(resultCode == REQUEST_INFO){
+            assert data != null;
+            player.setDices(data.getParcelableArrayListExtra(GameActivity.DATA_DICES));
+            player.setSlots(data.getParcelableArrayListExtra(GameActivity.DATA_SLOTS));
         }
     }
 
@@ -159,15 +158,14 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
             });
             popupMenu.show();
         });
-        playerInfoButton.setOnClickListener( v -> {
-            ArrayList<Slot> slots = testSlots();
-            ArrayList<Dice> dices = testDices();
-            player.setSlots(slots);
-            player.setDices(dices);
-        });
+        playerInfoButton.setOnClickListener( v -> callInformationActivity());
         playerCraftsmanPlusButton.setOnClickListener( v -> player.addCraftsmanPoint());
         playerCraftsmanSubButton.setOnClickListener(v -> player.subCraftsmanPoint());
         setVariableObservers();
+
+        /*TEST*/
+        player.setSlots(testSlots());
+        player.setDices(testDices());
     }
 
     @Override
@@ -215,6 +213,12 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
         Intent cameraIntent = new Intent(getActivity(), CamActivity.class);
         cameraIntent.putExtra("Data", requestCode);
         startActivityForResult(cameraIntent, requestCode);
+    }
+    private void callInformationActivity(){
+        Intent intent = new Intent(getActivity(), InformationActivity.class);
+        intent.putParcelableArrayListExtra(GameActivity.DATA_SLOTS, player.getSlots().getValue());
+        intent.putParcelableArrayListExtra(GameActivity.DATA_DICES, player.getDices().getValue());
+        startActivityForResult(intent, REQUEST_INFO);
     }
 
     private void addItemsToMenu(Menu menu, List<String> titles){
@@ -305,10 +309,15 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
     private ArrayList<Dice> testDices(){
         ArrayList<Dice> array = new ArrayList<Dice>();
 
-        array.add(new Dice("GREEN", 6, 0,2));
-        array.add(new Dice("BLUE", 2, 1,2));
-        array.add(new Dice("YELLOW", 3, 2,2));
+        array.add(new Dice("GREEN", 6, 0,0));
+        array.add(new Dice("GREEN", 4, 0,2));
+        array.add(new Dice("BLUE", 2, 1,0));
+        array.add(new Dice("BLUE", 3, 1,2));
+        array.add(new Dice("YELLOW", 3, 2,0));
+        array.add(new Dice("YELLOW", 2, 2,2));
+        array.add(new Dice("RED", 1, 3,0));
         array.add(new Dice("RED", 1, 3,2));
+        array.get(2).errType = RULE_ERR.DIFF_ERR;
 
         return array;
     }

@@ -42,6 +42,9 @@
 
     <string name="cardBrushPaper">Sandpaper</string>
     <string name="cardEglomise">Eglomisé digger</string>
+
+    <string name="infoLayoutSlotText"><u>Information about key card:</u></string>
+    <string name="infoLayoutDiceText"><u>Information about stained glass dices:</u></string>
     
     <!--String values of quest cards-->
     <string-array name="personalQuestStrings">
@@ -64,4 +67,28 @@
         <item>Colorful diagonals</item>
     </string-array>
 
+    <string name="menuItemNone">None</string>
+    <string-array name="colorMenuItems">
+        <item>Red</item>
+        <item>Green</item>
+        <item>Blue</item>
+        <item>Violet</item>
+        <item>Yellow</item>
+        <item>White</item>
+    </string-array>
+    <string-array name="numberMenuItems">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+
+    <string-array name="errorMessageArray">
+        <item>At least one dice has to be on the edge of stained glass.</item>
+        <item>Dice has to match pattern on the same position.</item>
+        <item>Dice has to have at least one neighbor on diagonal or vertically or horizontally.</item>
+        <item>Dice cannot have edge neighbors of same color or number.</item>
+    </string-array>
 </resources>

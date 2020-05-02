@@ -91,12 +91,4 @@ public class GameViewModel extends ViewModel {
         }
         return Arrays.asList(context.getResources().getStringArray(R.array.groupQuestStrings)).get(commonQuest.getValue());
     }
-
-    public void output(){
-        if(players.getValue() != null){
-            for(Player player : players.getValue()){
-                Log.println(Log.INFO, "HOSE", Integer.toString(player.points));
-            }
-        }
-    }
 }

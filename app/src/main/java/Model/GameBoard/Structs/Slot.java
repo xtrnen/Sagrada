@@ -29,7 +29,7 @@ public class Slot implements Parcelable {
         this.infoType = SetInfoType(_info);
     }
 
-    private String SetInfoType(String _info){
+    public String SetInfoType(String _info){
         switch (_info){
             case "NONE":
             case "WHITE":

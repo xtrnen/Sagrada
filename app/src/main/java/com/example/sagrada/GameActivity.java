@@ -65,23 +65,9 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         /*ImageButtons in ActionBar*/
         ImageButton deletePlayerButton = findViewById(R.id.playerToolbarDeleteButton);
         ImageButton createPlayerButton = findViewById(R.id.playerToolbarCreatePlayer);
-        //ImageButton addCQButton = findViewById(R.id.gameToolbarAddCQID);
         //set onClick actions
         deletePlayerButton.setOnClickListener(v -> ShowDeletePlayerDialog());
         createPlayerButton.setOnClickListener(v -> ShowCreatePlayerDialog());
-        /*.setOnClickListener(v -> {
-            PopupMenu popupMenu = new PopupMenu(this, v);
-            MenuInflater menuInflater = popupMenu.getMenuInflater();
-            menuInflater.inflate(R.menu.cq_menu_layout, popupMenu.getMenu());
-            popupMenu.getMenu().clear();
-            addItemsToMenu(popupMenu.getMenu(), Arrays.asList(getResources().getStringArray(R.array.groupQuestStrings)));
-            popupMenu.setOnMenuItemClickListener(item -> {
-                gameViewModel.addCommonQuest(item.getItemId());
-                return true;
-            });
-            popupMenu.show();
-        });*/
-        /*Show Creation Dialog so we create first user*/
         ShowCreatePlayerDialog();
 
         viewPager = findViewById(R.id.GamePager);
@@ -119,7 +105,6 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         }
         gamePagerCollectionAdapter.addFragment(playerFragment, username, pqIndex);
         viewPager.setCurrentItem(gamePagerCollectionAdapter.getItemCount());
-        gameViewModel.output();
     }
     @Override
     public void onCreatePlayerCanceled() {

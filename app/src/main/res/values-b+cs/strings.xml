@@ -45,6 +45,9 @@
     <string name="cardBrushPaper">Brusný papír</string>
     <string name="cardEglomise">Rydlo na eglomisé</string>
 
+    <string name="infoLayoutSlotText"><u>Informace o kartě klíče:</u></string>
+    <string name="infoLayoutDiceText"><u>Informace o kostkách vitráže:</u></string>
+
     <string-array name="personalQuestStrings">
         <item>Ametyst</item>
         <item>Tyrkys</item>
@@ -63,5 +66,30 @@
         <item>Všechny barvy duhy</item>
         <item>Světlo a stín</item>
         <item>Barevné diagonály</item>
+    </string-array>
+
+    <string name="menuItemNone">Žádná</string>
+    <string-array name="colorMenuItems">
+        <item>Červená</item>
+        <item>Zelená</item>
+        <item>Modrá</item>
+        <item>Fialová</item>
+        <item>Žlutá</item>
+        <item>Bílá</item>
+    </string-array>
+    <string-array name="numberMenuItems">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+
+    <string-array name="errorMessageArray">
+        <item>Alespoň jedna kostka musí být na okraji vitráže.</item>
+        <item>Kostka musí splnit podmínku daného pole karty klíče</item>
+        <item>Kostka musí mít alespoň jednoho souseda, ať už hranou, nebo na diagonále.</item>
+        <item>Kostka nesmí sousedit hranou s kostkou stejné barvy nebo čísla.</item>
     </string-array>
 </resources>

@@ -114,25 +114,29 @@ public:
         //Find control Point
         controlPoint.x += oft;
         Rect rect = Rect(Point(0,0), controlPoint);
-        __android_log_print(ANDROID_LOG_INFO, "MSG", "Rects");
+        __android_log_print(ANDROID_LOG_INFO, "MSG", "Boxes");
         //Find color slots & detect contours
         vector<Rect> boxes;
         boxes = ApplyColorMasks(this->patternImg(rect));
 
+        if(boxes.empty()){
+            return vector<Mat>();
+        }
+        __android_log_print(ANDROID_LOG_INFO, "MSG", "RectOffset");
         this->refOffset = DetectRectOffset(boxes);
         __android_log_print(ANDROID_LOG_INFO, "MSG", "Split");
         //SplitImg
         vector<Rect> matrixRect = RectPatternGrid(4, 5, controlPoint, boxes);
-        __android_log_print(ANDROID_LOG_INFO, "MSG", "Rect");
+        __android_log_print(ANDROID_LOG_INFO, "MSG", "Rect %d", matrixRect.size());
 
         for(Rect rect : matrixRect)
         {
-            if(!rect.empty())
-                rectangle(this->tmp, rect, Scalar(0,0,255), 3);
+            rectangle(this->tmp, rect, Scalar(0,0,255), 3);
         }
 
         matrix = matrixRect;
 
+        __android_log_print(ANDROID_LOG_INFO, "MSG", "Split Image");
         return SplitImageToPattern(4, 5, matrixRect, this->patternImg);
     }
 
@@ -206,7 +210,7 @@ private:
             double areaOffset = area * 0.5;
 
             if(area > 50.0 && cArea >= area && cArea <= area + areaOffset){
-                __android_log_print(ANDROID_LOG_INFO, "DDD", "%f || %f", area, cArea);
+                //__android_log_print(ANDROID_LOG_INFO, "DDD", "%f || %f", area, cArea);
                 centers.push_back(Point((int)center.x, (int)center.y));
             }
         }
@@ -264,6 +268,7 @@ private:
     Mat FindContours(Mat input, vector<Rect>& rectBoxes)
     {
         Mat drawing = Mat::zeros( input.size(), CV_8UC3);
+        morphologyEx(input, input, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(9,9), Point(-1, -1)));
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
 
@@ -316,7 +321,7 @@ private:
                 rectangle(drawing, boxes[i], Scalar(0,255,0), 5);
             }
         }
-        //__android_log_print(ANDROID_LOG_INFO, "DD", "%d", count);
+        __android_log_print(ANDROID_LOG_INFO, "DD", "%d", count);
         if(count != 0)
         {
             this->refHeight = sumHeight / count;
@@ -331,8 +336,8 @@ private:
     vector<Rect> RectPatternGrid(int rows, int cols, Point controlPoint, vector<Rect> contourBoxes)
     {
         vector<vector<Rect>> rowsWithBoxes; //output of FOR cycle with rectangles found on specified row
-        vector<Rect> rectsOnRow(5); //temporary storage for know rectangles on row
-        vector<Rect> refRects(4);  //temporary storage for referenceRect on each row
+        vector<Rect> rectsOnRow; //temporary storage for know rectangles on row
+        vector<Rect> refRects;  //temporary storage for referenceRect on each row
         vector<Rect> blankRects;    //storage of created rects on positions where should be found rect contour, but was not found
         vector<Rect> tmpVector;     //For cycle vector of all rectangles on line, which is later sorted and pushed to output vector
         vector<Rect> retVector;
@@ -378,6 +383,7 @@ private:
 
     vector<Rect> CompleteRefRects(Rect controlRect, Point controlPoint)
     {
+        //TODO: zde doplnit, že z existujicích slotů nastav jako referenční na řádku ten slot, který je nejblíže kontrol pointu na řádku. Pokud na řádku není, vytvoř
         int offset = this->refOffset;
         vector<Rect> outputVector;
         Point br;
@@ -1003,25 +1009,25 @@ private:
             int yB = box.br().y;
             for(Rect rect : boxes)
             {
-                if(rect.tl().x > xR && rect.tl().x <= xR + this->refWidth && rect.br().y >= yB - offset && rect.br().y <= yB + offset)
+                if(rect.x > xR && rect.x <= xR + this->refWidth && rect.y + rect.height >= yB - offset && rect.y + rect.height <= yB + offset)
                 {
                     //__android_log_print(ANDROID_LOG_INFO, "OFS--xR", "%d | %d -- %d", rect.tl().x, xR, rect.tl().x - xR);
-                    return  rect.tl().x - xR;
+                    return  rect.x - xR;
                 }
-                else if (rect.br().x < xL && rect.br().x >= xL - this->refWidth && rect.br().y >= yB - offset && rect.br().y <= yB + offset)
+                else if (rect.x + rect.width < xL && rect.x + rect.width >= xL - this->refWidth && rect.y + rect.height >= yB - offset && rect.y + rect.height <= yB + offset)
                 {
                     //__android_log_print(ANDROID_LOG_INFO, "OFS--xL", "%d | %d -- %d", rect.br().x, xL, xL - rect.br().x);
-                    return xL - rect.br().x;
+                    return xL - rect.x + rect.width;
                 }
-                else if (rect.br().y < yT && rect.br().y >= yT - this->refHeight && rect.br().x >= xL - offset && rect.br().x <= xL + offset)
+                else if (rect.y + rect.height < yT && rect.y + rect.height >= yT - this->refHeight && rect.x + rect.width >= xL - offset && rect.x + rect.width <= xL + offset)
                 {
                     //__android_log_print(ANDROID_LOG_INFO, "OFS--yT", "%d | %d -- %d", rect.br().y, yT, yT - rect.br().y);
-                    return yT - rect.br().y;
+                    return yT - rect.y + rect.height;
                 }
-                else if (rect.tl().y > yB && rect.tl().y <= yB + this->refHeight && rect.tl().x >= xR - offset && rect.tl().x <= xR + offset)
+                else if (rect.y > yB && rect.y <= yB + this->refHeight && rect.x >= xR - offset && rect.x <= xR + offset)
                 {
                     //__android_log_print(ANDROID_LOG_INFO, "OFS--yB", "%d | %d -- %d", rect.tl().y, yB, rect.br().y - yB);
-                    return (rect.br().y - yB) - rect.height;
+                    return (rect.y + rect.height - yB) - rect.height;
                 }
             }
             box = boxes.back();
