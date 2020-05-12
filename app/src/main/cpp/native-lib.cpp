@@ -59,7 +59,8 @@ JNIEXPORT jobjectArray JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *en
     //diceAnalyzer.DiceOutput();
     jobjectArray outputArray = BuildDicesOutput(env, diceAnalyzer.dices);
 
-    diceAnalyzer.diceBoundImg.copyTo(outputImg);
+    //diceAnalyzer.diceBoundImg.copyTo(outputImg);
+    resize(diceAnalyzer.diceBoundImg, outputImg, Size(diceImg.cols, diceImg.rows));
     //tp.copyTo(outputImg);
     return outputArray;
 };

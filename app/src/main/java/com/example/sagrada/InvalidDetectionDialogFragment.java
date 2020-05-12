@@ -12,9 +12,9 @@ import androidx.fragment.app.DialogFragment;
 
 public class InvalidDetectionDialogFragment extends DialogFragment {
     public interface IDetectionFailedDialogListener {
-        public void onCaptureAgain();
-        public void onUserHandle();
-        public void onCancel();
+        void onCaptureAgain();
+        void onUserHandle();
+        void onCancel();
     }
     private IDetectionFailedDialogListener detectionFailedDialogListener;
 
@@ -32,26 +32,11 @@ public class InvalidDetectionDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setPositiveButton("Capture Again", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                detectionFailedDialogListener.onCaptureAgain();
-            }
-        });
-        builder.setNegativeButton("Fill myself", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                detectionFailedDialogListener.onUserHandle();
-            }
-        });
-        builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                detectionFailedDialogListener.onCancel();
-            }
-        });
+        builder.setTitle(R.string.invalidDetectDialogTitle);
+        builder.setMessage(R.string.invalidDetectDialogText);
+        builder.setNeutralButton(R.string.cancelString, (dialog, which) -> detectionFailedDialogListener.onCancel());
+        builder.setNegativeButton(R.string.invalidDetectDialogMyself, (dialog, which) -> detectionFailedDialogListener.onUserHandle());
+        builder.setPositiveButton(R.string.invalidDetectDialogAgain, (dialog, which) -> detectionFailedDialogListener.onCaptureAgain());
         return builder.create();
     }
-
-
 }

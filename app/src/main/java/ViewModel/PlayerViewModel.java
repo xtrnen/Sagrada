@@ -106,6 +106,6 @@ public class PlayerViewModel extends ViewModel {
     /*CHECK PLAYER STATS*/
     private boolean isDiceSet(){ return dices.getValue() != null && dices.getValue().size() > 0; }
     private boolean isSlotSet(){ return slots.getValue() != null && slots.getValue().size() > 0; }
-    private boolean isCraftsmanSet(){ return craftsmanPoints.getValue() != null && craftsmanPoints.getValue() > 0; }
+    private boolean isCraftsmanSet(){ return craftsmanPoints.getValue() != null && craftsmanPoints.getValue() >= 0; }
     private boolean areCardsSet(){ return (cqIndex.getValue() != null && pqIndex.getValue() != null); }
 }

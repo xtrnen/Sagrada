@@ -37,6 +37,7 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
     TabLayout tabLayout;
     public final static int REQUEST_SLOTS = 1;
     public final static int REQUEST_DICES = 2;
+    public final static int REQUEST_INFO_ACTIVITY = 3;
     public final static String DATA_SLOTS = "Slots";
     public final static String DATA_DICES = "Dices";
     //TODO: Dialog reacts to click anywhere with dismiss of dialog...
@@ -136,16 +137,13 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.GameMenuHelp:
-                Log.println(Log.INFO, "MenuOption", "Help msg!");
                 //TODO: Dialog or activity with guidelines
                 return true;
             case R.id.GameMenuQuitGame:
-                Log.println(Log.INFO, "MenuOption", "Quit clicked");
                 Intent intent = new Intent(GameActivity.this, MenuActivity.class);
                 this.finish();
                 startActivity(intent);
             case R.id.GameMenuSettings:
-                Log.println(Log.INFO, "MenuOption", "Settings clicked");
                 //TODO: Go to settings activity
                 return true;
             default:

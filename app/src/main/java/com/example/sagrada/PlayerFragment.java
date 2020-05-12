@@ -10,7 +10,6 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import androidx.annotation.NonNull;
@@ -26,28 +25,26 @@ import java.util.Arrays;
 import java.util.List;
 import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
-import Model.GameBoard.Structs.SlotInfo;
 import Model.Points.Quests.CQ_TYPES;
 import Model.Points.Quests.PQ_TYPES;
-import Model.Rules.RULE_ERR;
-import Model.Rules.RuleMsg;
 import ViewModel.GameViewModel;
 import ViewModel.PlayerViewModel;
 
-public class PlayerFragment extends Fragment implements IPlayerPointsCallback, CraftsmanPointsDialogFragment.ICraftsmanCards {
+public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
     private PlayerViewModel player;
     private static final String FRAGMENT_POSITION = "Pos";
     private static final String FRAGMENT_NAME = "Name";
     private static final String FRAGMENT_PQ = "PQ";
-    final static int REQUEST_INFO = 42;
+    final static int REQUEST_INFO = 41;
+    final static int REQUEST_INFO_VALID = 42;
+    final static int REQUEST_INFO_INVALID = -42;
     private Integer counter;
     private Button playerPointsButton;
     private GameViewModel gameViewModel;
     IPlayerPointsCallback pointsCallback;
-    private boolean isEglomise;
-    private boolean isSandpaper;
     private int eglomiseValue;
     private int sandpaperValue;
+    private boolean ruleOK = false;
 
     public PlayerFragment(){}
 
@@ -84,11 +81,21 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
             ArrayList<Dice> dices = data.getParcelableArrayListExtra(GameActivity.DATA_DICES);
             player.setDices(dices);
         }
-        if(resultCode == REQUEST_INFO){
+        if(resultCode == REQUEST_INFO_VALID){
             assert data != null;
             player.setDices(data.getParcelableArrayListExtra(GameActivity.DATA_DICES));
             player.setSlots(data.getParcelableArrayListExtra(GameActivity.DATA_SLOTS));
-
+            playerPointsButton.setBackgroundResource(R.drawable.points_btn_background_green);
+            ruleOK = true;
+        }
+        if(resultCode == REQUEST_INFO_INVALID){
+            assert data != null;
+            player.setDices(data.getParcelableArrayListExtra(GameActivity.DATA_DICES));
+            player.setSlots(data.getParcelableArrayListExtra(GameActivity.DATA_SLOTS));
+            playerPointsButton.setBackgroundResource(R.drawable.points_btn_background_red);
+        }
+        if(resultCode == GameActivity.REQUEST_INFO_ACTIVITY){
+            callInformationActivity();
         }
     }
 
@@ -126,13 +133,8 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
         playerPointsButton.setText(pointStringLocale() + "0");
         playerCameraButton.setOnClickListener(v -> createCaptureModeDialog());
         playerPointsButton.setOnClickListener(v -> {
-            if(player.isPlayerSet()){
-                //pointsCallback.callbackPoints(player.getSlots().getValue(), player.getDices().getValue());
-                if(isOnlyPlayer()){
-                    createCraftsmanUseDialog();
-                } else {
-                    createCalculationDialog();
-                }
+            if(player.isPlayerSet() && ruleOK){
+                calculateThis();
             }
         });
         playerPersonalQuestButton.setOnClickListener(v -> {
@@ -163,10 +165,6 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
         playerCraftsmanPlusButton.setOnClickListener( v -> player.addCraftsmanPoint());
         playerCraftsmanSubButton.setOnClickListener(v -> player.subCraftsmanPoint());
         setVariableObservers();
-
-        /*TEST*/
-        player.setSlots(testSlots());
-        player.setDices(testDices());
     }
 
     @Override
@@ -188,26 +186,6 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
            callCameraActivity(GameActivity.REQUEST_DICES);
         });
         dialogBuilder.show();
-    }
-    private void createCraftsmanUseDialog(){
-        //TODO: refactor to use for question if 2 specific craftsman cards were used
-        //TODO: Dialog pro potvrzení jedné ze dvou karet pro porušení pravidla "Rydlo na eglomisé - lze porušit barvu políčka", "Brusný papír - lze porušit číslo pole"
-        CraftsmanPointsDialogFragment craftsmanPointsDialogFragment = new CraftsmanPointsDialogFragment();
-        craftsmanPointsDialogFragment.setTargetFragment(this, 0);
-        craftsmanPointsDialogFragment.show(getActivity().getSupportFragmentManager(), "craftsmanDialog");
-    }
-    private void createCalculationDialog(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle(R.string.calculateDialogTitle);
-        builder.setMessage(R.string.calculateDialogMsg);
-        builder.setNeutralButton(R.string.cancelString, (dialog, which) -> {});
-        builder.setPositiveButton(R.string.calculateDialogPlayer, (dialog, which) -> {
-            calculateThis();
-        });
-        builder.setNegativeButton(R.string.calculateDialogAll, (dialog, which) -> {
-            //TODO: Send mesage to GameActivity to Calculate game!
-        });
-        builder.show();
     }
 
     private void callCameraActivity(int requestCode){
@@ -235,7 +213,7 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
 
     private void slotsObserver(){
         final Observer<ArrayList<Slot>> slotsObserver = slots -> {
-            if(player.isPlayerSet()){
+            if(player.isPlayerSet() && ruleOK){
                 playerReady();
             }
         };
@@ -245,7 +223,7 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
         final Observer<ArrayList<Dice>> diceObserver = new Observer<ArrayList<Dice>>() {
             @Override
             public void onChanged(ArrayList<Dice> dice) {
-                if(player.isPlayerSet()){
+                if(player.isPlayerSet() && ruleOK){
                     playerReady();
                 }
             }
@@ -256,7 +234,7 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
         final Observer<String> pqCardObserver = new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                if(player.isPlayerSet()){
+                if(player.isPlayerSet() && ruleOK){
                     playerReady();
                 }
             }
@@ -265,7 +243,7 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
     }
     private void craftsmanObserver(){
         final Observer<Integer> craftsmanObserver = integer -> {
-            if(player.isPlayerSet()){
+            if(player.isPlayerSet() && ruleOK){
                 playerReady();
             }
         };
@@ -279,77 +257,17 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
     }
 
     private void playerReady(){ playerPointsButton.setBackgroundResource(R.drawable.points_btn_background_green);}
-    private boolean isOnlyPlayer(){
-        return gameViewModel.getPlayersCount() == 1;
-    }
     private void calculateThis(){
         ArrayList<Dice> dicesArray = player.getDices().getValue();
         ArrayList<Slot> slotsArray = player.getSlots().getValue();
         gameViewModel.gameBoard.setDiceArray(dicesArray.toArray(new Dice[dicesArray.size()]));
         gameViewModel.gameBoard.setSlotArray(slotsArray.toArray(new Slot[slotsArray.size()]));
-        gameViewModel.gameBoard.assignToRuleHandler();
-        int points = 0;
-        if(isEglomise){
-            Log.println(Log.INFO, "Calculate", "isEglomise card " + eglomiseValue);
-        }
-        if(isSandpaper){
-            Log.println(Log.INFO, "Calculate", "isSandpaper card " + sandpaperValue);
-        }
-        if(gameViewModel.gameBoard.ruleCheck()){
-            points = gameViewModel.gameBoard.Evaluation(PQ_TYPES.values()[player.getPQIndex().getValue()], CQ_TYPES.values()[gameViewModel.getCommonQuest().getValue()], player.getCraftsman().getValue());
-        } else {
-            playerPointsButton.setBackgroundResource(R.drawable.points_btn_background_red);
-            //Check error types
-            ArrayList<RuleMsg> list = gameViewModel.gameBoard.getLogList();
-        }
+        int points = gameViewModel.gameBoard.Evaluation(PQ_TYPES.values()[player.getPQIndex().getValue()], CQ_TYPES.values()[gameViewModel.getCommonQuest().getValue()], player.getCraftsman().getValue());
         player.setPoints(points);
+        Log.println(Log.INFO, "POINTS", ""+points);
         String text;
         text = pointStringLocale();
         playerPointsButton.setText(text + points);
-    }
-    private ArrayList<Dice> testDices(){
-        ArrayList<Dice> array = new ArrayList<Dice>();
-
-        array.add(new Dice("GREEN", 6, 0,0));
-        array.add(new Dice("GREEN", 4, 0,2));
-        array.add(new Dice("BLUE", 2, 1,0));
-        array.add(new Dice("BLUE", 3, 1,2));
-        array.add(new Dice("YELLOW", 3, 2,0));
-        array.add(new Dice("YELLOW", 2, 2,2));
-        array.add(new Dice("RED", 1, 3,0));
-        array.add(new Dice("RED", 1, 3,2));
-        array.get(2).errType = RULE_ERR.DIFF_ERR;
-
-        return array;
-    }
-    private ArrayList<Slot> testSlots(){
-        ArrayList<Slot> array = new ArrayList<Slot>();
-
-        array.add(new Slot("WHITE",0,0));
-        array.add(new Slot("WHITE", 0,1));
-        array.add(new Slot("SIX", 0,2));
-        array.add(new Slot("WHITE",0 ,3));
-        array.add(new Slot("WHITE", 0,4));
-
-        array.add(new Slot("WHITE", 1,0));
-        array.add(new Slot("FIVE", 1,1));
-        array.add(new Slot("BLUE", 1,2));
-        array.add(new Slot("FOUR", 1,3));
-        array.add(new Slot("WHITE", 1,4));
-
-        array.add(new Slot("THREE", 2,0));
-        array.add(new Slot("GREEN", 2,1));
-        array.add(new Slot("YELLOW", 2,2));
-        array.add(new Slot("VIOLET", 2,3));
-        array.add(new Slot("TWO", 2,4));
-
-        array.add(new Slot("ONE", 3,0));
-        array.add(new Slot("FOUR", 3,1));
-        array.add(new Slot("RED", 3,2));
-        array.add(new Slot("FIVE", 3,3));
-        array.add(new Slot("THREE", 3,4));
-
-        return array;
     }
     private String pointStringLocale() {
         String text;
@@ -360,21 +278,5 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback, C
 
         }
         return text;
-    }
-    private boolean checkRules(){
-        ArrayList<Dice> dicesArray = player.getDices().getValue();
-        ArrayList<Slot> slotsArray = player.getSlots().getValue();
-        gameViewModel.gameBoard.setDiceArray(dicesArray.toArray(new Dice[dicesArray.size()]));
-        gameViewModel.gameBoard.setSlotArray(slotsArray.toArray(new Slot[slotsArray.size()]));
-        gameViewModel.gameBoard.assignToRuleHandler();
-    }
-
-    @Override
-    public void getCraftValues(int sandpaper, int eglomise, boolean sandpaperCheck, boolean eglomiseCheck) {
-        isEglomise = eglomiseCheck;
-        isSandpaper = sandpaperCheck;
-        eglomiseValue = eglomise;
-        sandpaperValue = sandpaper;
-        calculateThis();
     }
 }

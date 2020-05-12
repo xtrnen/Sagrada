@@ -47,6 +47,12 @@
 
     <string name="infoLayoutSlotText"><u>Informace o kartě klíče:</u></string>
     <string name="infoLayoutDiceText"><u>Informace o kostkách vitráže:</u></string>
+    <string name="ruleText">Kontrola pravidel</string>
+
+    <string name="invalidDetectDialogMyself">Vyplnit ručně</string>
+    <string name="invalidDetectDialogAgain">Vyfotit znovu</string>
+    <string name="invalidDetectDialogTitle">Nepřesná detekce?</string>
+    <string name="invalidDetectDialogText">Vyber co dělat dále.</string>
 
     <string-array name="personalQuestStrings">
         <item>Ametyst</item>

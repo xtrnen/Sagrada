@@ -1,7 +1,5 @@
 package Model.Rules;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
 
@@ -15,49 +13,52 @@ public class RuleHandler {
     * */
     private Dice[][] diceArray;
     private Slot[][] slotArray;
-    public ArrayList<RuleMsg> logList;
+    private int current_eglomise;
+    private int current_sandpaper;
+    public boolean edgeRule;
 
     public RuleHandler(Dice[][] dices, Slot[][] slots)
     {
         diceArray = dices;
         slotArray = slots;
-        logList = new ArrayList<>();
+        edgeRule = false;
     }
     public RuleHandler(){
-        logList = new ArrayList<>();
     }
 
-    public boolean CheckRules()
+    public boolean CheckRules(int eglomiseCount, int sandpaperCount)
     {
-        boolean edgeRule = false;
+        current_eglomise = eglomiseCount;
+        current_sandpaper = sandpaperCount;
+
+        edgeRule = IsEdgeDiceRule();
+
         for(int row = 0; row < 4; row++){
             for(int col = 0; col < 5; col++){
                 if(diceArray[row][col].number == 0){
                     continue;
                 }
-                if(IsEdgeDiceRule(row, col)){
+                /*if(IsEdgeDiceRule(row, col)){
                     edgeRule = true;
-                } else{
+                } {
                     diceArray[row][col].errType = RULE_ERR.EDGE_ERR;
-                    //logList.add(new RuleMsg(row, col, RULE_ERR.EDGE_ERR));
-                }
+                }*/
                 if(!SlotConditionRule(row, col)){
                     diceArray[row][col].errType = RULE_ERR.SLOT_ERR;
-                    //logList.add(new RuleMsg(row, col, RULE_ERR.SLOT_ERR));
                     return false;
                 }
                 if(!IsNeighborRule(row, col)){
                     diceArray[row][col].errType = RULE_ERR.NEIGHBOR_ERR;
-                    //logList.add(new RuleMsg(row, col, RULE_ERR.NEIGHBOR_ERR));
                     return false;
                 }
                 if(!IsDiffDice(row, col)){
                     diceArray[row][col].errType = RULE_ERR.DIFF_ERR;
-                    //logList.add(new RuleMsg(row, col, RULE_ERR.DIFF_ERR));
                     return false;
                 }
+                diceArray[row][col].errType = RULE_ERR.NO_ERR;
             }
         }
+
         return edgeRule;
     }
 
@@ -112,9 +113,26 @@ public class RuleHandler {
         }
         return leftTop || up || rightTop || left || right || leftBottom || down || rightBottom;
     }
-    private Boolean IsEdgeDiceRule(int row, int col)
+    private Boolean IsEdgeDiceRule(/*int row, int col*/)
     {
-        if(diceArray[row][col].row == 0 || diceArray[row][col].row == 4){
+        for(Dice[] row : diceArray){
+            for(Dice dice : row){
+                if(dice.number != 0){
+                    if(dice.row == 0 || dice.row == 4){
+                        if(dice.col >= 0 && dice.col <= 5){
+                            return true;
+                        }
+                    }
+                    if(dice.row > 0 && dice.row < 4){
+                        if(dice.col == 0 || dice.col == 5){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+        /*if(diceArray[row][col].row == 0 || diceArray[row][col].row == 4){
             if(diceArray[row][col].col >= 0 && diceArray[row][col].col <= 5){
                 return true;
             }
@@ -124,33 +142,18 @@ public class RuleHandler {
                 return true;
             }
         }
-        return false;
+        return false;*/
     }
     private Boolean IsDiffDice(int row, int col)
     {
-        //TODO: Zřejmě odebrat LT, RT, LB, RB
         if(diceArray.length == 1){
             return true;
-        }
-        //LT
-        boolean leftTop = true;
-        if(diceArray[row][col].row - 1 >= 0 && diceArray[row][col].col - 1 >= 0){
-            if(diceArray[row - 1][col - 1].number != 0){
-                leftTop = DiffColors(diceArray[row][col], diceArray[row - 1][col - 1]) && DiffNumbers(diceArray[row][col], diceArray[row - 1][col - 1]);
-            }
         }
         //Up
         boolean up = true;
         if(diceArray[row][col].row - 1 >= 0){
             if(diceArray[row - 1][col].number != 0){
                 up = DiffColors(diceArray[row][col], diceArray[row - 1][col]) && DiffNumbers(diceArray[row][col], diceArray[row - 1][col]);
-            }
-        }
-        //RT
-        boolean rightTop = true;
-        if(diceArray[row][col].row - 1 >= 0 && diceArray[row][col].col + 1 < 5){
-            if(diceArray[row - 1][col + 1].number != 0){
-                rightTop = DiffColors(diceArray[row][col], diceArray[row - 1][col + 1]) && DiffNumbers(diceArray[row][col], diceArray[row - 1][col + 1]);
             }
         }
         //L
@@ -167,13 +170,6 @@ public class RuleHandler {
                 right = DiffColors(diceArray[row][col], diceArray[row][col + 1]) && DiffNumbers(diceArray[row][col], diceArray[row][col + 1]);
             }
         }
-        //LB
-        boolean leftBottom = true;
-        if(diceArray[row][col].row + 1 < 4 && diceArray[row][col].col - 1 >= 0){
-            if(diceArray[row + 1][col - 1].number != 0){
-                leftBottom = DiffColors(diceArray[row][col], diceArray[row + 1][col - 1]) && DiffNumbers(diceArray[row][col], diceArray[row + 1][col - 1]);
-            }
-        }
         //Down
         boolean down = true;
         if(diceArray[row][col].row + 1 < 4){
@@ -181,23 +177,39 @@ public class RuleHandler {
                 down = DiffColors(diceArray[row][col], diceArray[row + 1][col]) && DiffNumbers(diceArray[row][col], diceArray[row + 1][col]);
             }
         }
-        //RB
-        boolean rightBottom = true;
-        if(diceArray[row][col].row + 1 < 4 && diceArray[row][col].col + 1 < 5){
-            if(diceArray[row + 1][col + 1].number != 0){
-                rightBottom = DiffColors(diceArray[row][col], diceArray[row + 1][col + 1]) && DiffNumbers(diceArray[row][col], diceArray[row + 1][col + 1]);
-            }
-        }
-        return leftTop && up && rightTop && left && right && leftBottom && down && rightBottom;
+        return up && left && right && down;
     }
-
     private Boolean SlotColorRule(Dice dice, Slot slot)
     {
-        return (slot.infoType.equals("COLOR")) ? (dice.color.equals(slot.info.name())) : true;
+        if(slot.infoType.equals("COLOR")){
+            if(dice.color.equals(slot.info.name())){
+                return true;
+            } else if(current_eglomise > 0){
+                current_eglomise--;
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+        //return (slot.infoType.equals("COLOR")) ? (dice.color.equals(slot.info.name())) : true;
     }
     private Boolean SlotNumberRule(Dice dice, Slot slot)
     {
-        return (slot.infoType.equals("NUMBER")) ? (dice.number == slot.info.StrToNum()) : true;
+        if(slot.infoType.equals("NUMBER")){
+            if(dice.number == slot.info.StrToNum()){
+                return true;
+            } else if(current_sandpaper > 0){
+                current_sandpaper--;
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+        //return (slot.infoType.equals("NUMBER")) ? (dice.number == slot.info.StrToNum()) : true;
     }
     private Boolean DiffColors(Dice dice1, Dice dice2)
     {
@@ -210,4 +222,5 @@ public class RuleHandler {
 
     public void assignArray(Dice[][] dices){ diceArray = dices; }
     public void assignArray(Slot[][] slots){ slotArray = slots; }
+    public Dice[][] getDices(){ return diceArray; }
 }

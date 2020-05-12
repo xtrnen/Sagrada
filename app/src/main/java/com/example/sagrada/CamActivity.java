@@ -1,12 +1,8 @@
 package com.example.sagrada;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
-import android.util.Size;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -24,10 +20,6 @@ import com.otaliastudios.cameraview.CameraView;
 import com.otaliastudios.cameraview.PictureResult;
 import com.otaliastudios.cameraview.overlay.OverlayLayout;
 
-import java.util.ArrayList;
-
-import Model.GameBoard.Structs.Dice;
-
 public class CamActivity extends AppCompatActivity implements View.OnClickListener {
     private CameraView cameraView;
     public static int VALID_PREVIEW = 10;
@@ -35,6 +27,7 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
     private ImageView frame;
     static final int CROP_WIDTH = 1080;
     static final int CROP_HEIGHT = 720;
+    public static int CAPTURE_AGAIN = 1;
 
     CameraListener cameraListener = new CameraListener() {
         @Override
@@ -148,6 +141,12 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
 
             }
             setResult(requestC, retData);
+            finish();
+        } else if( resultCode == CAPTURE_AGAIN){
+            //Do nothing
+        } else if( resultCode == GameActivity.REQUEST_INFO_ACTIVITY){
+            Intent ret = new Intent();
+            setResult(GameActivity.REQUEST_INFO_ACTIVITY);
             finish();
         }
     }

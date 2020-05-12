@@ -25,7 +25,7 @@ public class CraftsmanPointsDialogFragment extends DialogFragment {
     public void onAttach(Context context){
         super.onAttach(context);
         try {
-            listener = (ICraftsmanCards) getTargetFragment();
+            listener = (ICraftsmanCards) context;
         } catch (ClassCastException e){
             throw new ClassCastException(getActivity().toString() + "No ICraftsmanCards implementation");
         }

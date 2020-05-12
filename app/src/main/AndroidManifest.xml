@@ -29,7 +29,6 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity android:name=".CamActivity"/>
         <activity android:name=".ShowPictureActivity" />
-        <activity android:name=".ImageDetectionActivity" />
         <activity android:name=".InformationActivity" />
 
         <provider

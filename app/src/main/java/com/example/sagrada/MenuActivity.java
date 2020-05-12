@@ -28,17 +28,15 @@ public class MenuActivity extends AppCompatActivity {
 
         //Set listeners
         startGameButton.setOnClickListener(v -> {
-            Log.println(Log.INFO, "StartGameListener", "Starting game");
             Intent intent = new Intent(MenuActivity.this, GameActivity.class);
             startActivity(intent);
         });
 
         settingsButton.setOnClickListener(v -> {
-            Log.println(Log.INFO, "StartSettingsListener", "Settings");
+            //TODO: Settings
         });
 
         quitAppButton.setOnClickListener(v -> {
-            Log.println(Log.INFO, "StartQuitAppListener", "Quit App");
             finish();
             System.exit(0);
         });

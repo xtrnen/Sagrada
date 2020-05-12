@@ -1,7 +1,6 @@
 package Model.GameBoard;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
@@ -9,7 +8,6 @@ import Model.Points.Quests.CQ_TYPES;
 import Model.Points.Quests.PQ_TYPES;
 import Model.Points.Quests.Quest;
 import Model.Rules.RuleHandler;
-import Model.Rules.RuleMsg;
 
 public class GameBoard {
     private Dice[][] diceArray;
@@ -36,25 +34,26 @@ public class GameBoard {
 
         return quest.RunEvaluation(diceArray, craftsmanPoints);
     }
-    public boolean ruleCheck(){
-        return ruleHandler.CheckRules();
+    public boolean ruleCheck(int eglomiseCount, int sandpaperCount){
+        return ruleHandler.CheckRules(eglomiseCount, sandpaperCount);
     }
 
     public void setDiceArray(Dice[] dices){
-        adaptArray(dices);
+       diceArray = adaptArray(dices);
     }
     public void setSlotArray(Slot[] slots){
-        adaptArray(slots);
+        slotArray = adaptArray(slots);
     }
     public void assignToRuleHandler(){
         ruleHandler.assignArray(diceArray);
         ruleHandler.assignArray(slotArray);
     }
 
-    private void adaptArray(Dice[] dices){
+    public static Dice[][] adaptArray(Dice[] dices){
+        Dice[][] diceArray = new Dice[4][5];
         int index = 0;
-        for(int row = 0; row < rows; row++){
-            for(int col = 0; col < columns; col++){
+        for(int row = 0; row < 4; row++){
+            for(int col = 0; col < 5; col++){
                 Dice dice;
 
                 dice = (index > dices.length - 1) ? null : dices[index];
@@ -69,11 +68,13 @@ public class GameBoard {
                 }
             }
         }
+        return diceArray;
     }
-    private void adaptArray(Slot[] slots){
+    public static Slot[][] adaptArray(Slot[] slots){
+        Slot[][] slotArray = new Slot[4][5];
         int index = 0;
-        for(int row = 0; row < rows; row++){
-            for(int col = 0; col < columns; col++){
+        for(int row = 0; row < 4; row++){
+            for(int col = 0; col < 5; col++){
                 Dice dice;
                 Slot slot;
 
@@ -89,9 +90,6 @@ public class GameBoard {
                 }
             }
         }
-    }
-
-    public ArrayList<RuleMsg> getLogList(){
-        return ruleHandler.logList;
+        return slotArray;
     }
 }

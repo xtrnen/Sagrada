@@ -10,12 +10,24 @@
         android:background="@android:color/holo_green_light"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <Button
-            android:id="@+id/confirmInfoBtnID"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:text="@string/confirmString" />
+            android:weightSum="1"
+            android:gravity="end">
+            <Button
+                android:id="@+id/rulesInfoBtnID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layoutDirection="rtl"
+                android:text="@string/ruleText"/>
+            <Button
+                android:id="@+id/confirmInfoBtnID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layoutDirection="rtl"
+                android:text="@string/confirmString" />
+        </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
     <TextView
         android:paddingTop="10dp"
@@ -61,6 +73,7 @@
         </LinearLayout>
     </RelativeLayout>
     <TextView
+        android:id="@+id/diceTextInfoID"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
         android:paddingStart="10dp"

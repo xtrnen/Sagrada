@@ -3,7 +3,9 @@ package com.example.sagrada;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.os.Build;
@@ -26,7 +28,7 @@ public class SlotInfoCell extends androidx.appcompat.widget.AppCompatButton {
         super(context);
         slot = _slot;
 
-        this.setTextSize(20);
+        this.setTextSize(26);
         setContent();
         addBorder();
 
@@ -89,25 +91,27 @@ public class SlotInfoCell extends androidx.appcompat.widget.AppCompatButton {
     private int chooseColor(SlotInfo info){
         switch (info){
             case RED:
-                return Color.RED;
+                return getResources().getColor(R.color.redDice, getContext().getTheme());
             case GREEN:
-                return Color.GREEN;
+                return getResources().getColor(R.color.greenDice, getContext().getTheme());
             case BLUE:
-                return Color.BLUE;
+                return getResources().getColor(R.color.blueDice, getContext().getTheme());
             case YELLOW:
-                return Color.YELLOW;
+                return getResources().getColor(R.color.yellowDice, getContext().getTheme());
             case VIOLET:
-                return Color.rgb(148, 0, 211);
+                return getResources().getColor(R.color.violetDice, getContext().getTheme());
             case WHITE:
-                return Color.WHITE;
+                return getResources().getColor(R.color.whiteDice, getContext().getTheme());
             default:
-                return Color.LTGRAY;
+                return getResources().getColor(R.color.grayDice, getContext().getTheme());
         }
     }
     private void addBorder(){
-        GradientDrawable grad = new GradientDrawable();
+        LayerDrawable diceDrawable = (LayerDrawable)getResources().getDrawable(R.drawable.dice_valid, getContext().getTheme()).mutate();
+        /*GradientDrawable grad = new GradientDrawable();
         grad.setColor(this.chooseColor(slot.info));
-        grad.setStroke(2, Color.BLACK);
-        this.setBackground(grad);
+        grad.setStroke(2, Color.BLACK);*/
+        diceDrawable.findDrawableByLayerId(R.id.diceDrawableColorID).setColorFilter(chooseColor(slot.info), PorterDuff.Mode.SRC);
+        this.setBackground(diceDrawable);
     }
 }

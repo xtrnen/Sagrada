@@ -25,35 +25,38 @@ struct color_range
 {
     /*Yellow color*/
     Scalar lowYellow = Scalar(15, 90, 100);//,100,20
-    Scalar lowYellowSlot = Scalar(15, 90, 60);
+    Scalar lowDiceYellow = Scalar(15, 90, 70);
     Scalar highYellow = Scalar(35, 255, 255);
 
     /*Green color*/
     Scalar lowDiceGreen = Scalar(40, 100, 35);
-    Scalar lowGreen = Scalar(35, 50, 35);//40
-    Scalar highGreen = Scalar(80, 255, 255);//90
+    Scalar lowGreen = Scalar(30, 40, 40);//40
+    Scalar highGreen = Scalar(85, 255, 255);//90
     Scalar highDiceGreen = Scalar(85, 255, 255);//90-255-255
 
     /*Blue color*/
     Scalar lowDiceBlue = Scalar(85, 80, 40);//80-50-20
-    Scalar lowBlue = Scalar(80, 50, 40);
-    Scalar highBlue = Scalar(130, 255, 255);//127-255-255
+    Scalar lowBlue = Scalar(85, 35, 80);
+    Scalar highBlue = Scalar(135, 255, 255);//127-255-255
 
     /*Red color*/
     Scalar lowRedFirstMask = Scalar(0, 135, 50);//(0, 150, 70)
+    Scalar lowRedDiceFirstMask = Scalar(0,135,50);
     Scalar highRedFirstMask = Scalar(15, 255, 255);//(10, 255, 255)
     Scalar lowRedSecondMask = Scalar(170, 135, 50);//(171, 150, 70)
+    Scalar lowRedDiceSecondMask = Scalar(170,135,50);
     Scalar highRedSecondMask = Scalar(180, 255, 255);//(180, 255, 255)
 
     /*Violet color*/
-    Scalar lowViolet = Scalar(135, 100, 35);//135-50-20
+    Scalar lowViolet = Scalar(135, 100, 100);//135-50-20
+    Scalar lowDiceViolet = Scalar(135, 50, 50);
     Scalar highViolet = Scalar(170, 255, 255);
 
     /*White color*/
-    Scalar lowWhite = Scalar(0, 0, 150);
-    Scalar lowDiceWhite = Scalar(0, 0, 120);
-    Scalar highDiceWhite = Scalar(180, 80, 255);
-    Scalar highWhite = Scalar(180, 50, 255);
+    Scalar lowWhite = Scalar(0, 0, 100);
+    Scalar lowDiceWhite = Scalar(0, 0, 100);
+    Scalar highDiceWhite = Scalar(180, 60, 255);
+    Scalar highWhite = Scalar(180, 80, 255);
 } COLOR_RANGES;
 
 struct s_circle
@@ -189,8 +192,8 @@ public:
         SetScaleValues(diceBoundImg.size().width, diceBoundImg.size().height, scaleWidth, scaleHeight, 512, 512);
         __android_log_print(ANDROID_LOG_INFO, "DetectDiceSlots", "color ranges");
         //red
-        inRange(hsv, COLOR_RANGES.lowRedFirstMask, COLOR_RANGES.highRedFirstMask, mask);
-        inRange(hsv, COLOR_RANGES.lowRedSecondMask, COLOR_RANGES.highRedSecondMask, maskTmp);
+        inRange(hsv, COLOR_RANGES.lowRedDiceFirstMask, COLOR_RANGES.highRedFirstMask, mask);
+        inRange(hsv, COLOR_RANGES.lowRedDiceSecondMask, COLOR_RANGES.highRedSecondMask, maskTmp);
         mask += maskTmp;
         //green
         inRange(hsv, COLOR_RANGES.lowDiceGreen, COLOR_RANGES.highDiceGreen, maskTmp);
@@ -199,10 +202,10 @@ public:
         inRange(hsv, COLOR_RANGES.lowDiceBlue, COLOR_RANGES.highBlue, maskTmp);
         mask += maskTmp;
         //yellow
-        inRange(hsv, COLOR_RANGES.lowYellow, COLOR_RANGES.highYellow, maskTmp);
+        inRange(hsv, COLOR_RANGES.lowDiceYellow, COLOR_RANGES.highYellow, maskTmp);
         mask += maskTmp;
         //violet
-        inRange(hsv, COLOR_RANGES.lowViolet, COLOR_RANGES.highViolet, maskTmp);
+        inRange(hsv, COLOR_RANGES.lowDiceViolet, COLOR_RANGES.highViolet, maskTmp);
         mask += maskTmp;
         //white
         /*inRange(hsv, COLOR_RANGES.lowDiceWhite, COLOR_RANGES.highDiceWhite, maskTmp);
@@ -251,18 +254,14 @@ public:
     {
         cvtColor(diceBoundImg, hsvImage, COLOR_BGR2HSV);
         //Get slots
-        __android_log_print(ANDROID_LOG_INFO, "DICE_MSG", "Detect Dice Slots");
         vector<Rect> slotBounds = DetectDiceSlots();
         //sort slots by rows
-        __android_log_print(ANDROID_LOG_INFO, "DICE_MSG", "Sort slots");
         //set boundry for left side (starting side of sorting)
         leftXBoundry = getXLeftBound();
 
         vector<vector<Rect>> sortedSlots = SortSlots(4, slotBounds);
-        __android_log_print(ANDROID_LOG_INFO, "DICE_MSG", "Fill output");
         //for each row -> from left to right check slot, assign Dice value, color, row and col
         for(int row = 0; row < sortedSlots.size(); row++){
-            __android_log_print(ANDROID_LOG_INFO, "DICE_MSG", "ROW - %d", row);
             //Check each slot
             for(int col = 0; col < sortedSlots[row].size(); col++){
                 Dice_s dice = FindDice(sortedSlots[row][col]);
@@ -272,6 +271,11 @@ public:
                     dice.col = col;
                     dices.push_back(dice);
                     rectangle(diceBoundImg, dice.boundRect.tl(), dice.boundRect.br(), Scalar(0,0,255), 5, LINE_AA);
+                    Point* point = new Point(dice.boundRect.tl().x, dice.boundRect.br().y);
+                    stringstream ss;
+                    ss << dice.number << "--" << dice.GetColorString();
+                    putText(diceBoundImg, ss.str(), Point(point->x, point->y), FONT_HERSHEY_PLAIN, 3, Scalar(255, 255, 255), LINE_AA);
+                    ss.clear();
                 }
             }
         }
@@ -316,6 +320,7 @@ public:
     vector<Rect> AddBlankSlots(vector<Rect> rowSlots)
     {
         int index = 0;
+        int width = refWidth + 30 * (diceBoundImg.cols / 720);
         vector<Rect> outputVec;
         for(int i = 0; i < rowSlots.size(); i++){
             Rect slot = rowSlots[i];
@@ -327,7 +332,7 @@ public:
             }
             //No slots given
             if(rowSlots.size() == 0){
-                possibleSlots = slot.x / refWidth;
+                possibleSlots = slot.x / width;
                 if(possibleSlots != 0){
                     //add given number of slots
                     for(int i = possibleSlots; i >= 1; i--){
@@ -344,7 +349,7 @@ public:
             Rect lastRect;
             if(outputVec.empty()){
                 lastRect = Rect(leftXBoundry,slot.y,0,0);
-                possibleSlots = slot.x / refWidth;
+                possibleSlots = slot.x / width;
             }
             else{
                 lastRect = outputVec[outputVec.size() - 1];
@@ -372,7 +377,7 @@ public:
     }
     Dice_s FindDice(Rect slot)
     {
-        //Check Red
+        /*//Check Red
         Dice_s redDice = FindDiceByColor(S_RED, slot);
         if(redDice.boundRect.width != 0)
             return redDice;
@@ -393,9 +398,64 @@ public:
         if(violetDice.boundRect.width != 0)
             return violetDice;
         Dice_s noDice(Rect(0,0,0,0), S_NONE);
-        return noDice;
+        return noDice;*/
+        vector<int> counts = vector<int>();
+        Mat mask;
+        Mat maskTmp;
+        inRange(hsvImage(slot), COLOR_RANGES.lowRedFirstMask, COLOR_RANGES.highRedFirstMask, mask);
+        inRange(hsvImage(slot), COLOR_RANGES.lowRedSecondMask, COLOR_RANGES.highRedSecondMask, maskTmp);
+        mask += maskTmp;
+        counts.push_back(countNonZero(mask));
+        //green
+        inRange(hsvImage(slot), COLOR_RANGES.lowDiceGreen, COLOR_RANGES.highDiceGreen, mask);
+        counts.push_back(countNonZero(mask));
+        //blue
+        inRange(hsvImage(slot), COLOR_RANGES.lowDiceBlue, COLOR_RANGES.highBlue, mask);
+        counts.push_back(countNonZero(mask));
+        //yellow
+        inRange(hsvImage(slot), COLOR_RANGES.lowDiceYellow, COLOR_RANGES.highYellow, mask);
+        counts.push_back(countNonZero(mask));
+        //violet
+        inRange(hsvImage(slot), COLOR_RANGES.lowDiceViolet, COLOR_RANGES.highViolet, mask);
+        counts.push_back(countNonZero(mask));
+        maskTmp.release();
+        mask.release();
+
+        int dist = -1;
+        dist = distance(counts.begin(), max_element(counts.begin(), counts.end()));
+        if (dist != -1 && counts[dist] != 0 && counts[dist] >= hsvImage(slot).cols * hsvImage(slot).rows * 0.3) {
+            counts.clear();
+            int blob_count = 0;
+            if (IsNumber(hsvImage(slot), blob_count) && blob_count > 0 && blob_count < 7) {
+                SagradaColor color;
+                switch (dist)
+                {
+                    case 0:
+                        color = S_RED;
+                        break;
+                    case 1:
+                        color = S_GREEN;
+                        break;
+                    case 2:
+                        color = S_BLUE;
+                        break;
+                    case 3:
+                        color = S_YELLOW;
+                        break;
+                    case 4:
+                        color = S_VIOLET;
+                        break;
+                    default:
+                        color = S_NONE;
+                        break;
+                }
+                Dice_s dice(slot, color);
+                dice.number = blob_count;
+                return dice;
+            }
+        }
+        return Dice_s(Rect(0, 0, 0, 0), S_NONE);
     }
-    //Output Mat is for debug
     Dice_s FindDiceByColor(SagradaColor _color, Rect slot)
     {
         Mat colorMask;
@@ -403,6 +463,14 @@ public:
         //Red color complex mask
         if(_color == S_RED)
         {
+            Mat lab;
+            cvtColor(diceBoundImg, lab, COLOR_BGR2Lab);
+            Scalar means, dev;
+            meanStdDev(lab(slot), means, dev);
+            if (means[2] > means[1]) {
+                Dice_s dice(Rect(0, 0, 0, 0), _color);
+                return dice;
+            }
             Mat tmp;
             inRange(this->hsvImage(slot), cRange[0], cRange[2], tmp);
             inRange(this->hsvImage(slot), cRange[1], cRange[3], colorMask);
@@ -429,7 +497,7 @@ public:
             approxPolyDP( contours[i], contours_poly[i], epsilon, true );
 
             double area = contourArea(contours_poly[i]);
-            if(area >= slot.area() * 0.25){
+            if(area >= slot.area() * 0.05){
                 int blob_count = 0;
                 if(IsNumber(this->hsvImage(slot), blob_count) && blob_count > 0 && blob_count < 7){
                     Dice_s dice(slot, _color);
@@ -497,9 +565,9 @@ public:
             float radius;
             minEnclosingCircle(contours_poly[i], center, radius);
             double cArea = radius * radius * 3.14;
-            double areaOffset = cArea * 0.25;
+            double areaOffset = cArea * 0.3;
 
-            if(area >= cArea - areaOffset && hierarchy[i][3] == -1 && area > 100)
+            if(area >= cArea - areaOffset && hierarchy[i][3] == -1 && area > 50)
             {
                 count++;
             }

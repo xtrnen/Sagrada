@@ -1,25 +1,20 @@
 package com.example.sagrada;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
-import android.util.Log;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.LayerDrawable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
-
 import com.tomergoldst.tooltips.ToolTip;
 import com.tomergoldst.tooltips.ToolTipsManager;
-
 import java.util.Arrays;
 import java.util.List;
-
 import Model.GameBoard.Structs.Dice;
 import Model.Rules.RULE_ERR;
-import Model.Rules.RuleMsg;
 
 public class DiceInfoCell extends androidx.appcompat.widget.AppCompatButton {
     private Dice dice;
@@ -53,6 +48,10 @@ public class DiceInfoCell extends androidx.appcompat.widget.AppCompatButton {
     public Dice getDice(){
         return dice;
     }
+    public void setDice(Dice newDice) {
+        dice = newDice;
+        setBtnDesign();
+    }
 
     private void addItemMenuToMenu(Menu menu, List<String> titles){
         for (int order = 0; order < titles.size(); order++){
@@ -70,6 +69,7 @@ public class DiceInfoCell extends androidx.appcompat.widget.AppCompatButton {
             MenuItem item = menu.add(0, order, 0, titles.get(order));
             item.setOnMenuItemClickListener(ac -> {
                 dice.number = Integer.parseInt(item.getTitle().toString());
+                dice.errType = RULE_ERR.NO_ERR;
                 setBtnDesign();
                 return true;
             });
@@ -82,25 +82,24 @@ public class DiceInfoCell extends androidx.appcompat.widget.AppCompatButton {
         } else {
             this.setText(Integer.toString(dice.number));
         }
-        this.setTextSize(20);
-        this.setBackgroundColor(chooseColor(dice.color));
-        addBorder();
+        this.setTextSize(26);
+        setBtnResource();
     }
 
     private int chooseColor(String color){
         switch (color){
             case "RED":
-                return Color.RED;
+                return getResources().getColor(R.color.redDice, getContext().getTheme());
             case "GREEN":
-                return Color.GREEN;
+                return getResources().getColor(R.color.greenDice, getContext().getTheme());
             case "BLUE":
-                return Color.BLUE;
+                return getResources().getColor(R.color.blueDice, getContext().getTheme());
             case "YELLOW":
-                return Color.YELLOW;
+                return getResources().getColor(R.color.yellowDice, getContext().getTheme());
             case "VIOLET":
-                return Color.rgb(148, 0, 211);
+                return getResources().getColor(R.color.violetDice, getContext().getTheme());
             default:
-                return Color.LTGRAY;
+                return getResources().getColor(R.color.whiteDice, getContext().getTheme());
         }
     }
     private String setColorInfo(int colorPosition){
@@ -119,11 +118,15 @@ public class DiceInfoCell extends androidx.appcompat.widget.AppCompatButton {
                 return "NONE";
         }
     }
-    private void addBorder(){
-        GradientDrawable grad = new GradientDrawable();
-        grad.setColor(this.chooseColor(dice.color));
-        grad.setStroke(2, Color.BLACK);
-        this.setBackground(grad);
+    private void setBtnResource(){
+        LayerDrawable diceDrawable;
+        if(dice.errType != RULE_ERR.NO_ERR){
+            diceDrawable = (LayerDrawable)getResources().getDrawable(R.drawable.dice_invalid, getContext().getTheme()).mutate();
+        } else {
+            diceDrawable = (LayerDrawable)getResources().getDrawable(R.drawable.dice_valid, getContext().getTheme()).mutate();
+        }
+        diceDrawable.findDrawableByLayerId(R.id.diceDrawableColorID).setColorFilter(chooseColor(dice.color), PorterDuff.Mode.SRC);
+        this.setBackground(diceDrawable);
     }
 
     public void createTooltip(Context context, RelativeLayout layout){
@@ -131,7 +134,9 @@ public class DiceInfoCell extends androidx.appcompat.widget.AppCompatButton {
             ToolTipsManager toolTipsManager = new ToolTipsManager();
             ToolTip.Builder builder = new ToolTip.Builder(context, this, layout, getErrResource(), setTipPosition());
             this.setOnLongClickListener(e -> {
-                toolTipsManager.show(builder.build());
+                if(dice.errType != RULE_ERR.NO_ERR){
+                    toolTipsManager.show(builder.build());
+                }
                 return true;
             });
         }
@@ -145,16 +150,30 @@ public class DiceInfoCell extends androidx.appcompat.widget.AppCompatButton {
     }
 
     private int setTipPosition(){
-        switch (dice.col){
+        switch (dice.row){
             case 0:
             case 1:
-                return ToolTip.POSITION_RIGHT_TO;
-            case 3:
-            case 4:
-                return ToolTip.POSITION_LEFT_TO;
+                switch (dice.col){
+                    case 0:
+                    case 1:
+                        return ToolTip.POSITION_RIGHT_TO;
+                    case 2:
+                        return ToolTip.POSITION_BELOW;
+                    default:
+                        return ToolTip.POSITION_LEFT_TO;
+                }
             case 2:
+            case 3:
             default:
-                return ToolTip.POSITION_ABOVE;
+                switch (dice.col){
+                    case 0:
+                    case 1:
+                        return ToolTip.POSITION_RIGHT_TO;
+                    case 2:
+                        return ToolTip.POSITION_ABOVE;
+                    default:
+                        return ToolTip.POSITION_LEFT_TO;
+                }
         }
     }
 }
