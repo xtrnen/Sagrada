@@ -29,5 +29,4 @@ public class ImageProcessor
     public native Slot[] PatternDetector(long output);
     public native Dice[] DiceDetector(long output);
 
-    //TODO: Error handlers
 }

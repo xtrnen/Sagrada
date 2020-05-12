@@ -99,7 +99,7 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
                         rot = 270;
                         break;
                     case 270:
-                        rot = 360;
+                        rot = 180;
                         break;
                     case 0:
                         rot = 90;
@@ -109,13 +109,14 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
                         break;
                 }
                 matrix.postRotate(rot);
+                //Image being rotated
                 newBitmap = Bitmap.createBitmap(bitmap, 0,0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-
-                int x = rectX * bitmap.getWidth() / rectW;
-                int y = rectY * bitmap.getHeight() / rectH;
-                int endX = (rectX + CamActivity.CROP_WIDTH) * bitmap.getWidth() / rectW;
-                int endY = (rectY + CamActivity.CROP_HEIGHT) * bitmap.getHeight() / rectH;
-
+                //Set resolution for cropped image
+                int x, y, endX, endY;
+                x = rectX * newBitmap.getWidth() / rectW;
+                y = rectY * newBitmap.getHeight() / rectH;
+                endX = (rectX + CamActivity.CROP_WIDTH) * newBitmap.getWidth() / rectW;
+                endY = (rectY + CamActivity.CROP_HEIGHT) * newBitmap.getHeight() / rectH;
                 newBitmap = Bitmap.createBitmap(newBitmap, x, y, endX - x, endY - y);
 
                 Mat mat = new Mat();
