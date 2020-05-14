@@ -96,6 +96,6 @@
         <item>Alespoň jedna kostka musí být na okraji vitráže.</item>
         <item>Kostka musí splnit podmínku daného pole karty klíče</item>
         <item>Kostka musí mít alespoň jednoho souseda, ať už hranou, nebo na diagonále.</item>
-        <item>Kostka nesmí sousedit hranou s kostkou stejné barvy nebo čísla.</item>
+        <item>Kostka, nebo okolní kostka nesmí sousedit hranou s kostkou stejné barvy nebo čísla.</item>
     </string-array>
 </resources>

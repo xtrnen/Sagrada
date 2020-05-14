@@ -176,7 +176,15 @@ public class ShowPictureActivity extends AppCompatActivity implements InvalidDet
 
     @Override
     public void onUserHandle() {
-        setResult(GameActivity.REQUEST_INFO_ACTIVITY);
+        Intent data = new Intent();
+        if(requestCode == GameActivity.REQUEST_SLOTS){
+            data.putParcelableArrayListExtra(GameActivity.DATA_SLOTS, slotArray);
+        } else if(requestCode == GameActivity.REQUEST_DICES){
+            data.putParcelableArrayListExtra(GameActivity.DATA_DICES, diceArray);
+        } else {
+            return;
+        }
+        setResult(GameActivity.REQUEST_INFO_ACTIVITY, data);
         finish();
     }
 

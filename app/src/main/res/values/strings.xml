@@ -95,6 +95,6 @@
         <item>At least one dice has to be on the edge of stained glass.</item>
         <item>Dice has to match pattern on the same position.</item>
         <item>Dice has to have at least one neighbor on diagonal or vertically or horizontally.</item>
-        <item>Dice cannot have edge neighbors of same color or number.</item>
+        <item>Dice or neighbor dice cannot have edge neighbors of same color or number.</item>
     </string-array>
 </resources>

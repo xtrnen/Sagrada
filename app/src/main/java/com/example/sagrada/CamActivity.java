@@ -146,7 +146,14 @@ public class CamActivity extends AppCompatActivity implements View.OnClickListen
             //Do nothing
         } else if( resultCode == GameActivity.REQUEST_INFO_ACTIVITY){
             Intent ret = new Intent();
-            setResult(GameActivity.REQUEST_INFO_ACTIVITY);
+            if (requestC == GameActivity.REQUEST_SLOTS) {
+                ret.putParcelableArrayListExtra(GameActivity.DATA_SLOTS, data.getParcelableArrayListExtra(GameActivity.DATA_SLOTS));
+            }
+            if (requestC == GameActivity.REQUEST_DICES) {
+                ret.putParcelableArrayListExtra(GameActivity.DATA_DICES, data.getParcelableArrayListExtra(GameActivity.DATA_DICES));
+
+            }
+            setResult(GameActivity.REQUEST_INFO_ACTIVITY, ret);
             finish();
         }
     }

@@ -40,7 +40,6 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
     public final static int REQUEST_INFO_ACTIVITY = 3;
     public final static String DATA_SLOTS = "Slots";
     public final static String DATA_DICES = "Dices";
-    //TODO: Dialog reacts to click anywhere with dismiss of dialog...
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -56,9 +55,7 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        toolbar.setNavigationOnClickListener(v -> {
-            onBackPressed();
-        });
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         gameViewModel = new ViewModelProvider(this).get(GameViewModel.class);
         gameViewModel.addContext(this);

@@ -1,5 +1,7 @@
 package Model.Rules;
 
+import android.util.Log;
+
 import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
 
@@ -13,6 +15,7 @@ public class RuleHandler {
     * */
     private Dice[][] diceArray;
     private Slot[][] slotArray;
+    private int numOfDices;
     private int current_eglomise;
     private int current_sandpaper;
     public boolean edgeRule;
@@ -22,6 +25,8 @@ public class RuleHandler {
         diceArray = dices;
         slotArray = slots;
         edgeRule = false;
+
+        numOfDices = getDiceCount();
     }
     public RuleHandler(){
     }
@@ -32,34 +37,33 @@ public class RuleHandler {
         current_sandpaper = sandpaperCount;
 
         edgeRule = IsEdgeDiceRule();
+        boolean result = edgeRule;
 
         for(int row = 0; row < 4; row++){
             for(int col = 0; col < 5; col++){
                 if(diceArray[row][col].number == 0){
                     continue;
                 }
-                /*if(IsEdgeDiceRule(row, col)){
-                    edgeRule = true;
-                } {
-                    diceArray[row][col].errType = RULE_ERR.EDGE_ERR;
-                }*/
+                diceArray[row][col].errType = RULE_ERR.NO_ERR;
                 if(!SlotConditionRule(row, col)){
                     diceArray[row][col].errType = RULE_ERR.SLOT_ERR;
-                    return false;
-                }
-                if(!IsNeighborRule(row, col)){
-                    diceArray[row][col].errType = RULE_ERR.NEIGHBOR_ERR;
-                    return false;
+                    result = false;
                 }
                 if(!IsDiffDice(row, col)){
-                    diceArray[row][col].errType = RULE_ERR.DIFF_ERR;
-                    return false;
+                    if(diceArray[row][col].errType == RULE_ERR.NO_ERR){
+                        diceArray[row][col].errType = RULE_ERR.DIFF_ERR;
+                    }
+                    result = false;
                 }
-                diceArray[row][col].errType = RULE_ERR.NO_ERR;
+                if(!IsNeighborRule(row, col)){
+                    if(diceArray[row][col].errType == RULE_ERR.NO_ERR){
+                        diceArray[row][col].errType = RULE_ERR.NEIGHBOR_ERR;
+                    }
+                    result = false;
+                }
             }
         }
-
-        return edgeRule;
+        return result;
     }
 
     private Boolean SlotConditionRule(int row, int col)
@@ -68,46 +72,46 @@ public class RuleHandler {
     }
     private Boolean IsNeighborRule(int row, int col)
     {
-        if(diceArray.length == 1){
+        if(numOfDices == 1){
             return true;
         }
         //LT
-        boolean leftTop = true;
+        boolean leftTop = false;
         if(diceArray[row][col].row - 1 >= 0 && diceArray[row][col].col - 1 >= 0){
             leftTop = diceArray[row - 1][col - 1].number != 0;
         }
         //Up
-        boolean up = true;
+        boolean up = false;
         if(diceArray[row][col].row - 1 >= 0){
             up = diceArray[row - 1][col].number != 0;
         }
         //RT
-        boolean rightTop = true;
+        boolean rightTop = false;
         if(diceArray[row][col].row - 1 >= 0 && diceArray[row][col].col + 1 < 5){
             rightTop = diceArray[row - 1][col + 1].number != 0;
         }
         //L
-        boolean left = true;
+        boolean left = false;
         if(diceArray[row][col].col - 1 >= 0){
             left = diceArray[row][col - 1].number != 0;
         }
         //R
-        boolean right = true;
+        boolean right = false;
         if(diceArray[row][col].col + 1 < 5){
             right = diceArray[row][col + 1].number != 0;
         }
         //LB
-        boolean leftBottom = true;
+        boolean leftBottom = false;
         if(diceArray[row][col].row + 1 < 4 && diceArray[row][col].col - 1 >= 0){
             leftBottom = diceArray[row + 1][col - 1].number != 0;
         }
         //Down
-        boolean down = true;
+        boolean down = false;
         if(diceArray[row][col].row + 1 < 4){
             down = diceArray[row + 1][col].number != 0;
         }
         //RB
-        boolean rightBottom = true;
+        boolean rightBottom = false;
         if(diceArray[row][col].row + 1 < 4 && diceArray[row][col].col + 1 < 5){
             rightBottom = diceArray[row + 1][col + 1].number != 0;
         }
@@ -146,7 +150,7 @@ public class RuleHandler {
     }
     private Boolean IsDiffDice(int row, int col)
     {
-        if(diceArray.length == 1){
+        if(numOfDices == 1){
             return true;
         }
         //Up
@@ -223,4 +227,14 @@ public class RuleHandler {
     public void assignArray(Dice[][] dices){ diceArray = dices; }
     public void assignArray(Slot[][] slots){ slotArray = slots; }
     public Dice[][] getDices(){ return diceArray; }
+    private int getDiceCount(){
+        int count = 0;
+        for (Dice[] row: diceArray) {
+            for (Dice dice: row){
+                if(dice.number != 0)
+                    count++;
+            }
+        }
+        return count;
+    }
 }

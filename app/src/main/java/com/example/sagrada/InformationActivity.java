@@ -5,13 +5,16 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
@@ -160,7 +163,6 @@ public class InformationActivity extends AppCompatActivity implements CraftsmanP
         }
         return retArray;
     }
-    private void controlRules(){}
 
     @Override
     public void getCraftValues(int sandpaper, int eglomise, boolean sandpaperCheck, boolean eglomiseCheck) {
@@ -201,6 +203,7 @@ public class InformationActivity extends AppCompatActivity implements CraftsmanP
             //set card to default color
             findViewById(R.id.diceTextInfoID).setBackground(defaultBackground);
             ruleCheck = true;
+            showSuccessDialog();
         }
     }
 
@@ -216,5 +219,23 @@ public class InformationActivity extends AppCompatActivity implements CraftsmanP
                 }
             }
         }
+    }
+
+    private void showSuccessDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View layoutView = getLayoutInflater().inflate(R.layout.positive_rule_layout, null);
+        builder.setView(layoutView);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        new CountDownTimer(2000, 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {}
+            @Override
+            public void onFinish() {
+                dialog.dismiss();
+            }
+        }.start();
     }
 }

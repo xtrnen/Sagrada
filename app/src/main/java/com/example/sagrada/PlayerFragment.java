@@ -95,6 +95,14 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
             playerPointsButton.setBackgroundResource(R.drawable.points_btn_background_red);
         }
         if(resultCode == GameActivity.REQUEST_INFO_ACTIVITY){
+            if(requestCode == GameActivity.REQUEST_SLOTS){
+                assert data != null;
+                player.setSlots(data.getParcelableArrayListExtra(GameActivity.DATA_SLOTS));
+            }
+            if(requestCode == GameActivity.REQUEST_DICES){
+                assert data != null;
+                player.setDices(data.getParcelableArrayListExtra(GameActivity.DATA_DICES));
+            }
             callInformationActivity();
         }
     }
@@ -256,7 +264,7 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
         craftsmanObserver();
     }
 
-    private void playerReady(){ playerPointsButton.setBackgroundResource(R.drawable.points_btn_background_green);}
+    private void playerReady(){ playerPointsButton.setBackgroundResource(R.drawable.points_btn_background_green); calculateThis();}
     private void calculateThis(){
         ArrayList<Dice> dicesArray = player.getDices().getValue();
         ArrayList<Slot> slotsArray = player.getSlots().getValue();
@@ -264,18 +272,16 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
         gameViewModel.gameBoard.setSlotArray(slotsArray.toArray(new Slot[slotsArray.size()]));
         int points = gameViewModel.gameBoard.Evaluation(PQ_TYPES.values()[player.getPQIndex().getValue()], CQ_TYPES.values()[gameViewModel.getCommonQuest().getValue()], player.getCraftsman().getValue());
         player.setPoints(points);
-        Log.println(Log.INFO, "POINTS", ""+points);
         String text;
         text = pointStringLocale();
         playerPointsButton.setText(text + points);
     }
     private String pointStringLocale() {
         String text;
-            if (ConfigurationCompat.getLocales(getResources().getConfiguration()).get(0).getDisplayLanguage().equals("cs")) {
+        if (ConfigurationCompat.getLocales(getResources().getConfiguration()).get(0).getDisplayLanguage().equals("čeština")) {
             text = "Body: ";
         } else {
             text = "Points: ";
-
         }
         return text;
     }
