@@ -10,7 +10,7 @@ android {
         }
     }
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.example.sagrada"
         minSdkVersion 24
@@ -44,6 +44,7 @@ android {
     dataBinding {
         enabled true
     }
+    ndkVersion "21.1.6352462"
 }
 
 dependencies {
