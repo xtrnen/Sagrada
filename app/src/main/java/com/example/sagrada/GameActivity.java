@@ -133,7 +133,7 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.GameMenuHelp:
-                //TODO: Dialog or activity with guidelines
+                showHelpDialog();
                 return true;
             case R.id.GameMenuQuitGame:
                 Intent intent = new Intent(GameActivity.this, MenuActivity.class);
@@ -153,9 +153,5 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         gameViewModel.removePlayer(currentUsername);
     }
 
-    private void addItemsToMenu(Menu menu, List<String>titles){
-        for (int order = 0; order < titles.size(); order++){
-            menu.add(0,order, 0, titles.get(order));
-        }
-    }
+    private void showHelpDialog(){}
 }

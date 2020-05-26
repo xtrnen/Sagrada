@@ -33,7 +33,6 @@ public class MenuActivity extends AppCompatActivity {
         });
 
         /*settingsButton.setOnClickListener(v -> {
-            //TODO: Settings
         });*/
 
         quitAppButton.setOnClickListener(v -> {
