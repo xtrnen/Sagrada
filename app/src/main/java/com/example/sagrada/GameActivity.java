@@ -2,13 +2,17 @@ package com.example.sagrada;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
@@ -21,12 +25,9 @@ import com.example.sagrada.Fragments.Dialogs.DeletePlayerDialogFragment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import Model.GameBoard.Player;
-import Model.GameBoard.Structs.Dice;
-import Model.GameBoard.Structs.Slot;
 import ViewModel.GameViewModel;
 
 public class GameActivity extends AppCompatActivity implements CreatePlayerDialogFragment.ICreatePlayerDialogListener, DeletePlayerDialogFragment.IDeletePlayerDialogListener {
@@ -153,5 +154,14 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         gameViewModel.removePlayer(currentUsername);
     }
 
-    private void showHelpDialog(){}
+    private void showHelpDialog(){
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View scrollView = inflater.inflate(R.layout.help_dialog_scroll_layout, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.helpDialogTitle);
+        builder.setView(scrollView);
+        builder.setNeutralButton("OK", null);
+        builder.create()
+                .show();
+    }
 }

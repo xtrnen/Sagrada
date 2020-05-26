@@ -53,6 +53,9 @@
     <string name="invalidDetectDialogText">Choose what to do next…</string>
 
     <string name="playerFragmentRuleStatus">Rules: </string>
+
+    <string name="helpDialogTitle">Help</string>
+    <string name="helpDialogText">This is big text for help dialog, that yet needs to be filled, but is this large so we can display how the text is cropped inside the container.</string>
     
     <!--String values of quest cards-->
     <string-array name="personalQuestStrings">
