@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         release {
-            storeFile file('C:\\Users\\jtrne\\Desktop\\app-release-unsigned.apk')
+            storeFile file('home/Android/app-release-unsigned.apk')
             keyPassword 'Henkaj6uru'
             keyAlias = 'key0'
             storePassword 'Henkaj6uru'

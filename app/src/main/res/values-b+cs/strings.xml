@@ -54,6 +54,8 @@
     <string name="invalidDetectDialogTitle">Nepřesná detekce?</string>
     <string name="invalidDetectDialogText">Vyber co dělat dále.</string>
 
+    <string name="playerFragmentRuleStatus">Pravidla: </string>
+
     <string-array name="personalQuestStrings">
         <item>Ametyst</item>
         <item>Tyrkys</item>

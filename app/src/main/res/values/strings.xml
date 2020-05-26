@@ -51,6 +51,8 @@
     <string name="invalidDetectDialogAgain">Capture again</string>
     <string name="invalidDetectDialogTitle">Incorrect detection?</string>
     <string name="invalidDetectDialogText">Choose what to do next…</string>
+
+    <string name="playerFragmentRuleStatus">Rules: </string>
     
     <!--String values of quest cards-->
     <string-array name="personalQuestStrings">

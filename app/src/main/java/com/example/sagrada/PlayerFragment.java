@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -93,6 +94,7 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
             player.setDices(data.getParcelableArrayListExtra(GameActivity.DATA_DICES));
             player.setSlots(data.getParcelableArrayListExtra(GameActivity.DATA_SLOTS));
             playerPointsButton.setBackgroundResource(R.drawable.points_btn_background_red);
+            ruleOK = false;
         }
         if(resultCode == GameActivity.REQUEST_INFO_ACTIVITY){
             if(requestCode == GameActivity.REQUEST_SLOTS){
@@ -105,6 +107,8 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
             }
             callInformationActivity();
         }
+        /*Check rule status indicator*/
+        setRuleStatus();
     }
 
     @Override
@@ -218,7 +222,8 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
     public int callbackPoints(ArrayList<Slot> slots, ArrayList<Dice> dices) {
         return player.getPoints();
     }
-
+    /*PlayerFragment information Observers
+    * Each value, that can change has observer for fragment to know when to redraw UIs*/
     private void slotsObserver(){
         final Observer<ArrayList<Slot>> slotsObserver = slots -> {
             if(player.isPlayerSet() && ruleOK){
@@ -239,15 +244,13 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
         player.getDices().observe(this, diceObserver);
     }
     private void cardsObserver(){
-        final Observer<String> pqCardObserver = new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                if(player.isPlayerSet() && ruleOK){
-                    playerReady();
-                }
+        final Observer<String> cardObserver = s -> {
+            if(player.isPlayerSet() && ruleOK){
+                playerReady();
             }
         };
-        player.personalQ.observe(this, pqCardObserver);
+        player.personalQ.observe(this, cardObserver);
+        gameViewModel.cqString.observe(this, cardObserver);
     }
     private void craftsmanObserver(){
         final Observer<Integer> craftsmanObserver = integer -> {
@@ -257,11 +260,21 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
         };
         player.getCraftsman().observe(this, craftsmanObserver);
     }
+    /*Starts all observers when fragment is created*/
     private void setVariableObservers(){
         slotsObserver();
         dicesObserver();
         cardsObserver();
         craftsmanObserver();
+    }
+    /*Check ruleCheck variable and add corespondent image indicator*/
+    private void setRuleStatus(){
+        ImageView ruleStatusView = this.getView().findViewById(R.id.playerRuleStatusID);
+        if(ruleOK){
+            ruleStatusView.setBackgroundResource(R.drawable.ok_icon);
+        } else {
+            ruleStatusView.setBackgroundResource(R.drawable.cancel);
+        }
     }
 
     private void playerReady(){ playerPointsButton.setBackgroundResource(R.drawable.points_btn_background_green); calculateThis();}
