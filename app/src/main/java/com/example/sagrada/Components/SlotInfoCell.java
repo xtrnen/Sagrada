@@ -1,4 +1,4 @@
-package com.example.sagrada;
+package com.example.sagrada.Components;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -14,6 +14,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.widget.PopupMenu;
+
+import com.example.sagrada.R;
 
 import java.util.Arrays;
 import java.util.List;

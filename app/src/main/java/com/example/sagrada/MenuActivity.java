@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MenuActivity extends AppCompatActivity {
     private Button startGameButton;
-    private Button settingsButton;
+    //private Button settingsButton;
     private Button quitAppButton;
     public final static int GAME_ROWS = 4;
     public final static int GAME_COLS = 5;
@@ -21,8 +21,8 @@ public class MenuActivity extends AppCompatActivity {
         //Bind layout buttons with class props & check binding
         startGameButton = (Button) findViewById(R.id.StartGameButton);
         assert startGameButton != null;
-        settingsButton = (Button) findViewById(R.id.SettingsButton);
-        assert settingsButton != null;
+        //settingsButton = (Button) findViewById(R.id.SettingsButton);
+        //assert settingsButton != null;
         quitAppButton = (Button) findViewById(R.id.QuitAppButton);
         assert quitAppButton != null;
 
@@ -32,9 +32,9 @@ public class MenuActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        settingsButton.setOnClickListener(v -> {
+        /*settingsButton.setOnClickListener(v -> {
             //TODO: Settings
-        });
+        });*/
 
         quitAppButton.setOnClickListener(v -> {
             finish();

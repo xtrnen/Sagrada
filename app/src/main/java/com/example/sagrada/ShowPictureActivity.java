@@ -3,9 +3,7 @@ package com.example.sagrada;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.graphics.drawable.shapes.Shape;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -15,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 
+import com.example.sagrada.Fragments.Dialogs.InvalidDetectionDialogFragment;
 import com.otaliastudios.cameraview.PictureResult;
 import com.otaliastudios.cameraview.size.Size;
 

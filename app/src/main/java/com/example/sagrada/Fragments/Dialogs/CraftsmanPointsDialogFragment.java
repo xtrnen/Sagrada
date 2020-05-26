@@ -1,4 +1,4 @@
-package com.example.sagrada;
+package com.example.sagrada.Fragments.Dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -13,6 +13,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+
+import com.example.sagrada.R;
 
 public class CraftsmanPointsDialogFragment extends DialogFragment {
     public interface ICraftsmanCards {

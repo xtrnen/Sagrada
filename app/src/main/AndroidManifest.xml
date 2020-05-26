@@ -30,7 +30,6 @@
         <activity android:name=".CamActivity"/>
         <activity android:name=".ShowPictureActivity" />
         <activity android:name=".InformationActivity" />
-
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.sagrada.fileprovider"

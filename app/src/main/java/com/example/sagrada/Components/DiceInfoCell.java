@@ -1,4 +1,4 @@
-package com.example.sagrada;
+package com.example.sagrada.Components;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -9,6 +9,8 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
+
+import com.example.sagrada.R;
 import com.tomergoldst.tooltips.ToolTip;
 import com.tomergoldst.tooltips.ToolTipsManager;
 import java.util.Arrays;

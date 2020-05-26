@@ -1,9 +1,11 @@
-package com.example.sagrada;
+package com.example.sagrada.Components;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+
+import com.example.sagrada.PlayerFragment;
 
 import java.util.ArrayList;
 import java.util.List;

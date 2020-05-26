@@ -1,4 +1,4 @@
-package com.example.sagrada;
+package com.example.sagrada.Fragments.Dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -9,6 +9,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+
+import com.example.sagrada.R;
 
 public class InvalidDetectionDialogFragment extends DialogFragment {
     public interface IDetectionFailedDialogListener {

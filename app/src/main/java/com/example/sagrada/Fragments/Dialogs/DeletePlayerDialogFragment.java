@@ -1,4 +1,4 @@
-package com.example.sagrada;
+package com.example.sagrada.Fragments.Dialogs;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
+
+import com.example.sagrada.R;
 
 public class DeletePlayerDialogFragment extends DialogFragment {
     public interface IDeletePlayerDialogListener{

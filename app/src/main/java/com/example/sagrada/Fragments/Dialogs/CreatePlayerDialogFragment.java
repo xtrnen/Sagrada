@@ -1,4 +1,4 @@
-package com.example.sagrada;
+package com.example.sagrada.Fragments.Dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -16,6 +16,8 @@ import android.widget.TextView;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.example.sagrada.R;
 
 import java.util.Arrays;
 import java.util.List;
