@@ -29,7 +29,7 @@ import Model.GameBoard.Structs.Dice;
 import Model.GameBoard.Structs.Slot;
 import ViewModel.GameViewModel;
 
-public class GameActivity extends AppCompatActivity implements CreatePlayerDialogFragment.ICreatePlayerDialogListener, DeletePlayerDialogFragment.IDeletePlayerDialogListener, IPlayerPointsCallback {
+public class GameActivity extends AppCompatActivity implements CreatePlayerDialogFragment.ICreatePlayerDialogListener, DeletePlayerDialogFragment.IDeletePlayerDialogListener {
     GamePagerCollectionAdapter gamePagerCollectionAdapter;
     GameViewModel gameViewModel;
     ViewPager2 viewPager;
@@ -157,12 +157,5 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
         for (int order = 0; order < titles.size(); order++){
             menu.add(0,order, 0, titles.get(order));
         }
-    }
-
-    @Override
-    public int callbackPoints(ArrayList<Slot> slots, ArrayList<Dice> dices) {
-        //TODO: GameBoard calculation
-
-        return 0;
     }
 }

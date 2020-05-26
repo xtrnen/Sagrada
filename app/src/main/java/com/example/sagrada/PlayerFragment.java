@@ -31,7 +31,7 @@ import Model.Points.Quests.PQ_TYPES;
 import ViewModel.GameViewModel;
 import ViewModel.PlayerViewModel;
 
-public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
+public class PlayerFragment extends Fragment {
     private PlayerViewModel player;
     private static final String FRAGMENT_POSITION = "Pos";
     private static final String FRAGMENT_NAME = "Name";
@@ -42,9 +42,6 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
     private Integer counter;
     private Button playerPointsButton;
     private GameViewModel gameViewModel;
-    IPlayerPointsCallback pointsCallback;
-    private int eglomiseValue;
-    private int sandpaperValue;
     private boolean ruleOK = false;
 
     public PlayerFragment(){}
@@ -62,11 +59,6 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        try {
-            pointsCallback = (IPlayerPointsCallback) context;
-        } catch (ClassCastException e){
-            throw new ClassCastException(getActivity().toString() + "No IPlayerPointsCallback implementation");
-        }
     }
 
     @Override
@@ -218,10 +210,6 @@ public class PlayerFragment extends Fragment implements IPlayerPointsCallback {
         }
     }
 
-    @Override
-    public int callbackPoints(ArrayList<Slot> slots, ArrayList<Dice> dices) {
-        return player.getPoints();
-    }
     /*PlayerFragment information Observers
     * Each value, that can change has observer for fragment to know when to redraw UIs*/
     private void slotsObserver(){
