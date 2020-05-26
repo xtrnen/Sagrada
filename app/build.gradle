@@ -3,10 +3,10 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         release {
-            storeFile file('home/Android/app-release-unsigned.apk')
-            keyPassword 'Henkaj6uru'
+            storeFile file('/home/xtrnen/Documents/Bachelor/Sagrada/app/keyFile.jks')
+            keyPassword 't55hgqkq'
             keyAlias = 'key0'
-            storePassword 'Henkaj6uru'
+            storePassword 't55hgqkq'
         }
     }
     compileSdkVersion 29
@@ -25,6 +25,7 @@ android {
             }
         }
         multiDexEnabled true
+        signingConfig signingConfigs.release
     }
     buildTypes {
         release {
