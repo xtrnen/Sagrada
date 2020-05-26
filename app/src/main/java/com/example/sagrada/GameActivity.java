@@ -139,9 +139,8 @@ public class GameActivity extends AppCompatActivity implements CreatePlayerDialo
                 Intent intent = new Intent(GameActivity.this, MenuActivity.class);
                 this.finish();
                 startActivity(intent);
-            case R.id.GameMenuSettings:
-                //TODO: Go to settings activity
-                return true;
+            /*case R.id.GameMenuSettings:
+                return true;*/
             default:
                 return super.onOptionsItemSelected(item);
         }
