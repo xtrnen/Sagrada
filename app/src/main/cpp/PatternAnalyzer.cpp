@@ -95,15 +95,12 @@ public:
     vector<Mat> CreatePatternGrid()
     {
         //PrepGrayImg
-        __android_log_print(ANDROID_LOG_INFO, "MSG", "Prep Img");
         Mat gray = PrepGrayImg();
 
         //FindControlPoint
-        __android_log_print(ANDROID_LOG_INFO, "MSG", "Control Point");
         this->patternImg.copyTo(this->tmp);
         Point controlPoint = DetectControlPoint(gray);
         this->controlPoint = controlPoint;
-        __android_log_print(ANDROID_LOG_INFO, "Control Point", "%d|%d", controlPoint.x, controlPoint.y);
 
         //Crop image rectangle
         int oft = 30;
@@ -114,7 +111,6 @@ public:
         //Find control Point
         controlPoint.x += oft;
         Rect rect = Rect(Point(0,0), controlPoint);
-        __android_log_print(ANDROID_LOG_INFO, "MSG", "Boxes");
         //Find color slots & detect contours
         vector<Rect> boxes;
         boxes = ApplyColorMasks(this->patternImg(rect));
@@ -123,17 +119,14 @@ public:
             return vector<Mat>();
         }
         //Set reference heigh and width of rects
-        __android_log_print(ANDROID_LOG_INFO, "MSG", "RectOffset");
         setRefRectValues(boxes);
         //Set ref height and width again without anomaly rects
         filterRects(boxes);
         setRefRectValues(boxes);
         //try to find offset between neighbor rects
         this->refOffset = DetectRectOffset(boxes);
-        __android_log_print(ANDROID_LOG_INFO, "MSG", "Split");
         //SplitImg
         vector<Rect> matrixRect = RectPatternGrid(4, 5, controlPoint, boxes);
-        __android_log_print(ANDROID_LOG_INFO, "MSG", "Rect %d", matrixRect.size());
 
         for(Rect rect : matrixRect)
         {
@@ -142,7 +135,6 @@ public:
 
         matrix = matrixRect;
 
-        __android_log_print(ANDROID_LOG_INFO, "MSG", "Split Image");
         return SplitImageToPattern(4, 5, matrixRect, this->patternImg);
     }
 
@@ -226,10 +218,6 @@ private:
             /*minEnclosingCircle(poly, center, radius);
             double cArea = radius * radius * 3.14;
             double areaOffset = area * 0.7;*/
-        }
-
-        if(centers.empty()){
-            __android_log_print(ANDROID_LOG_ERROR, "CPoint", "Centers not found");
         }
 
         Point bottom = Point(0,0);
@@ -740,26 +728,18 @@ private:
     PatternID CheckColor(Mat subject)
     {
         if(IsColorRect(subject, S_GREEN)){
-            //__android_log_print(ANDROID_LOG_INFO, "COLOR INFO:", "IS_GREEN");
             return PatternID(PATID_GREEN);
         } else if(IsColorRect(subject, S_BLUE) && !isWhite(subject)) {
-            //__android_log_print(ANDROID_LOG_INFO, "COLOR INFO:", "IS_BLUE");
             return PatternID(PATID_BLUE);
         } else if(IsColorRect(subject, S_RED)){
-            //__android_log_print(ANDROID_LOG_INFO, "COLOR INFO:", "IS_RED");
             return PatternID(PATID_RED);
         } else if(IsColorRect(subject, S_VIOLET)){
-            //__android_log_print(ANDROID_LOG_INFO, "COLOR INFO:", "IS_VIOLET");
             return PatternID(PATID_VIOLET);
         } else if(IsColorRect(subject, S_YELLOW)){
-            //__android_log_print(ANDROID_LOG_INFO, "COLOR INFO:", "IS_YELLOW");
             return PatternID(PATID_YELLOW);
         } else if(IsColorRect(subject, S_WHITE)){
-            //__android_log_print(ANDROID_LOG_INFO, "COLOR INFO:", "IS_WHITE");
             return PatternID(PATID_WHITE);
         } else {
-            //__android_log_print(ANDROID_LOG_INFO, "COLOR INFO:", "ERROR");
-            //TODO: ERROR HANDLE
             return PatternID(PATID_NONE);
         }
     }
@@ -1092,22 +1072,18 @@ private:
             {
                 if(rect.x > xR && rect.x <= xR + this->refWidth && rect.y + rect.height >= yB - offset && rect.y + rect.height <= yB + offset)
                 {
-                    //__android_log_print(ANDROID_LOG_INFO, "OFS--xR", "%d | %d -- %d", rect.tl().x, xR, rect.tl().x - xR);
                     return  rect.x - xR;
                 }
                 else if (rect.x + rect.width < xL && rect.x + rect.width >= xL - this->refWidth && rect.y + rect.height >= yB - offset && rect.y + rect.height <= yB + offset)
                 {
-                    //__android_log_print(ANDROID_LOG_INFO, "OFS--xL", "%d | %d -- %d", rect.br().x, xL, xL - rect.br().x);
                     return xL - rect.br().x;
                 }
                 else if (rect.y + rect.height < yT && rect.y + rect.height >= yT - this->refHeight && rect.x + rect.width >= xL - offset && rect.x + rect.width <= xL + offset)
                 {
-                    //__android_log_print(ANDROID_LOG_INFO, "OFS--yT", "%d | %d -- %d", rect.br().y, yT, yT - rect.br().y);
                     return yT - rect.br().y;
                 }
                 else if (rect.y > yB && rect.y <= yB + this->refHeight && rect.x >= xR - offset && rect.x <= xR + offset)
                 {
-                    //__android_log_print(ANDROID_LOG_INFO, "OFS--yB", "%d | %d -- %d", rect.tl().y, yB, rect.br().y - yB);
                     return (rect.y + rect.height - yB) - rect.height;
                 }
             }

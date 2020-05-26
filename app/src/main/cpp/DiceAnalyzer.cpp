@@ -108,7 +108,6 @@ bool sort_by_x(Rect slot1, Rect slot2) { return slot1.x < slot2.x; }
 bool sort_by_y(Rect slot1, Rect slot2) { return slot1.y < slot2.y; }
 class DiceAnalyzer
 {
-    //TODO: "dice_correct" red dice One blob detection problem
 public:
     Mat diceImage;
     Mat hsvImage;
@@ -171,7 +170,6 @@ public:
         bound.y =(int) (bound.y * scaleHeight);
         //check if bound was found
         if(bound.width == 0){
-            __android_log_print(ANDROID_LOG_ERROR, "Detect dices", "No bound was found!");
             diceImage.copyTo(diceBoundImg);
         }
         else{
@@ -190,7 +188,6 @@ public:
         double scaleWidth;
         double scaleHeight;
         SetScaleValues(diceBoundImg.size().width, diceBoundImg.size().height, scaleWidth, scaleHeight, 512, 512);
-        __android_log_print(ANDROID_LOG_INFO, "DetectDiceSlots", "color ranges");
         //red
         inRange(hsv, COLOR_RANGES.lowRedDiceFirstMask, COLOR_RANGES.highRedFirstMask, mask);
         inRange(hsv, COLOR_RANGES.lowRedDiceSecondMask, COLOR_RANGES.highRedSecondMask, maskTmp);
@@ -214,12 +211,10 @@ public:
 
         /*Clear image*/
         GaussianBlur(mask, mask, Size(3, 3), 0);
-        //morphologyEx(mask, mask, MORPH_ERODE, getStructuringElement(MORPH_RECT, Size(9, 9), Point(-1, -1)));
         morphologyEx(mask, mask, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(9, 9), Point(-1, -1)));
 
         resize(mask, mask, Size(512,512));
         threshold(mask, mask, 50, 255, THRESH_BINARY);
-        __android_log_print(ANDROID_LOG_INFO, "DICE_MSG", "Contours");
         vector<vector<Point>> contours;
         findContours(mask, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
@@ -228,7 +223,6 @@ public:
         for(size_t i = 0; i < contours.size(); i++){
             Rect tmpBound = boundingRect(contours[i]);
             //filter contours && find fitting contours
-            //TODO: Instead of bound.width use bound.height when image is being rotated correctly
             if(tmpBound.width > 45 && tmpBound.width < 150 && tmpBound.height > 45 && tmpBound.height < 150){
                 //resize back
                 tmpBound.width =(int) (tmpBound.width * scaleWidth);
@@ -310,10 +304,6 @@ public:
                 slotRow.clear();
             }
         }
-        //Rows assertion
-        if(slotRows.size() > _rows){
-            __android_log_print(ANDROID_LOG_ERROR, "Number of detected rows exceeded", "rows : %d", _rows);
-        }
 
         return slotRows;
     }
@@ -372,7 +362,6 @@ public:
         if(outputVec.size() == 0){
             outputVec = rowSlots;
         }
-        __android_log_print(ANDROID_LOG_INFO, "DICE_MSG", "%d count outputVec", outputVec.size());
         return outputVec;
     }
     Dice_s FindDice(Rect slot)
@@ -590,7 +579,6 @@ public:
     {
         scaleWidth = _width / refWidth;
         scaleHeight = _height / refHeight;
-        //__android_log_print(ANDROID_LOG_INFO, "scale", "%d | %d | %f | %f", _width, _height, scaleWidth, scaleHeight);
     }
     static void CalculateLabValues(int& L, int& a, int& b)
     {
