@@ -8,6 +8,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/helpDialogText"
+            android:textSize="20sp"
+            android:justificationMode="inter_word"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"/>
     </LinearLayout>

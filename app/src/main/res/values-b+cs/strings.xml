@@ -56,8 +56,17 @@
 
     <string name="playerFragmentRuleStatus">Pravidla: </string>
 
-    <string name="helpDialogTitle">Help</string>
-    <string name="helpDialogText">This is big text for help dialog, that yet needs to be filled, but is this large so we can display how the text is cropped inside the container.</string>
+    <string name="helpDialogTitle">Nápověda</string>
+    <string name="helpDialogText">
+        Pomocník Sagrady je aplikace, která pomáhá hráčům deskové hry Sagrada v kontrole pravidel a výpočtu bodů.\n\n
+        Pro výpočet bodů aktivního hráče (aktuálně zobrazeného), hráč musí aplikaci předat informace o: kartě klíče, kostkách na hrací ploše, osobním a společném úkolu, počtu kamenů řemeslníka a zkontrolovat pravidla.\n
+        Pokud jsou veškeré informace vyplněny, aplikace vypočítá body hráče z dodaných informací. V případě změny informace jsou body automaticky přepočítány.\n\n
+        Pro kontrolu pravidel a ruční vyplnění údajů o kartě klíče, nebo kostkách, stiskněte tlačítko s ikonou "Informace".\n\n
+        Pro vyfocení a detekci karty klíče a kostek na hrací ploše, stiskněte tlačítko s ikonou kamery.\n\n
+        Pro změnu osobního nebo společného úkolu, stiskněte tlačítko vedle příslušného názvu karty.\n
+        V případě, že uživatel změní společný úkol, provede se změna u všech hráčů ve hře.\n\n
+        Pro kontrolu, zda-li pravidla nebyla porušena, nebo zda-li jsou v pořádku, existuje indikátor v levém horním okraji hráčského okna.\n\n
+    </string>
 
     <string-array name="personalQuestStrings">
         <item>Ametyst</item>
