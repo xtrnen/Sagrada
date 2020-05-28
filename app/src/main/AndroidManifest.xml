@@ -6,9 +6,9 @@
     <uses-feature android:name="android.hardware.camera2"
                   android:required="true" />
 
-    <uses-permission android:name="android.permission.CAMERA" />
+    <!--<uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="18" />
+        tools:remove="android:maxSdkVersion" />-->
 
     <application
         android:allowBackup="true"
@@ -16,14 +16,20 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:requestLegacyExternalStorage="true"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".CameraApiActivity">
+        <activity android:name=".MenuActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".GameActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+        <activity android:name=".CamActivity"/>
+        <activity android:name=".ShowPictureActivity" />
+        <activity android:name=".InformationActivity" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.sagrada.fileprovider"

@@ -1,3 +1,114 @@
 <resources>
     <string name="app_name">Sagrada</string>
+    <string name="app_title">Sagrada Helper</string>
+    <string name="game_title">Start game</string>
+    <string name="settings_title">Settings</string>
+    <string name="quitApp_title">Quit</string>
+    <string name="createPlayer_username">Username</string>
+    <string name="createPlayerDialog_title">Create</string>
+    <string name="cancelString">Cancel</string>
+    <string name="confirmString">Confirm</string>
+    <string name="playerPoints_title">Points \:</string>
+    <string name="gameMenuCreatePlayet_title">Create Player</string>
+    <string name="gameMenuDeleteCurrentPlayer_title">Delete Current Player</string>
+    <string name="gameMenuQuitGame_title">Quit game</string>
+    <string name="deletePlayerDialogMsg">Do you want to remove this player?</string>
+    <string name="deletePlayerDialogPositiveButton">Yes</string>
+    <string name="deletePlayerDialogNegativeButton">No</string>
+    <string name="cqTitleString"><u>Common quest:</u></string>
+    <string name="pqTitleString"><u>Personal quest:</u></string>
+    <string name="craftsmanTitleString"><u>Craftsman stones</u></string>
+    <string name="captureDiceSlotString">Do you want to capture Pattern card or Dices?</string>
+    <string name="diceString">Dices</string>
+    <string name="patternString">Pattern</string>
+    <string name="calculateDialogTitle">Game evaluation</string>
+    <string name="calculateDialogMsg">Evaluate game for current player or all players?</string>
+    <string name="calculateDialogPlayer">Current player</string>
+    <string name="calculateDialogAll">All players</string>
+    <string name="takePictureString">Take picture</string>
+    <string name="personalQString">Personal quest</string>
+    <string name="commonQString">Common quest</string>
+    <string name="declineString">Decline</string>
+    <string name="helpString">Help</string>
+
+    <!--String values of error logs-->
+    <string name="edgeRuleError">At least one dice has to be on edge slot.</string>
+    <string name="slotConditionError">Dice does not fit pattern on position: </string>
+    <string name="neighborRuleError">Dice without neighbor on position: </string>
+    <string name="diffDicesError">Dices with same color/number around position: </string>
+
+    <string name="craftsmanCardTitle">Rule bending cards were used?</string>
+    <string name="craftsmanCardMsg">Choose a card and times of use</string>
+
+    <string name="cardBrushPaper">Sandpaper</string>
+    <string name="cardEglomise">Eglomisé digger</string>
+
+    <string name="infoLayoutSlotText"><u>Information about key card:</u></string>
+    <string name="infoLayoutDiceText"><u>Information about stained glass dices:</u></string>
+    <string name="ruleText">Check rules</string>
+
+    <string name="invalidDetectDialogMyself">Fill myself</string>
+    <string name="invalidDetectDialogAgain">Capture again</string>
+    <string name="invalidDetectDialogTitle">Incorrect detection?</string>
+    <string name="invalidDetectDialogText">Choose what to do next…</string>
+
+    <string name="playerFragmentRuleStatus">Rules: </string>
+
+    <string name="helpDialogTitle">Help</string>
+    <string name="helpDialogText">
+        Sagrada Helper is application that helps players of board game Sagrada in rule control and point calculation.\n\n
+        To count active player points (player on screen), player has to have informations about pattern card, dices on board, number of craftsman points, personal card, common card and checked game rules.\n
+        If all those attributes are filled, the application will calculate points each time some of those attributes are changed.\n\n
+        To check rules or fill information about pattern or dices, use Information activity with informations about dices and pattern by clicking on button with Info icon.\n\n
+        To capture dices or pattern, click on button with camera icon.\n\n
+        To change common or personal card, use button with write symbol next to name of card currently selected.\n
+        If user changes common card, the card will be changed for every player.\n\n
+        To check if rules were not broken, screen has indicator in the left corner of player window.\n\n
+    </string>
+    
+    <!--String values of quest cards-->
+    <string-array name="personalQuestStrings">
+        <item>Amethyst</item>
+        <item>Turquoise</item>
+        <item>Emerald</item>
+        <item>Topaz</item>
+        <item>Ruby</item>
+    </string-array>
+    <string-array name="groupQuestStrings">
+        <item>Brightly colored columns</item>
+        <item>Diverse columns</item>
+        <item>Brightly colored rows</item>
+        <item>Diverse rows</item>
+        <item>Light shades</item>
+        <item>Medium shades</item>
+        <item>Dark shades</item>
+        <item>All colors of the rainbow</item>
+        <item>Light &amp; shadow</item>
+        <item>Colorful diagonals</item>
+    </string-array>
+
+    <string name="menuItemNone">None</string>
+    <string-array name="colorMenuItems">
+        <item>Red</item>
+        <item>Green</item>
+        <item>Blue</item>
+        <item>Violet</item>
+        <item>Yellow</item>
+        <item>White</item>
+    </string-array>
+    <string-array name="numberMenuItems">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+
+    <string-array name="errorMessageArray">
+        <item>At least one dice has to be on the edge of stained glass.</item>
+        <item>Dice has to match pattern on the same position.</item>
+        <item>Dice has to have at least one neighbor on diagonal or vertically or horizontally.</item>
+        <item>Dice or neighbor dice cannot have edge neighbors of same color or number.</item>
+    </string-array>
 </resources>

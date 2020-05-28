@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sagrada</string>
+    <string name="app_title">Pomocník Sagrady</string>
+    <string name="game_title">Začít hru</string>
+    <string name="settings_title">Nastavení</string>
+    <string name="quitApp_title">Ukončit</string>
+    <string name="createPlayer_username">Přezdívka</string>
+    <string name="createPlayerDialog_title">Vytvořit</string>
+    <string name="cancelString">Zrušit</string>
+    <string name="confirmString">Potvrdit</string>
+    <string name="playerPoints_title">Body \:</string>
+    <string name="gameMenuCreatePlayet_title">Vytvořit hráče</string>
+    <string name="gameMenuDeleteCurrentPlayer_title">Odstranit hráče</string>
+    <string name="gameMenuQuitGame_title">Ukončit hru</string>
+    <string name="deletePlayerDialogMsg">Chcete odstranit tohoto hráče?</string>
+    <string name="deletePlayerDialogPositiveButton">Ano</string>
+    <string name="deletePlayerDialogNegativeButton">Ne</string>
+    <string name="cqTitleString"><u>Společný úkol:</u></string>
+    <string name="pqTitleString"><u>Osobní úkol:</u></string>
+    <string name="craftsmanTitleString"><u>Kameny řemeslníků</u></string>
+    <string name="captureDiceSlotString">Chcete detekovat klíč, nebo kostky?</string>
+    <string name="diceString">Kostky</string>
+    <string name="patternString">Klíč</string>
+    <string name="calculateDialogTitle">Vyhodnotit hru</string>
+    <string name="calculateDialogMsg">Vyhodnotit hru pro aktuálního hráče, nebo všechny hráče?</string>
+    <string name="calculateDialogPlayer">Aktuálního hráče</string>
+    <string name="calculateDialogAll">Všichny hráče</string>
+    <string name="takePictureString">Vyfotit</string>
+    <string name="personalQString">Osobní úkol</string>
+    <string name="commonQString">Společný úkol</string>
+    <string name="declineString">Odmítnout</string>
+    <string name="helpString">Nápověda</string>
+
+    <!--String values of error logs-->
+    <string name="edgeRuleError">Alespoň jedna kostka musí být na okraji hracího rámu</string>
+    <string name="slotConditionError">Kostka nesouhlasí s klíčem na pozici: </string>
+    <string name="neighborRuleError">Kostka nesousedící s žádnou kostkou na pozici: </string>
+    <string name="diffDicesError">Kostky se stejnou barvou/číslem okolo pozice: </string>
+
+    <!---->
+    <string name="craftsmanCardTitle">Byly použity karty měnící pravidlo?</string>
+    <string name="craftsmanCardMsg">Zvolte kartu a počet použití</string>
+
+    <string name="cardBrushPaper">Brusný papír</string>
+    <string name="cardEglomise">Rydlo na eglomisé</string>
+
+    <string name="infoLayoutSlotText"><u>Informace o kartě klíče:</u></string>
+    <string name="infoLayoutDiceText"><u>Informace o kostkách vitráže:</u></string>
+    <string name="ruleText">Kontrola pravidel</string>
+
+    <string name="invalidDetectDialogMyself">Vyplnit ručně</string>
+    <string name="invalidDetectDialogAgain">Vyfotit znovu</string>
+    <string name="invalidDetectDialogTitle">Nepřesná detekce?</string>
+    <string name="invalidDetectDialogText">Vyber co dělat dále.</string>
+
+    <string name="playerFragmentRuleStatus">Pravidla: </string>
+
+    <string name="helpDialogTitle">Nápověda</string>
+    <string name="helpDialogText">
+        Pomocník Sagrady je aplikace, která pomáhá hráčům deskové hry Sagrada v kontrole pravidel a výpočtu bodů.\n\n
+        Pro výpočet bodů aktivního hráče (aktuálně zobrazeného), hráč musí aplikaci předat informace o: kartě klíče, kostkách na hrací ploše, osobním a společném úkolu, počtu kamenů řemeslníka a zkontrolovat pravidla.\n
+        Pokud jsou veškeré informace vyplněny, aplikace vypočítá body hráče z dodaných informací. V případě změny informace jsou body automaticky přepočítány.\n\n
+        Pro kontrolu pravidel a ruční vyplnění údajů o kartě klíče, nebo kostkách, stiskněte tlačítko s ikonou "Informace".\n\n
+        Pro vyfocení a detekci karty klíče a kostek na hrací ploše, stiskněte tlačítko s ikonou kamery.\n\n
+        Pro změnu osobního nebo společného úkolu, stiskněte tlačítko vedle příslušného názvu karty.\n
+        V případě, že uživatel změní společný úkol, provede se změna u všech hráčů ve hře.\n\n
+        Pro kontrolu, zda-li pravidla nebyla porušena, nebo zda-li jsou v pořádku, existuje indikátor v levém horním okraji hráčského okna.\n\n
+    </string>
+
+    <string-array name="personalQuestStrings">
+        <item>Ametyst</item>
+        <item>Tyrkys</item>
+        <item>Smaragd</item>
+        <item>Topaz</item>
+        <item>Rubín</item>
+    </string-array>
+    <string-array name="groupQuestStrings">
+        <item>Pestrobarevné sloupce</item>
+        <item>Různorodé sloupce</item>
+        <item>Pestrobarevné řádky</item>
+        <item>Různorodé řádky</item>
+        <item>Světlé odstíny</item>
+        <item>Střední odstíny</item>
+        <item>Tmavé odstíny</item>
+        <item>Všechny barvy duhy</item>
+        <item>Světlo a stín</item>
+        <item>Barevné diagonály</item>
+    </string-array>
+
+    <string name="menuItemNone">Žádná</string>
+    <string-array name="colorMenuItems">
+        <item>Červená</item>
+        <item>Zelená</item>
+        <item>Modrá</item>
+        <item>Fialová</item>
+        <item>Žlutá</item>
+        <item>Bílá</item>
+    </string-array>
+    <string-array name="numberMenuItems">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+
+    <string-array name="errorMessageArray">
+        <item>Alespoň jedna kostka musí být na okraji vitráže.</item>
+        <item>Kostka musí splnit podmínku daného pole karty klíče</item>
+        <item>Kostka musí mít alespoň jednoho souseda, ať už hranou, nebo na diagonále.</item>
+        <item>Kostka, nebo okolní kostka nesmí sousedit hranou s kostkou stejné barvy nebo čísla.</item>
+    </string-array>
+</resources>

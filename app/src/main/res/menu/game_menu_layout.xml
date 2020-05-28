@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--<item android:id="@+id/GameMenuSettings"
+        android:title="@string/settings_title"/>-->
+    <item android:id="@+id/GameMenuHelp"
+        android:title="@string/helpString" />
+    <item android:id="@+id/GameMenuQuitGame"
+        android:title="@string/gameMenuQuitGame_title" />
+</menu>

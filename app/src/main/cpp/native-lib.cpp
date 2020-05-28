@@ -28,14 +28,14 @@ JNIEXPORT jobjectArray JNICALL Java_Model_ImageProcessor_PatternDetector(JNIEnv 
     patternImg = GetObjectImg(env, obj, "org/opencv/core/Mat", "patternImg");
 
     cvtColor(patternImg, patternImg, COLOR_BGR2RGB);
+    resize(patternImg, patternImg, Size(1024,720));
     PatternAnalyzer patternAnalyzer = PatternAnalyzer(patternImg);
 
+    //Detect Control Point
     vector<Mat> grid = patternAnalyzer.CreatePatternGrid();
-
-    //Correction in grid creater
+    //Detect Slots
+    //Detect attribute
     patternAnalyzer.GetCardPattern(grid);
-
-    //patternAnalyzer.Test(grid[6]).copyTo(outputImg);
 
     patternAnalyzer.tmp.copyTo(outputImg);
 
@@ -49,15 +49,9 @@ JNIEXPORT jobjectArray JNICALL Java_Model_ImageProcessor_DiceDetector(JNIEnv *en
 
     cvtColor(diceImg, diceImg, COLOR_BGR2RGB);
     DiceAnalyzer diceAnalyzer = DiceAnalyzer(diceImg);
-    diceAnalyzer.DetectDiceGrid();
-    //diceAnalyzer.BoostDices();
-    diceAnalyzer.DetectDiceSlots();
     diceAnalyzer.DetectDices();
-    //diceAnalyzer.DiceOutput();
     jobjectArray outputArray = BuildDicesOutput(env, diceAnalyzer.dices);
-
-    diceAnalyzer.diceBoundImg.copyTo(outputImg);
-    //tp.copyTo(outputImg);
+    resize(diceAnalyzer.diceBoundImg, outputImg, Size(diceImg.cols, diceImg.rows));
     return outputArray;
 };
 Mat GetObjectImg(JNIEnv *env, jobject obj, string _propTypeRoute, string _propName){
@@ -79,8 +73,9 @@ jobjectArray BuildSlotsOutput(JNIEnv *env, vector<Slot> slots)
     jobjectArray jSlotArray = env->NewObjectArray(slots.size(), jSlot, 0);
 
     jmethodID jSlotInit = env->GetMethodID(jSlot, "<init>", "(Ljava/lang/String;II)V");
-    if(jSlotInit == 0){
-        __android_log_print(ANDROID_LOG_ERROR, "BuildSlotsOutput", "Cannot create init method!");
+
+    if(slots.empty()){
+        return jSlotArray;
     }
 
     for(int i = 0; i < slots.size(); i++){
@@ -98,8 +93,6 @@ jobjectArray BuildDicesOutput(JNIEnv *env, vector<Dice_s> dices)
     jobjectArray jDiceArray = env->NewObjectArray(dices.size(), jDice, 0);
 
     jmethodID jDiceInit = env->GetMethodID(jDice, "<init>", "(Ljava/lang/String;III)V");
-    if(jDiceInit == 0)
-        __android_log_print(ANDROID_LOG_ERROR, "BuildDicesOutput", "Cannot create init method!");
 
     for(int i = 0; i < dices.size(); i++){
         jstring dColor = env->NewStringUTF(dices[i].GetColorString().c_str());
